@@ -25,3 +25,8 @@ _Becathlon_ is an online multisport equipment catalogue that recreates the look,
 | stores | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/stores/, static/stores/, fixtures/stores.json | Store locator with mock locations |
 | recommendations | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/recommendations/ | recommendation system |
 | profiles | apps.py, models.py, views.py, urls.py, forms.py, admin.py, tests.py, migrations/, templates/profiles/, static/profiles/ | User profiles and preferences |
+
+
+NOTES:
+```Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process``` to fix any execution policy issues on PS.
+go to /becathlon_app and run ```\venv\Scripts\activate.ps1``` to activate the virtual environment.
