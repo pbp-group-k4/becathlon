@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Becathlon — Your Trail Awaits</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            yellow: '#FFD400',
+                            black: '#0B0B0B',
+                            graphite: '#1F1F1F',
+                            fog: '#F5F5F5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+                    },
+                    boxShadow: {
+                        subtle: '0 20px 60px -30px rgba(15, 15, 15, 0.35)',
+                        ring: '0 0 0 1.5px rgba(15, 15, 15, 0.1)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-white text-brand.black antialiased">
+    {% now "Y" as current_year %}
+    <div class="flex min-h-screen flex-col">
+        <header class="border-b border-neutral-200 bg-white">
+            <div class="bg-brand.black text-white">
+                <div class="mx-auto flex max-w-7xl items-center justify-center px-4 py-3 text-xs font-medium uppercase tracking-[0.2em]">
+                    {{ announcement }}
+                </div>
+            </div>
+            <nav class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-5 md:px-6">
+                <a href="/" class="text-2xl font-semibold tracking-tight">
+                    Becathlon
+                </a>
+                <div class="hidden items-center gap-6 text-sm font-medium md:flex">
+                    <a href="#shop-by-sport" class="transition hover:text-brand.yellow">Sports</a>
+                    <a href="#most-popular" class="transition hover:text-brand.yellow">Men</a>
+                    <a href="#new-arrivals" class="transition hover:text-brand.yellow">Women</a>
+                    <a href="#themed-highlights" class="transition hover:text-brand.yellow">Kids</a>
+                    <a href="{% if user.is_authenticated %}#account{% else %}{% url 'authentication:login' %}{% endif %}" class="transition hover:text-brand.yellow">Account</a>
+                    <a href="#" class="transition hover:text-brand.yellow">Cart</a>
+                    <a href="#" class="transition hover:text-brand.yellow">Search</a>
+                </div>
+                <div class="hidden items-center gap-3 md:flex">
+                    {% if user.is_authenticated %}
+                        <span class="text-xs uppercase tracking-wide text-neutral-500">Hi, {{ user.first_name|default:user.username }}</span>
+                        <a href="{% url 'authentication:logout' %}" class="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium transition hover:border-brand.black hover:text-brand.black">Sign out</a>
+                    {% else %}
+                        <a href="{% url 'authentication:login' %}" class="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium transition hover:border-brand.black hover:text-brand.black">Sign in</a>
+                        <a href="{% url 'authentication:register' %}" class="rounded-full bg-brand.yellow px-4 py-2 text-sm font-semibold text-brand.black transition hover:brightness-95">Join now</a>
+                    {% endif %}
+                </div>
+                <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-brand.black transition hover:border-brand.black md:hidden" data-menu-toggle>
+                    <span class="sr-only">Toggle navigation</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+            </nav>
+            <div class="mobile-menu hidden border-t border-neutral-200 bg-white px-4 pb-6 md:hidden" data-menu-panel>
+                <div class="space-y-4 py-6 text-sm font-medium">
+                    <a href="#shop-by-sport" class="block transition hover:text-brand.yellow">Sports</a>
+                    <a href="#most-popular" class="block transition hover:text-brand.yellow">Men</a>
+                    <a href="#new-arrivals" class="block transition hover:text-brand.yellow">Women</a>
+                    <a href="#themed-highlights" class="block transition hover:text-brand.yellow">Kids</a>
+                    <a href="{% if user.is_authenticated %}#account{% else %}{% url 'authentication:login' %}{% endif %}" class="block transition hover:text-brand.yellow">Account</a>
+                    <a href="#" class="block transition hover:text-brand.yellow">Cart</a>
+                    <a href="#" class="block transition hover:text-brand.yellow">Search</a>
+                </div>
+                <div class="flex flex-col gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'authentication:logout' %}" class="flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium transition hover:border-brand.black hover:text-brand.black">Sign out</a>
+                    {% else %}
+                        <a href="{% url 'authentication:login' %}" class="flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium transition hover:border-brand.black hover:text-brand.black">Sign in</a>
+                        <a href="{% url 'authentication:register' %}" class="flex items-center justify-center rounded-full bg-brand.yellow px-4 py-2 text-sm font-semibold text-brand.black transition hover:brightness-95">Join now</a>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1">
+            {% if messages %}
+                <div class="mx-auto mt-8 max-w-4xl px-4 md:px-6">
+                    <div class="space-y-3">
+                        {% for message in messages %}
+                            <div class="rounded-2xl border border-neutral-200 bg-brand.fog px-4 py-3 text-sm text-brand.black shadow-sm">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <section class="relative overflow-hidden">
+                <div class="absolute inset-y-0 right-0 hidden w-1/2 bg-gradient-to-br from-brand.fog via-white to-brand.fog lg:block"></div>
+                <div class="mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-20 pt-16 md:px-6 lg:flex-row lg:items-center">
+                    <div class="relative z-10 max-w-2xl space-y-8">
+                        <p class="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500">
+                            Outdoor, inclusive, skill-first
+                        </p>
+                        <div class="space-y-6">
+                            <h1 class="text-4xl font-semibold tracking-tight text-brand.black sm:text-5xl lg:text-[3.75rem]">Your Trail Awaits.</h1>
+                            <p class="text-lg text-neutral-600">We build gear ecosystems that welcome every explorer—engineered for varied terrains, versatile body types, and every level of experience.</p>
+                        </div>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <a href="#most-popular" class="inline-flex items-center justify-center rounded-full bg-brand.black px-6 py-3 text-sm font-semibold text-white shadow-subtle transition hover:bg-neutral-900">Find your gear</a>
+                            <a href="#shop-by-sport" class="inline-flex items-center justify-center rounded-full border border-brand.black px-6 py-3 text-sm font-semibold transition hover:bg-brand.yellow hover:text-brand.black">Shop by sport</a>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            {% for sport in hero_category_links %}
+                                <a href="{{ sport.anchor }}" class="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 transition hover:border-brand.black hover:text-brand.black">
+                                    <span class="h-1 w-8 rounded-full bg-brand.yellow"></span>
+                                    {{ sport.label }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="relative z-10 w-full max-w-xl">
+                        <div class="relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-subtle">
+                            <div class="absolute left-6 top-6 h-16 w-16 rounded-full border border-neutral-200"></div>
+                            <div class="absolute -right-12 bottom-10 h-32 w-32 rounded-full bg-brand.yellow/20 blur-3xl"></div>
+                            <div class="space-y-6 px-8 py-10">
+                                <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-neutral-400">
+                                    <span>Equipment report</span>
+                                    <span>{{ sport_highlights|length }} sports</span>
+                                </div>
+                                <div class="space-y-4">
+                                    {% for sport in sport_highlights|slice:':3' %}
+                                        <div class="flex items-start justify-between gap-4 rounded-2xl border border-neutral-200 px-4 py-4">
+                                            <div>
+                                                <p class="text-sm font-semibold text-brand.black">{{ sport.name }}</p>
+                                                <p class="mt-1 text-xs text-neutral-500">{{ sport.summary }}</p>
+                                            </div>
+                                            <span class="text-xs font-semibold uppercase tracking-wide text-neutral-500">{{ sport.stat }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <a href="#shop-by-sport" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand.black transition hover:text-neutral-500">
+                                    View full sport index
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                        <path d="M5 12h14" />
+                                        <path d="m12 5 7 7-7 7" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="shop-by-sport" class="border-y border-neutral-200 bg-brand.fog py-16">
+                <div class="mx-auto max-w-7xl px-4 md:px-6">
+                    <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                        <div class="max-w-2xl space-y-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Tailored categories</p>
+                            <h2 class="text-3xl font-semibold text-brand.black">Shop by sport</h2>
+                            <p class="text-sm text-neutral-600">Precision-curated gear lists that balance performance, comfort, and accessibility for every adventure.</p>
+                        </div>
+                        <a href="#themed-highlights" class="inline-flex items-center gap-2 text-sm font-semibold text-brand.black transition hover:text-neutral-500">
+                            Explore highlights
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7 7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {% for sport in sport_highlights %}
+                            <article id="{{ sport.id }}" class="group flex flex-col justify-between rounded-3xl border border-transparent bg-white p-6 shadow-subtle transition hover:border-brand.yellow">
+                                <div class="space-y-4">
+                                    <span class="inline-flex h-2 w-12 rounded-full bg-brand.yellow"></span>
+                                    <h3 class="text-xl font-semibold text-brand.black">{{ sport.name }}</h3>
+                                    <p class="text-sm text-neutral-600">{{ sport.summary }}</p>
+                                </div>
+                                <div class="mt-6 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                                    <span>{{ sport.stat }}</span>
+                                    <span class="flex items-center gap-2 text-brand.black transition group-hover:translate-x-1">Shop now
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <path d="M5 12h14" />
+                                            <path d="m12 5 7 7-7 7" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section id="most-popular" class="py-16">
+                <div class="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-6">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                        <div class="space-y-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Most popular</p>
+                            <h2 class="text-3xl font-semibold text-brand.black">High-rated trail essentials</h2>
+                            <p class="text-sm text-neutral-600">Community favorite gear with proven reviews and performance-first engineering.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-brand.black transition hover:border-brand.black" data-scroll="prev" data-scroll-target="#popular-carousel">
+                                <span class="sr-only">Scroll left</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 19.5-7.5-7.5 7.5-7.5" />
+                                </svg>
+                            </button>
+                            <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-brand.black transition hover:border-brand.black" data-scroll="next" data-scroll-target="#popular-carousel">
+                                <span class="sr-only">Scroll right</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="popular-carousel" class="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4">
+                        {% for product in popular_products %}
+                            <article class="relative flex w-[320px] flex-col gap-6 rounded-3xl border border-neutral-200 bg-white p-6 shadow-subtle snap-start">
+                                {% if product.badge or product.is_on_sale %}
+                                    <span class="absolute right-6 top-6 rounded-full bg-brand.yellow px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-brand.black">
+                                        {{ product.badge|default:"Limited" }}
+                                    </span>
+                                {% endif %}
+                                <div class="space-y-4">
+                                    <div class="aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-200 bg-brand.fog">
+                                        {% if product.image %}
+                                            <img src="{{ product.image }}" alt="{{ product.name }}" class="h-full w-full object-cover" />
+                                        {% else %}
+                                            <div class="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">Image coming soon</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="space-y-2">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">{{ product.vendor }}</p>
+                                        <h3 class="text-lg font-semibold text-brand.black">{{ product.name }}</h3>
+                                        <p class="text-sm text-neutral-600">{{ product.description }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between text-sm font-medium text-brand.black">
+                                    <span>IDR {{ product.price|floatformat:0 }}</span>
+                                    <div class="flex items-center gap-1 text-xs text-neutral-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-brand.yellow">
+                                            <path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.566a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.726-2.885a.562.562 0 0 0-.586 0l-4.726 2.885a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557L3.54 10.385a.563.563 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345l2.125-5.111Z" />
+                                        </svg>
+                                        <span>{{ product.rating }}</span>
+                                        <span class="text-neutral-400">({{ product.reviews }})</span>
+                                    </div>
+                                </div>
+                                {% if product.discount %}
+                                    <div class="rounded-2xl border border-brand.yellow/80 bg-brand.yellow/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-brand.black">{{ product.discount }}</div>
+                                {% endif %}
+                                <div class="flex flex-col gap-2">
+                                    <button type="button" class="inline-flex items-center justify-center rounded-full bg-brand.black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-900">{{ product.options.0 }}</button>
+                                    {% if product.options|length > 1 %}
+                                        <button type="button" class="inline-flex items-center justify-center rounded-full border border-brand.black px-4 py-2 text-sm font-semibold text-brand.black transition hover:bg-brand.yellow">{{ product.options.1 }}</button>
+                                    {% endif %}
+                                </div>
+                            </article>
+                        {% empty %}
+                            <p class="text-sm text-neutral-600">Popular products will appear here soon.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section id="new-arrivals" class="border-y border-neutral-200 bg-brand.fog py-16">
+                <div class="mx-auto max-w-7xl px-4 md:px-6">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                        <div class="space-y-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">New arrivals</p>
+                            <h2 class="text-3xl font-semibold text-brand.black">Fresh drops, ready for the trail</h2>
+                            <p class="text-sm text-neutral-600">Innovations landing this week across hiking, cycling, and all-condition layering.</p>
+                        </div>
+                        <a href="#themed-highlights" class="text-sm font-semibold text-brand.black transition hover:text-neutral-500">See more collections →</a>
+                    </div>
+                    <div class="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                        {% for product in new_arrivals %}
+                            <article class="flex h-full flex-col gap-4 rounded-3xl border border-neutral-200 bg-white p-6 shadow-subtle">
+                                <div class="aspect-[4/3] overflow-hidden rounded-2xl border border-neutral-200 bg-brand.fog">
+                                    {% if product.image %}
+                                        <img src="{{ product.image }}" alt="{{ product.name }}" class="h-full w-full object-cover" />
+                                    {% else %}
+                                        <div class="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">Preview</div>
+                                    {% endif %}
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                                        <span>{{ product.vendor }}</span>
+                                        <span class="text-brand.yellow">New</span>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-brand.black">{{ product.name }}</h3>
+                                    <p class="text-sm text-neutral-600">{{ product.description }}</p>
+                                </div>
+                                <div class="mt-auto flex items-center justify-between text-sm font-semibold text-brand.black">
+                                    <span>IDR {{ product.price|floatformat:0 }}</span>
+                                    <div class="flex items-center gap-1 text-xs text-neutral-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-brand.yellow">
+                                            <path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.566a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.726-2.885a.562.562 0 0 0-.586 0l-4.726 2.885a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557L3.54 10.385a.563.563 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345l2.125-5.111Z" />
+                                        </svg>
+                                        <span>{{ product.rating }}</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="inline-flex items-center justify-center rounded-full bg-brand.black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-900">{{ product.options.0 }}</button>
+                            </article>
+                        {% empty %}
+                            <p class="text-sm text-neutral-600">New arrivals will appear once products are added.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section id="themed-highlights" class="py-16">
+                <div class="mx-auto max-w-7xl px-4 md:px-6">
+                    <div class="space-y-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Themed highlights</p>
+                        <h2 class="text-3xl font-semibold text-brand.black">Curated spotlights by our field team</h2>
+                        <p class="text-sm text-neutral-600">Dial-in kits tailored for different adventures. Rotate weekly to keep your gear locker fresh.</p>
+                    </div>
+                    <div class="mt-12 grid gap-6 md:grid-cols-2">
+                        {% for highlight in highlight_sections %}
+                            <article class="flex flex-col gap-6 rounded-3xl border border-neutral-200 p-6 {% if highlight.theme == 'dark' %}bg-brand.black text-white{% elif highlight.theme == 'accent' %}bg-brand.yellow text-brand.black{% elif highlight.theme == 'outline' %}bg-white text-brand.black border-brand.black/40{% else %}bg-white text-brand.black{% endif %}">
+                                <div class="space-y-3">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.3em] {% if highlight.theme == 'dark' %}text-white/60{% else %}text-neutral-500{% endif %}">{{ highlight.title }}</p>
+                                    <h3 class="text-2xl font-semibold">{{ highlight.subtitle }}</h3>
+                                </div>
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    {% for product in highlight.products %}
+                                        <div class="flex flex-col gap-2 rounded-2xl border border-current/20 bg-white/10 p-4 {% if highlight.theme != 'dark' %}bg-white text-brand.black{% endif %}">
+                                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">{{ product.category }}</p>
+                                            <p class="text-sm font-semibold">{{ product.name }}</p>
+                                            <p class="text-xs text-neutral-500">{{ product.description }}</p>
+                                            <div class="mt-auto text-sm font-semibold">IDR {{ product.price|floatformat:0 }}</div>
+                                        </div>
+                                    {% empty %}
+                                        <p class="text-sm text-neutral-500">New spotlight coming soon.</p>
+                                    {% endfor %}
+                                </div>
+                                <a href="#" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] {% if highlight.theme == 'dark' %}text-white transition hover:text-brand.yellow{% else %}text-brand.black transition hover:text-neutral-500{% endif %}">
+                                    Discover collection
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                        <path d="M5 12h14" />
+                                        <path d="m12 5 7 7-7 7" />
+                                    </svg>
+                                </a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="border-t border-neutral-200 bg-white py-12">
+            <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 text-sm text-neutral-500 md:flex-row md:items-center md:justify-between md:px-6">
+                <p>&copy; {{ current_year }} Becathlon. Built for inclusive exploration.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="transition hover:text-brand.black">Privacy</a>
+                    <a href="#" class="transition hover:text-brand.black">Terms</a>
+                    <a href="#" class="transition hover:text-brand.black">Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const toggle = document.querySelector('[data-menu-toggle]');
+        const panel = document.querySelector('[data-menu-panel]');
+        const scrollButtons = document.querySelectorAll('[data-scroll]');
+
+        if (toggle && panel) {
+            toggle.addEventListener('click', () => {
+                panel.classList.toggle('hidden');
+            });
+        }
+
+        scrollButtons.forEach((button) => {
+            const targetSelector = button.getAttribute('data-scroll-target');
+            const target = document.querySelector(targetSelector);
+            if (!target) return;
+
+            button.addEventListener('click', () => {
+                const direction = button.getAttribute('data-scroll');
+                const scrollAmount = target.clientWidth * 0.8;
+                target.scrollBy({
+                    left: direction === 'next' ? scrollAmount : -scrollAmount,
+                    behavior: 'smooth',
+                });
+            });
+        });
+    </script>
+</body>
+</html>
