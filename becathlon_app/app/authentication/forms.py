@@ -7,9 +7,9 @@ class TailwindMixin:
     """Apply Tailwind utility classes to form widgets."""
 
     input_classes = (
-        'mt-1 block w-full rounded-xl border border-white/10 bg-slate-900/70 '
-        'px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 '
-        'focus:border-brand.sky focus:outline-none focus:ring-2 focus:ring-brand.sky/60'
+        'mt-1 block w-full rounded-xl border border-neutral-200 bg-white '
+        'px-4 py-3 text-sm text-brand.black placeholder:text-neutral-400 '
+        'focus:border-brand.yellow focus:outline-none focus:ring-2 focus:ring-brand.yellow/60'
     )
 
     def _apply_tailwind(self):
