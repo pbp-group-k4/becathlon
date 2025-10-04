@@ -1,35 +1,27 @@
-hihiahhaaha
+# Becathlon
 
-> **Note:** If you're not comfortable with Git commands, use GitHub Desktop!
+> A Django-powered storefront that mirrors the visual polish and browsing experience of Decathlon—minus the heavy operational tooling.
 
-## Setup
+## Team Members
 
-1. Clone the repository
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   ```
-3. Activate the virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - Mac/Linux: `source ./venv/bin/activate`
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-5. Run migrations:
-   ```bash
-   python manage.py migrate
-   ```
-6. Start the development server:
-   ```bash
-   python manage.py runserver
-   ```
+- Muhammad Adra Prakoso – Backend developer / 2406453530
+- !!Insert your name!!
 
-## Useful Commands
+## Application Story & Benefits
 
-- `python manage.py startapp <YOURAPPNAME>` - Create a new Django app (replace `<YOURAPPNAME>` with your app name)
-- `python manage.py makemigrations` - Generate migration files for model changes
-- `python manage.py migrate` - Apply migrations to the database
-- `python manage.py runserver` - Start the development server
+_Becathlon_ is an online multisport equipment catalogue that recreates the look, feel, and partial functionality of the Decathlon website. 
 
+## Modules
 
+| App Name | Modules | Purpose |
+|----------|---------|---------|
+| main | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/main/, static/main/ | Homepage, navigation, footer, about pages |
+| authentication | apps.py, models.py, views.py, urls.py, forms.py, admin.py, tests.py, migrations/, templates/authentication/ | User login, registration, logout |
+| catalog | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/catalog/, static/catalog/, fixtures/products.json | Product listings, categories, product details |
+| search | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/search/, static/search/ | Search functionality with filters |
+| cart | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/cart/, static/cart/ | Shopping cart management |
+| checkout | apps.py, models.py, views.py, urls.py, forms.py, admin.py, tests.py, migrations/, templates/checkout/, static/checkout/ | Mock checkout process |
+| orders | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/orders/, static/orders/ | Order history and mock refunds |
+| stores | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/stores/, static/stores/, fixtures/stores.json | Store locator with mock locations |
+| recommendations | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/recommendations/ | recommendation system |
+| profiles | apps.py, models.py, views.py, urls.py, forms.py, admin.py, tests.py, migrations/, templates/profiles/, static/profiles/ | User profiles and preferences |
