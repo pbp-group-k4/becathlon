@@ -5,6 +5,7 @@
 ## Team Members
 
 - Muhammad Adra Prakoso – Backend developer / 2406453530
+- Berguegou Briana Yadjam – Frontend and Backend / 2506561555
 - !!Insert your name!!
 
 ## Application Story & Benefits
