@@ -26,3 +26,12 @@ _Becathlon_ is an online multisport equipment catalogue that recreates the look,
 | stores | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/stores/, static/stores/, fixtures/stores.json | Store locator with mock locations |
 | recommendations | apps.py, models.py, views.py, urls.py, admin.py, tests.py, migrations/, templates/recommendations/ | recommendation system |
 | profiles | apps.py, models.py, views.py, urls.py, forms.py, admin.py, tests.py, migrations/, templates/profiles/, static/profiles/ | User profiles and preferences |
+
+## User Roles
+
+| Role              | Description | Permissions | Relevant Modules |
+|-------------------|-------------|-------------|------------------|
+| **Guest / Visitor** | Unregistered users browsing the site. | - View products, categories, promotions<br>- Search and filter items<br>- Add to temporary cart (session-based)<br>- Read reviews (limited) | `main` (homepage, about)<br>`catalog` (product listings, categories)<br>`search` (search & filters)<br>`cart` (temporary cart)<br>`recommendations` (basic suggestions) |
+| **Client / Customer** | Registered shoppers with an account. | - Everything a guest can do<br>- Manage profile (addresses, preferences)<br>- Place orders<br>- Checkout with payment<br>- Write reviews & ratings<br>- Save wishlists<br>- Access personalized recommendations | `authentication` (login, registration)<br>`profiles` (user info, preferences)<br>`cart` (persistent cart)<br>`checkout` (payment, shipping)<br>`orders` (order history, refunds)<br>`recommendations` (personalized) |
+| **Administrator** | Full control over the platform. | - Manage all users, roles, and permissions<br>- Add/edit/remove products<br>- Configure payments, shipping, taxes<br>- Access analytics<br>- Approve/remove content<br>- Handle disputes and refunds | `authentication` (user management)<br>`profiles` (role assignments)<br>`catalog` (product management)<br>`checkout` (payment config)<br>`orders` (refunds, disputes)<br>`stores` (store management)<br>`admin.py` across all apps |
+
