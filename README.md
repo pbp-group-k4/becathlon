@@ -6,6 +6,7 @@
 
 - Muhammad Adra Prakoso – Backend developer / 2406453530
 - Berguegou Briana Yadjam – Frontend and Backend / 2506561555
+- Zahran Musyaffa Ramadhan Mulya - 2406365401
 - !!Insert your name!!
 
 ## Application Story & Benefits
