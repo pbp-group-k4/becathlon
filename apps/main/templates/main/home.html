@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Becathlon — Performance Elevated</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-black: #0a0a0a;
+            --secondary-black: #1a1a1a;
+            --accent-gray: #2a2a2a;
+            --light-gray: #a0a0a0;
+            --ultra-light: #f5f5f5;
+            --accent-gold: #d4af37;
+            --accent-blue: #0066ff;
+            --gradient-start: #0a0a0a;
+            --gradient-end: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--ultra-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem 3rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, #ffffff 0%, var(--light-gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a, .nav-links button {
+            text-decoration: none;
+            color: var(--light-gray);
+            font-weight: 400;
+            font-size: 0.9rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .nav-links a:hover, .nav-links button:hover {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .user-info {
+            color: var(--ultra-light);
+            font-weight: 400;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 8rem 2rem;
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, var(--light-gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--light-gray);
+            max-width: 650px;
+            margin: 0 auto;
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            line-height: 1.8;
+        }
+
+        .auth-prompt {
+            background: rgba(0, 102, 255, 0.05);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-prompt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.3), transparent);
+        }
+
+        .auth-prompt h3 {
+            color: #ffffff;
+            margin-bottom: 1rem;
+            font-weight: 300;
+            font-size: 1.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        .auth-prompt p {
+            color: var(--light-gray);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            font-size: 1rem;
+        }
+
+        .auth-prompt .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-weight: 400;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #0052cc 100%);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .section {
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: #ffffff;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--light-gray);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: #ffffff;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: rgba(0, 102, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: rgba(26, 26, 26, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .product-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light-gray);
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .product-content {
+            padding: 1.75rem;
+        }
+
+        .product-category {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light-gray);
+            padding: 0.4rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.02em;
+        }
+
+        .product-description {
+            color: var(--light-gray);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .product-stock {
+            font-size: 0.85rem;
+            color: var(--light-gray);
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .product-meta {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #ff4444;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            cursor: pointer;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 68, 68, 0.1);
+            border-color: rgba(255, 68, 68, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 6rem 2rem;
+            color: var(--light-gray);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-weight: 300;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            letter-spacing: 0.05em;
+        }
+
+        .empty-state p {
+            font-weight: 300;
+            color: var(--light-gray);
+        }
+
+        .messages {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            max-width: 420px;
+        }
+
+        .alert {
+            padding: 1.25rem 1.75rem;
+            margin-bottom: 0.75rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(450px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .alert-info {
+            background: rgba(0, 102, 255, 0.1);
+            color: #93c5fd;
+            border-color: rgba(0, 102, 255, 0.3);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-black);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .hero {
+                padding: 4rem 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .messages {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">Becathlon</div>
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <span class="user-info">Hi, {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit">Sign Out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Sign In</a>
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <div class="messages" id="messagesContainer">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <section class="hero">
+            <h1>Performance Elevated</h1>
+            <p>Experience the intersection of precision engineering and athletic excellence. Curated equipment for those who demand more from their performance.</p>
+        </section>
+
+        {% if not user.is_authenticated %}
+        <section class="auth-prompt">
+            <h3>Access Exclusive Gear</h3>
+            <p>Join an elite community of athletes and innovators. Unlock your potential with premium equipment designed for peak performance.</p>
+            <div class="btn-group">
+                <a href="{% url 'signup' %}" class="btn btn-primary">Request Access</a>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Member Login</a>
+            </div>
+        </section>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <section class="section">
+            <h2>List Equipment</h2>
+            <form id="addProductForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="productName">Equipment Name</label>
+                        <input type="text" id="productName" placeholder="Enter product name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productType">Category</label>
+                        <select id="productType" required>
+                            <option value="">Select Category</option>
+                            {% for type in product_types %}
+                            <option value="{{ type.id }}">{{ type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productPrice">Price (USD)</label>
+                        <input type="number" id="productPrice" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productStock">Quantity</label>
+                        <input type="number" id="productStock" min="0" value="0" placeholder="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Specifications</label>
+                    <textarea id="productDescription" placeholder="Describe the equipment features and specifications" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="productImage">Image URL</label>
+                    <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit Listing</button>
+            </form>
+        </section>
+        {% endif %}
+
+        <section class="section">
+            <h2>Equipment Catalog</h2>
+            <div id="productsGrid" class="products-grid">
+                <!-- Products will be loaded via AJAX -->
+            </div>
+        </section>
+    </div>
+
+    <div id="user-data" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}" data-username="{{ user.username }}"></div>
+
+    <script>
+        const userData = document.getElementById('user-data');
+        const isAuthenticated = userData.dataset.authenticated === 'true';
+        const currentUsername = userData.dataset.username;        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Show message
+        function showMessage(message, type) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            messagesContainer.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Load products
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products/');
+                const data = await response.json();
+
+                const productsGrid = document.getElementById('productsGrid');
+
+                if (data.products.length === 0) {
+                    productsGrid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">─</div>
+                            <h3>Catalog Initialization</h3>
+                            <p>No equipment currently listed. Be among the first to contribute to our premium collection.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                productsGrid.innerHTML = data.products.map(product => `
+                    <div class="product-card">
+                        <div class="product-image">
+                            ${product.image_url ? `<img src="${product.image_url}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="font-size: 3rem; opacity: 0.3;">─</div>'}
+                        </div>
+                        <div class="product-content">
+                            <span class="product-category">${product.product_type}</span>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-description">${product.description}</div>
+                            <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
+                            <div class="product-stock">Quantity: ${product.stock} Available</div>
+                            <div class="product-meta">${product.created_by} • ${product.created_at}</div>
+                            ${product.can_delete ? `<button class="btn-danger" onclick="deleteProduct(${product.id})">Remove Listing</button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showMessage('Error loading products', 'error');
+            }
+        }
+
+        // Add product
+        if (isAuthenticated) {
+            document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = {
+                    name: document.getElementById('productName').value,
+                    description: document.getElementById('productDescription').value,
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    product_type: document.getElementById('productType').value,
+                    stock: parseInt(document.getElementById('productStock').value),
+                    image_url: document.getElementById('productImage').value || ''
+                };
+
+                try {
+                    const response = await fetch('/api/products/add/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('Equipment listing submitted successfully', 'success');
+                        document.getElementById('addProductForm').reset();
+                        loadProducts();
+                    } else {
+                        showMessage(data.error || 'Unable to submit listing', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error adding product:', error);
+                    showMessage('Submission failed. Please try again', 'error');
+                }
+            });
+        }
+
+        // Delete product
+        async function deleteProduct(productId) {
+            if (!confirm('Confirm removal of this equipment listing?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/products/${productId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Listing removed from catalog', 'success');
+                    loadProducts();
+                } else {
+                    showMessage(data.error || 'Unable to remove listing', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing product:', error);
+                showMessage('Removal failed. Please try again', 'error');
+            }
+        }
+
+        // Load products on page load
+        loadProducts();
+    </script>
+</body>
+</html>
