@@ -43,9 +43,9 @@
     <div class="product-card">
         <div class="product-image">
             {% if product.image_url %}
-                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" crossorigin="anonymous">
             {% else %}
-                <img src="https://via.placeholder.com/500x500?text=No+Image" alt="No Image">
+                <img src="https://via.placeholder.com/500x500?text=No+Image" alt="No Image" crossorigin="anonymous">
             {% endif %}
         </div>
 
@@ -59,7 +59,9 @@
                 {% if product.brand %}
                     <span class="meta-item">Brand: <strong>{{ product.brand }}</strong></span>
                 {% endif %}
-                <span class="meta-item rating">★ {{ product.rating|floatformat:1 }}{% if product.rating_count > 0 %} ({{ product.rating_count }} review{{ product.rating_count|pluralize }}){% else %} (No reviews yet){% endif %}</span>
+                {% if product.rating %}
+                    <span class="meta-item rating">★ {{ product.rating }}</span>
+                {% endif %}
             </div>
             
             <p class="product-description">{{ product.description|default:"No description available." }}</p>
