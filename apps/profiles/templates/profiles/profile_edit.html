@@ -1,0 +1,140 @@
+{% extends 'profiles/base_profiles.html' %}
+{% block title %}Edit Profile — Becathlon{% endblock %}
+{% block extra_css %}
+<style>
+/* Buttons styling */
+.btn-primary {
+    background: #00c851;
+    color: #fff;
+    padding: 0.75rem 1.6rem;
+    border-radius: 8px;
+    transition: 0.3s;
+    border: none;
+}
+.btn-primary:hover {
+    background: #02e45c;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #ff4444;
+    color: #fff;
+    padding: 0.75rem 1.6rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+    margin-left: 1rem;
+}
+.btn-secondary:hover {
+    background: #ff2d2d;
+    transform: translateY(-2px);
+}
+
+/* Inputs consistent with grey contrast */
+input, select, textarea {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f5f5f5;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #007bff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row gap-10">
+  <!-- Sidebar -->
+  <aside class="md:w-1/4 w-full glass-panel p-6 rounded-xl h-fit">
+    <h3 class="text-base font-medium text-gray-300 mb-4 uppercase tracking-wide">Account</h3>
+    <nav class="flex flex-col gap-2">
+      <a href="{% url 'profiles:detail' %}" class="sidebar-link">Profile Overview</a>
+      <a href="{% url 'profiles:edit' %}" class="sidebar-link active">Edit Profile</a>
+    </nav>
+  </aside>
+
+  <!-- Edit Form -->
+  <section class="md:w-3/4 w-full glass-panel p-8 rounded-xl transition">
+    <h1 class="text-2xl font-light mb-8 text-white">Edit Your Profile</h1>
+    <form id="editProfileForm" method="post" class="grid md:grid-cols-2 gap-6">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div>
+        <label class="field-label" for="{{ form.first_name.id_for_label }}">First Name</label>
+        {{ form.first_name }}
+      </div>
+      <div>
+        <label class="field-label" for="{{ form.last_name.id_for_label }}">Last Name</label>
+        {{ form.last_name }}
+      </div>
+      <div>
+        <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+      </div>
+      <div>
+        <label class="field-label" for="{{ form.phone.id_for_label }}">Phone</label>
+        {{ form.phone }}
+      </div>
+      <div class="md:col-span-2">
+        <label class="field-label" for="{{ form.preferred_sports.id_for_label }}">Preferred Sports</label>
+        {{ form.preferred_sports }}
+      </div>
+      <div class="flex items-center gap-2 md:col-span-2">
+        {{ form.newsletter_opt_in }}
+        <label for="{{ form.newsletter_opt_in.id_for_label }}" class="text-sm text-gray-400">Subscribe to Newsletter</label>
+      </div>
+
+      <div class="md:col-span-2 mt-4">
+        <button type="submit" class="btn-primary">Save Changes</button>
+        <a href="{% url 'profiles:detail' %}" class="btn-secondary ml-3">Cancel</a>
+      </div>
+    </form>
+    <div id="formMessages" class="mt-6"></div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
+document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const messages = document.getElementById('formMessages');
+  const data = new FormData(this);
+
+  try {
+    const res = await fetch('{% url "profiles:edit" %}', {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': getCookie("csrftoken"),  // Add this line
+      },
+      body: data
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('Profile updated successfully', 'success');
+      messages.innerHTML = '<p class="text-green-400 mt-2">Saved successfully! <a href="{% url "profiles:detail" %}" class="underline">View changes</a></p>';
+    } else {
+      messages.innerHTML = '<p class="text-red-400 mt-2">Error updating profile</p>';
+      showToast('Error updating profile', 'error');
+    }
+  } catch {
+    messages.innerHTML = '<p class="text-red-400 mt-2">Connection failed.</p>';
+    showToast('Connection error', 'error');
+  }
+});
+</script>
+{% endblock %}

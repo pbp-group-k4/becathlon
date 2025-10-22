@@ -1,0 +1,89 @@
+/* ====== Panels & Fields ====== */
+.glass-panel {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #a8a8a8;
+  margin-bottom: .25rem;
+  display: block;
+}
+
+/* Light grey info box (solid so it's visible on dark bg) */
+.field-display {
+  background: #f1f1f1;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  display: inline-block;
+  padding: 0.72rem 1.4rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, background .15s ease;
+  font-weight: 500;
+}
+.btn:hover { transform: translateY(-2px); }
+
+/* Blue: Edit */
+.btn-blue { background:#007bff; color:#fff; }
+.btn-blue:hover { background:#0069d9; }
+
+/* Green: Save */
+.btn-green { background:#00c851; color:#fff; }
+.btn-green:hover { background:#02b74f; }
+
+/* Red: Cancel */
+.btn-red { background:#ff4444; color:#fff; }
+.btn-red:hover { background:#e63b3b; }
+
+/* Sidebar link look */
+.sidebar-link {
+  color: #bfbfbf; text-decoration: none;
+  padding: .6rem 1rem; border-radius: 8px;
+  transition: all .3s ease; display: block; font-size: .9rem;
+}
+.sidebar-link:hover, .sidebar-link.active {
+  color: #fff; background: rgba(255,255,255,0.08);
+}
+
+/* ====== iOS-like toggle (works with your existing HTML) ====== */
+.switch { position:relative; display:inline-block; width:52px; height:28px; }
+.switch input { opacity:0; width:0; height:0; }
+.slider { position:absolute; inset:0; background:rgba(120,120,120,.3); border-radius:34px; transition:.3s; }
+.slider:before { content:""; position:absolute; height:22px; width:22px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+.switch input:checked + .slider { background:#007bff; box-shadow:0 0 10px rgba(0,112,243,.6); }
+.switch input:checked + .slider:before { transform: translateX(24px); }
+
+/* ====== Toasts ====== */
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px;
+  background: rgba(30,30,30,.95);
+  color: #fff;
+  padding: .8rem 1.1rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  z-index: 9999;
+  font-size: 0.95rem;
+  animation: toast-in .2s ease-out;
+}
+.toast.success { background: #1f7a1f; }
+.toast.error   { background: #8b1a1a; }
+
+@keyframes toast-in { from { opacity:0; transform: translate(-50%, 8px);} to { opacity:1; transform: translate(-50%, 0);} }

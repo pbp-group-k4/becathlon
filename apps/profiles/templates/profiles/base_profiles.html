@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Profiles — Becathlon{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'profiles/css/profiles.css' %}">
+</head>
+
+<body class="font-inter bg-[#0a0a0a] text-gray-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-[rgba(10,10,10,0.85)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
+    <nav class="max-w-7xl mx-auto flex justify-between items-center px-8 py-4">
+      <a href="/" class="text-xl tracking-widest font-light uppercase text-white hover:text-[#0070f3] transition">Becathlon</a>
+      <div class="flex items-center gap-6 text-sm">
+        <a href="/" class="nav-link">Home</a>
+        {% if user.is_authenticated %}
+          <span class="text-gray-300">Hi, {{ user.username }}</span>
+          <form method="POST" action="{% url 'logout' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="nav-link">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="nav-link">Login</a>
+          <a href="{% url 'signup' %}" class="nav-link">Sign Up</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <!-- Content -->
+  <main class="flex-1 max-w-7xl mx-auto px-6 sm:px-10 py-12">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-gray-500 border-t border-[rgba(255,255,255,0.05)] py-6 text-sm">
+    © 2025 Becathlon — Performance Elevated
+  </footer>
+
+  <script src="{% static 'profiles/js/profiles.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
