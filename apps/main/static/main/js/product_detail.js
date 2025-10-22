@@ -12,6 +12,8 @@ function changeQuantity(delta) {
 
     if (newValue >= min && newValue <= max) {
         input.value = newValue;
+        // Trigger input event to ensure consistency
+        input.dispatchEvent(new Event('input', { bubbles: true }));
     }
 }
 
@@ -116,6 +118,7 @@ function applyWhiteGlow(container) {
 document.addEventListener('DOMContentLoaded', function() {
     // Apply ambient lighting effect
     applyAmbientLighting();
+    
     // Quantity input validation
     const quantityInput = document.getElementById('product-quantity');
     if (quantityInput) {
@@ -129,26 +132,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Quantity decrease button
+    // Quantity decrease button - with multiple event listener approaches for reliability
     const decreaseBtn = document.querySelector('.quantity-decrease');
     if (decreaseBtn) {
-        decreaseBtn.addEventListener('click', function() {
+        decreaseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             changeQuantity(-1);
         });
+        // Ensure button is always clickable
+        decreaseBtn.style.pointerEvents = 'auto';
     }
 
-    // Quantity increase button
+    // Quantity increase button - with multiple event listener approaches for reliability
     const increaseBtn = document.querySelector('.quantity-increase');
     if (increaseBtn) {
-        increaseBtn.addEventListener('click', function() {
+        increaseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             changeQuantity(1);
         });
+        // Ensure button is always clickable
+        increaseBtn.style.pointerEvents = 'auto';
     }
 
     // Add to cart button
     const addToCartBtn = document.querySelector('.btn-add-to-cart');
     if (addToCartBtn) {
-        addToCartBtn.addEventListener('click', function() {
+        addToCartBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const productId = this.getAttribute('data-product-id');
             const quantityElem = document.getElementById('product-quantity');
             const quantity = quantityElem ? parseInt(quantityElem.value) : 1;
@@ -160,5 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('addToCart function not found. Make sure cart.js is loaded.');
             }
         });
+        // Ensure button is always clickable
+        addToCartBtn.style.pointerEvents = 'auto';
     }
 });

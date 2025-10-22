@@ -26,21 +26,8 @@ def cart_view(request):
 @require_POST
 def add_to_cart(request, product_id):
     """
-    POST endpoint to add product to cart
+    POST endpoint to add product to cart (works for both guests and authenticated users)
     """
-    if not request.user.is_authenticated:
-        next_url = request.META.get('HTTP_REFERER') or reverse('catalog:home')
-        login_url = f"{reverse('login')}?{urlencode({'next': next_url})}"
-
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'login_required': True,
-                'login_url': login_url,
-            }, status=401)
-
-        return redirect(login_url)
-
     product = get_object_or_404(Product, id=product_id)
     cart = get_or_create_cart(request)
 
@@ -182,3 +169,30 @@ def api_cart_count(request):
     """
     cart = get_or_create_cart(request)
     return JsonResponse({'count': cart.get_total_items()})
+
+def checkout_view(request):
+    """
+    Checkout view - requires authentication
+    Redirects to login if guest, retains cart after login via transfer_guest_cart_to_user
+    """
+    if not request.user.is_authenticated:
+        login_url = f"{reverse('login')}?{urlencode({'next': reverse('cart:checkout')})}"
+        messages.info(request, 'Please log in to proceed to checkout.')
+        return redirect(login_url)
+    
+    cart = get_or_create_cart(request)
+    
+    if not cart.items.exists():
+        messages.warning(request, 'Your cart is empty.')
+        return redirect('cart:cart_view')
+    
+    # TODO: Implement checkout logic
+    # For now, show placeholder
+    context = {
+        'cart': cart,
+        'cart_items': cart.items.select_related('product', 'product__product_type').all(),
+        'subtotal': cart.get_subtotal(),
+    }
+    
+    messages.info(request, 'Checkout functionality coming soon!')
+    return redirect('cart:cart_view')

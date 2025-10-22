@@ -65,7 +65,7 @@
                 </div>
                 <div class="cart-actions">
                     <a href="{% url 'catalog:home' %}" class="btn-secondary">Continue Shopping</a>
-                    <button class="btn-primary" onclick="alert('Checkout coming soon!')">Proceed to Checkout</button>
+                    <a href="{% url 'cart:checkout' %}" class="btn-primary">Proceed to Checkout</a>
                 </div>
                 <div class="clear-cart">
                     <button class="btn-link btn-clear-cart">Clear Cart</button>

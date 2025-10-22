@@ -21,15 +21,6 @@ function showNotification(message, type = 'success') {
 
 // Add to cart
 function addToCart(productId, quantity = 1) {
-    const authState = window.becathlon || {};
-    const fallbackLoginUrl = `/login/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-
-    if (!authState.isAuthenticated) {
-        const loginUrl = authState.loginUrl || fallbackLoginUrl;
-        window.location.href = loginUrl;
-        return;
-    }
-
     const formData = new FormData();
     formData.append('quantity', quantity);
     formData.append('csrfmiddlewaretoken', getCSRFToken());
@@ -43,12 +34,6 @@ function addToCart(productId, quantity = 1) {
     })
     .then(async response => {
         const data = await response.json();
-
-        if (response.status === 401 && data?.login_required) {
-            const loginUrl = data.login_url || authState.loginUrl || fallbackLoginUrl;
-            window.location.href = loginUrl;
-            return;
-        }
 
         if (data && data.success) {
             showNotification(data.message);
