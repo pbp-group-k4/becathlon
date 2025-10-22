@@ -726,6 +726,16 @@
         </section>
         {% endif %}
 
+        {% if user.is_authenticated %}
+        <section class="section" id="recommendations-section">
+            <h2 class="section-title">Recommended for You</h2>
+
+            <div class="recommendations-wrapper">
+                {% include "recommendation/product_recommendations.html" with recommendations=recommendations %}
+            </div>
+        </section>
+        {% endif %}
+
         <section class="section">
             <h2>Equipment Catalog</h2>
             <form id="filterForm" style="margin-bottom:2rem;display:flex;gap:1rem;flex-wrap:wrap;">

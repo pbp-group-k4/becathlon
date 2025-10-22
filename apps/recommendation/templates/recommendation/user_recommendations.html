@@ -1,0 +1,8 @@
+<h2>Recommended for You</h2>
+<ul>
+    {% for p in products %}
+        <li><a href="/product/{{ p.id }}/">{{ p.name }} - ${{ p.price }}</a></li>
+    {% empty %}
+        <li>No recommendations yet.</li>
+    {% endfor %}
+</ul>

@@ -16,9 +16,11 @@ def home(request):
     """Home page displaying all products"""
     products = Product.objects.all().select_related('product_type', 'created_by')
     product_types = ProductType.objects.all()
+    recommendations = Product.objects.all().order_by('-created_at')[:6]
     context = {
         'products': products,
         'product_types': product_types,
+        'recommendations': recommendations,
     }
     return render(request, 'main/home.html', context)
 
