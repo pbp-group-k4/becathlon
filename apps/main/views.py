@@ -40,6 +40,7 @@ def add_product_ajax(request):
             description=data.get('description'),
             price=data.get('price'),
             product_type=product_type,
+            brand=data.get('brand', ''),
             stock=data.get('stock', 0),
             image_url=data.get('image_url', ''),
             created_by=request.user
@@ -53,6 +54,7 @@ def add_product_ajax(request):
                 'description': product.description,
                 'price': str(product.price),
                 'product_type': product.product_type.name,
+                'brand': product.brand,
                 'stock': product.stock,
                 'image_url': product.image_url,
                 'created_by': product.created_by.username,

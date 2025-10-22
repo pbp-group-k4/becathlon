@@ -823,6 +823,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="productBrand">Brand</label>
+                        <input type="text" id="productBrand" placeholder="Enter brand name (optional)">
+                    </div>
+
+                    <div class="form-group">
                         <label for="productPrice">Price (USD)</label>
                         <input type="number" id="productPrice" step="0.01" min="0" placeholder="0.00" required>
                     </div>
@@ -979,6 +984,7 @@
                     description: document.getElementById('productDescription').value,
                     price: parseFloat(document.getElementById('productPrice').value),
                     product_type: document.getElementById('productType').value,
+                    brand: document.getElementById('productBrand').value || '',
                     stock: parseInt(document.getElementById('productStock').value),
                     image_url: document.getElementById('productImage').value || ''
                 };

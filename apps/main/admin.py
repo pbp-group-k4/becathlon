@@ -19,8 +19,8 @@ class ProductTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'product_type', 'price', 'stock', 'created_by', 'created_at')
-    list_filter = ('product_type', 'created_at')
-    search_fields = ('name', 'description', 'created_by__username')
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('name', 'product_type', 'brand', 'price', 'stock', 'rating', 'created_by', 'created_at')
+    list_filter = ('product_type', 'created_at', 'brand')
+    search_fields = ('name', 'description', 'created_by__username', 'brand')
+    readonly_fields = ('created_at', 'updated_at', 'rating')
 
