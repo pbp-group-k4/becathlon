@@ -17,7 +17,137 @@
 </style>
 {% endblock %}
 
+<<<<<<< HEAD
 {% block content %}
+=======
+        .product-page {
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 40px;
+            background-color: #111111;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+
+        .back-link {
+            color: #9b9b9b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        .product-card {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        .product-image img {
+            width: 450px;
+            height: auto;
+            border-radius: 12px;
+            object-fit: cover;
+            background-color: #1a1a1a;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #f5f5f5;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #1c1c1c;
+            border-radius: 8px;
+            color: #9f9f9f;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            color: #00ffc6;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-right: 20px;
+        }
+
+        .stock {
+            font-size: 14px;
+            color: #9f9f9f;
+        }
+
+        .product-meta {
+            margin: 12px 0 18px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            font-size: 14px;
+            color: #b0b0b0;
+        }
+
+        .rating {
+            color: #ffcf50;
+            font-weight: bold;
+        }
+
+        .product-description {
+            margin-top: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #d0d0d0;
+        }
+
+        .seller-info {
+            margin-top: 40px;
+            background-color: #181818;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .seller-info h4 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .seller-info p {
+            font-size: 14px;
+            color: #bdbdbd;
+            margin: 3px 0;
+        }
+
+        @media (max-width: 768px) {
+            .product-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .product-image img {
+                width: 100%;
+                max-width: 400px;
+            }
+            .product-meta {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+>>>>>>> vegard
 <div class="product-page">
     <a class="back-link" href="{% url 'catalog:home' %}">← Back to Products</a>
 
@@ -32,6 +162,7 @@
 
         <div class="product-info">
             <h1 class="product-title">{{ product.name }}</h1>
+<<<<<<< HEAD
             <span class="tag">{{ product.product_type.name|default:"Uncategorized" }}</span>
             
             <div class="price-stock-container">
@@ -70,6 +201,24 @@
                 <p class="stock-info out-of-stock">❌ Out of Stock</p>
                 {% endif %}
             </div>
+=======
+            <span class="tag">
+                {{ product.product_type.name|default:"Uncategorized" }}
+            </span>
+
+            <div class="product-meta">
+                <span class="meta-item price">Rp {{ product.price }}</span>
+                <span class="meta-item stock">Stock: {{ product.stock }}</span>
+                {% if product.brand %}
+                    <span class="meta-item">Brand: <strong>{{ product.brand }}</strong></span>
+                {% endif %}
+                {% if product.rating %}
+                    <span class="meta-item rating">★ {{ product.rating }}</span>
+                {% endif %}
+            </div>
+
+            <p class="product-description">{{ product.description }}</p>
+>>>>>>> vegard
         </div>
     </div>
 
