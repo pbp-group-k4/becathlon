@@ -37,7 +37,7 @@
         .product-card {
             display: flex;
             flex-direction: row;
-            align-items: center;
+            align-items: flex-start;
             gap: 40px;
         }
 
@@ -82,6 +82,24 @@
             color: #9f9f9f;
         }
 
+        .product-meta {
+            margin: 12px 0 18px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            font-size: 14px;
+            color: #b0b0b0;
+        }
+
+        .rating {
+            color: #ffcf50;
+            font-weight: bold;
+        }
+
         .product-description {
             margin-top: 20px;
             font-size: 15px;
@@ -117,6 +135,9 @@
                 width: 100%;
                 max-width: 400px;
             }
+            .product-meta {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -138,10 +159,18 @@
             <span class="tag">
                 {{ product.product_type.name|default:"Uncategorized" }}
             </span>
-            <div style="margin: 15px 0;">
-                <span class="price">${{ product.price }}</span>
-                <span class="stock">Stock: {{ product.stock }}</span>
+
+            <div class="product-meta">
+                <span class="meta-item price">Rp {{ product.price }}</span>
+                <span class="meta-item stock">Stock: {{ product.stock }}</span>
+                {% if product.brand %}
+                    <span class="meta-item">Brand: <strong>{{ product.brand }}</strong></span>
+                {% endif %}
+                {% if product.rating %}
+                    <span class="meta-item rating">★ {{ product.rating }}</span>
+                {% endif %}
             </div>
+
             <p class="product-description">{{ product.description }}</p>
         </div>
     </div>
