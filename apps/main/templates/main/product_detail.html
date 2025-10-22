@@ -1,25 +1,163 @@
-{% extends "main/home.html" %}
-{% block content %}
+{% load static %}
 
-<p><a href="{% url 'home' %}" style="color:#aaa;text-decoration:none;">← Back to catalog</a></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Product Details</title>
+    <style>
+        body {
+            background-color: #0e0e0e;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-<div class="container" style="padding:3rem;">
-    <h1>{{ product.name }}</h1>
-    <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width:300px;">
-    <p><strong>Category:</strong> {{ product.product_type.name }}</p>
-    <p><strong>Price:</strong> ${{ product.price }}</p>
-    <p><strong>Stock:</strong> {{ product.stock }}</p>
-    <p><strong>Description:</strong> {{ product.description }}</p>
+        .product-page {
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 40px;
+            background-color: #111111;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
 
-    <h3>Seller Info</h3>
-    {% if show_contact and customer %}
-        <p><strong>Phone:</strong> {{ customer.phone_number }}</p>
-        <p><strong>Address:</strong> {{ customer.address }}</p>
-    {% elif show_contact and not customer %}
-        <p>Seller has not added contact information.</p>
-    {% else %}
-        <p><em>Login to view seller’s contact details.</em></p>
-        <a href="{% url 'login' %}?next={{ request.path }}">Sign In</a>
+        .back-link {
+            color: #9b9b9b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        .product-card {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .product-image img {
+            width: 450px;
+            height: auto;
+            border-radius: 12px;
+            object-fit: cover;
+            background-color: #1a1a1a;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #f5f5f5;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #1c1c1c;
+            border-radius: 8px;
+            color: #9f9f9f;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            color: #00ffc6;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-right: 20px;
+        }
+
+        .stock {
+            font-size: 14px;
+            color: #9f9f9f;
+        }
+
+        .product-description {
+            margin-top: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #d0d0d0;
+        }
+
+        .seller-info {
+            margin-top: 40px;
+            background-color: #181818;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .seller-info h4 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .seller-info p {
+            font-size: 14px;
+            color: #bdbdbd;
+            margin: 3px 0;
+        }
+
+        @media (max-width: 768px) {
+            .product-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .product-image img {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="product-page">
+    <a class="back-link" href="/">← Back to Products</a>
+
+    <div class="product-card">
+        <div class="product-image">
+            {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/400x400?text=No+Image" alt="No Image">
+            {% endif %}
+        </div>
+
+        <div class="product-info">
+            <h1 class="product-title">{{ product.name }}</h1>
+            <span class="tag">
+                {{ product.product_type.name|default:"Uncategorized" }}
+            </span>
+            <div style="margin: 15px 0;">
+                <span class="price">${{ product.price }}</span>
+                <span class="stock">Stock: {{ product.stock }}</span>
+            </div>
+            <p class="product-description">{{ product.description }}</p>
+        </div>
+    </div>
+
+    {% if customer %}
+    <div class="seller-info">
+        <h4>Seller Info</h4>
+        <p><strong>Name:</strong> {{ product.created_by.username }}</p>
+        {% if show_contact %}
+            <p><strong>Phone:</strong> {{ customer.phone_number }}</p>
+            <p><strong>Address:</strong> {{ customer.address }}</p>
+        {% else %}
+            <p><em>Login to view seller contact info.</em></p>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
-{% endblock %}
+</body>
+</html>
