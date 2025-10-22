@@ -182,7 +182,7 @@ function refreshCartCount() {
         const cartBadge = document.querySelector('.cart-badge');
         if (cartBadge) {
             cartBadge.textContent = data.count;
-            cartBadge.style.display = data.count > 0 ? 'inline' : 'none';
+            cartBadge.style.display = data.count > 0 ? 'inline-flex' : 'none';
         }
     })
     .catch(error => console.error('Error refreshing cart count:', error));
