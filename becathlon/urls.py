@@ -23,4 +23,5 @@ urlpatterns = [
     path('auth/', include('apps.authentication.urls')),
     path('catalog/', include('apps.catalog.urls')),
     path('cart/', include('apps.cart.urls')),
+    path('recommendation/', include('apps.recommendation.urls')),
 ]
