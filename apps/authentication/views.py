@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from .forms import SignUpForm
 from apps.main.models import Customer
+from apps.cart.utils import transfer_guest_cart_to_user
 
 
 def signup_view(request):
@@ -32,6 +33,8 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                # Transfer guest cart to user cart
+                transfer_guest_cart_to_user(request)
                 messages.success(request, f'Welcome back, {username}!')
                 return redirect('home')
             else:

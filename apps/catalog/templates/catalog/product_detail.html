@@ -1,4 +1,5 @@
 {% extends 'catalog/base_catalog.html' %}
+{% load static %}
 
 {% block title %}{{ product.name }} - Becathlon{% endblock %}
 
@@ -81,18 +82,32 @@
             </div>
 
             <div class="product-actions-panel">
-                <button class="btn-add-cart" {% if product.stock == 0 %}disabled{% endif %}>
-                    {% if product.stock > 0 %}
-                        Add to Cart (Coming Soon)
-                    {% else %}
-                        Out of Stock
-                    {% endif %}
+                {% if product.stock > 0 %}
+                <div class="quantity-selector">
+                    <label for="product-quantity">Quantity:</label>
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn quantity-decrease">-</button>
+                        <input type="number" id="product-quantity" class="quantity-input" value="1" min="1" max="{{ product.stock }}">
+                        <button type="button" class="quantity-btn quantity-increase">+</button>
+                    </div>
+                </div>
+                <button class="btn-add-cart btn-add-to-cart" data-product-id="{{ product.id }}">
+                    Add to Cart
                 </button>
+                {% else %}
+                <button class="btn-add-cart" disabled>
+                    Out of Stock
+                </button>
+                {% endif %}
                 <button class="btn-wishlist">Add to Wishlist</button>
             </div>
 
             <div class="product-notice">
-                <p>🛒 Cart functionality coming soon! Stay tuned for the shopping cart module.</p>
+                {% if product.stock > 0 %}
+                <p>✅ In Stock ({{ product.stock }} available)</p>
+                {% else %}
+                <p>❌ Out of Stock</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -144,14 +159,62 @@
 
 {% block extra_js %}
 <script>
-function changeMainImage(imageUrl, thumbnail) {
-    document.getElementById('main-product-image').src = imageUrl;
+// Quantity selector functions for product detail page
+function changeQuantity(delta) {
+    const input = document.getElementById('product-quantity');
+    if (!input) return;
     
-    // Update active thumbnail
-    document.querySelectorAll('.thumbnail').forEach(thumb => {
-        thumb.classList.remove('active');
-    });
-    thumbnail.classList.add('active');
+    const currentValue = parseInt(input.value);
+    const newValue = currentValue + delta;
+    const max = parseInt(input.max);
+    const min = parseInt(input.min);
+
+    if (newValue >= min && newValue <= max) {
+        input.value = newValue;
+    }
 }
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Quantity input validation
+    const quantityInput = document.getElementById('product-quantity');
+    if (quantityInput) {
+        quantityInput.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            const min = parseInt(this.min);
+            const max = parseInt(this.max);
+
+            if (value < min) this.value = min;
+            if (value > max) this.value = max;
+        });
+    }
+
+    // Quantity decrease button
+    const decreaseBtn = document.querySelector('.quantity-decrease');
+    if (decreaseBtn) {
+        decreaseBtn.addEventListener('click', function() {
+            changeQuantity(-1);
+        });
+    }
+
+    // Quantity increase button
+    const increaseBtn = document.querySelector('.quantity-increase');
+    if (increaseBtn) {
+        increaseBtn.addEventListener('click', function() {
+            changeQuantity(1);
+        });
+    }
+
+    // Add to cart button
+    const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const quantityInput = document.getElementById('product-quantity');
+            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+            addToCart(productId, quantity);
+        });
+    }
+});
 </script>
 {% endblock %}

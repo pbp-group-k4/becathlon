@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.main.apps.MainConfig',
     'apps.authentication.apps.AuthenticationConfig',
     'apps.catalog.apps.CatalogConfig',
+    'apps.cart.apps.CartConfig',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.cart.context_processors.cart_context',
             ],
         },
     },

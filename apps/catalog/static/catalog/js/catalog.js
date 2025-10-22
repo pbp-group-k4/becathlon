@@ -39,11 +39,12 @@ function initQuickView() {
                 }
                 
                 const product = await response.json();
-                
+
                 // Build quick view content
                 const quickViewHTML = buildQuickViewHTML(product);
                 modalContent.innerHTML = quickViewHTML;
-                
+                attachQuickViewActions(modalContent, product);
+
             } catch (error) {
                 console.error('Error loading quick view:', error);
                 modalContent.innerHTML = `
@@ -112,13 +113,26 @@ function buildQuickViewHTML(product) {
                     <a href="/catalog/product/${product.id}/" class="btn-view" style="flex: 1; text-decoration: none;">
                         View Full Details
                     </a>
-                    <button class="btn-add-cart" style="flex: 1;" ${!product.in_stock ? 'disabled' : ''}>
-                        ${product.in_stock ? 'Add to Cart (Soon)' : 'Out of Stock'}
+                    <button class="btn-add-cart" type="button" data-action="quick-view-add" style="flex: 1;" ${!product.in_stock ? 'disabled' : ''}>
+                        ${product.in_stock ? 'Add to Cart' : 'Out of Stock'}
                     </button>
                 </div>
             </div>
         </div>
     `;
+}
+
+function attachQuickViewActions(container, product) {
+    const addButton = container.querySelector('[data-action="quick-view-add"]');
+    if (!addButton || !product.in_stock) {
+        return;
+    }
+
+    addButton.addEventListener('click', () => {
+        if (typeof addToCart === 'function') {
+            addToCart(product.id, 1);
+        }
+    });
 }
 
 // AJAX Filtering (optional enhancement for dynamic updates)
@@ -267,13 +281,6 @@ function initPriceSlider() {
     // Could use libraries like noUiSlider for better UX
 }
 
-// Add to cart functionality (placeholder for cart module integration)
-function addToCart(productId) {
-    console.log('Add to cart functionality coming soon!');
-    alert('Shopping cart module will be available soon!');
-}
-
 // Export functions for use in templates
 window.changeMainImage = changeMainImage;
 window.filterProducts = filterProducts;
-window.addToCart = addToCart;

@@ -1,0 +1,86 @@
+{% extends "catalog/base_catalog.html" %}
+{% load static %}
+
+{% block title %}Shopping Cart - Becathlon{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cart/css/cart.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="{% url 'catalog:home' %}">Catalog</a>
+        <span>/</span>
+        <span class="current">Shopping Cart</span>
+    </nav>
+
+    <div class="cart-header">
+        <h1>Shopping Cart</h1>
+        {% if cart_items %}
+            <span class="cart-count">{{ total_items }} item{{ total_items|pluralize }}</span>
+        {% endif %}
+    </div>
+
+    {% if cart_items %}
+        <div class="cart-content">
+            <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item" data-item-id="{{ item.id }}">
+                    <div class="item-image">
+                        {% if item.product.image_url %}
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                        {% else %}
+                            <div class="no-image">No Image</div>
+                        {% endif %}
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-name">
+                            <a href="{% url 'catalog:product_detail' item.product.id %}">{{ item.product.name }}</a>
+                        </h3>
+                        <p class="item-type">{{ item.product.product_type.name }}</p>
+                        <div class="item-price">${{ item.product.price }}</div>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn quantity-decrease" data-item-id="{{ item.id }}" data-quantity="{{ item.quantity }}">-</button>
+                        <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}"
+                               data-item-id="{{ item.id }}">
+                        <button class="quantity-btn quantity-increase" data-item-id="{{ item.id }}" data-quantity="{{ item.quantity }}">+</button>
+                    </div>
+                    <div class="item-subtotal">${{ item.get_subtotal }}</div>
+                    <div class="item-remove">
+                        <button class="remove-btn" data-item-id="{{ item.id }}">Remove</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal ({{ total_items }} item{{ total_items|pluralize }}):</span>
+                    <span class="summary-total">${{ subtotal }}</span>
+                </div>
+                <div class="cart-actions">
+                    <a href="{% url 'catalog:home' %}" class="btn-secondary">Continue Shopping</a>
+                    <button class="btn-primary" onclick="alert('Checkout coming soon!')">Proceed to Checkout</button>
+                </div>
+                <div class="clear-cart">
+                    <button class="btn-link btn-clear-cart">Clear Cart</button>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">🛒</div>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'catalog:home' %}" class="btn-primary">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}
