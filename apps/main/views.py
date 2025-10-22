@@ -5,6 +5,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 from .models import Product, ProductType
+from django.db.models import Q
+from django.contrib.auth.models import User
+
 
 # Create your views here.
 
@@ -80,8 +83,29 @@ def delete_product_ajax(request, product_id):
 
 @require_http_methods(["GET"])
 def get_products_ajax(request):
-    """AJAX endpoint to get all products"""
+    """AJAX endpoint to get filtered products"""
     products = Product.objects.all().select_related('product_type', 'created_by')
+
+    q = request.GET.get('q')             # search keyword
+    product_type = request.GET.get('type')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    if q:
+        products = products.filter(Q(name__icontains=q) | Q(description__icontains=q))
+    if product_type:
+        products = products.filter(product_type__id=product_type)
+    if min_price:
+        try:
+            products = products.filter(price__gte=float(min_price))
+        except ValueError:
+            pass
+    if max_price:
+        try:
+            products = products.filter(price__lte=float(max_price))
+        except ValueError:
+            pass
+
     products_data = [{
         'id': p.id,
         'name': p.name,
@@ -94,6 +118,26 @@ def get_products_ajax(request):
         'created_at': p.created_at.strftime('%Y-%m-%d %H:%M'),
         'can_delete': request.user.is_authenticated and p.created_by == request.user
     } for p in products]
-    
+
     return JsonResponse({'success': True, 'products': products_data})
 
+
+def product_detail(request, product_id):
+    """Show product details (sensitive info hidden for guests)"""
+    product = get_object_or_404(Product.objects.select_related('product_type', 'created_by'), id=product_id)
+    customer = None
+
+    # Try to find the seller’s Customer profile
+    try:
+        customer = product.created_by.customer
+    except Exception:
+        customer = None
+
+    show_contact = request.user.is_authenticated
+
+    context = {
+        'product': product,
+        'customer': customer,
+        'show_contact': show_contact,
+    }
+    return render(request, 'main/product_detail.html', context)

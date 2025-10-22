@@ -1,0 +1,157 @@
+{% extends 'catalog/base_catalog.html' %}
+
+{% block title %}{{ product.name }} - Becathlon{% endblock %}
+
+{% block content %}
+<div class="product-detail-wrapper">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="{% url 'catalog:home' %}">Catalog</a>
+        <span>/</span>
+        <a href="{% url 'catalog:category' product.product_type.id %}">{{ product.product_type.name }}</a>
+        <span>/</span>
+        <span class="current">{{ product.name }}</span>
+    </nav>
+
+    <div class="product-detail-grid">
+        <!-- Image Gallery -->
+        <div class="product-gallery">
+            <div class="main-image">
+                {% if product_images %}
+                    <img id="main-product-image" src="{{ product_images.0.image_url }}" alt="{{ product.name }}">
+                {% elif product.image_url %}
+                    <img id="main-product-image" src="{{ product.image_url }}" alt="{{ product.name }}">
+                {% else %}
+                    <div class="no-image-large">No Image Available</div>
+                {% endif %}
+            </div>
+            
+            {% if product_images|length > 1 %}
+            <div class="thumbnail-gallery">
+                {% for image in product_images %}
+                <img src="{{ image.image_url }}" 
+                     alt="{{ product.name }} - Image {{ forloop.counter }}"
+                     class="thumbnail {% if forloop.first %}active{% endif %}"
+                     onclick="changeMainImage('{{ image.image_url }}', this)">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Information -->
+        <div class="product-info-panel">
+            <div class="product-category-badge">{{ product.product_type.name }}</div>
+            <h1 class="product-title">{{ product.name }}</h1>
+            
+            <div class="product-price-section">
+                <span class="product-price-large">${{ product.price }}</span>
+            </div>
+
+            <div class="product-stock-status">
+                {% if product.stock > 0 %}
+                    <span class="stock-indicator in-stock">✓ In Stock</span>
+                    <span class="stock-quantity">{{ product.stock }} available</span>
+                {% else %}
+                    <span class="stock-indicator out-of-stock">✗ Out of Stock</span>
+                {% endif %}
+            </div>
+
+            <div class="product-description">
+                <h3>Description</h3>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <div class="product-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Category:</span>
+                    <span class="meta-value">
+                        <a href="{% url 'catalog:category' product.product_type.id %}">{{ product.product_type.name }}</a>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Added:</span>
+                    <span class="meta-value">{{ product.created_at|date:"F d, Y" }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">SKU:</span>
+                    <span class="meta-value">#{{ product.id|stringformat:"05d" }}</span>
+                </div>
+            </div>
+
+            <div class="product-actions-panel">
+                <button class="btn-add-cart" {% if product.stock == 0 %}disabled{% endif %}>
+                    {% if product.stock > 0 %}
+                        Add to Cart (Coming Soon)
+                    {% else %}
+                        Out of Stock
+                    {% endif %}
+                </button>
+                <button class="btn-wishlist">Add to Wishlist</button>
+            </div>
+
+            <div class="product-notice">
+                <p>🛒 Cart functionality coming soon! Stay tuned for the shopping cart module.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="related-products-section">
+        <h2>Related Products</h2>
+        <p class="section-subtitle">More from {{ product.product_type.name }}</p>
+        
+        <div class="related-products-grid">
+            {% for related in related_products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if related.images.all %}
+                        <img src="{{ related.images.first.image_url }}" alt="{{ related.name }}">
+                    {% elif related.image_url %}
+                        <img src="{{ related.image_url }}" alt="{{ related.name }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    {% if related.stock == 0 %}
+                    <span class="stock-badge out-of-stock">Out of Stock</span>
+                    {% elif related.stock < 10 %}
+                    <span class="stock-badge low-stock">Low Stock</span>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ related.name }}</h3>
+                    <p class="product-price">${{ related.price }}</p>
+                    <div class="product-stock">
+                        {% if related.stock > 0 %}
+                            <span class="in-stock">{{ related.stock }} in stock</span>
+                        {% else %}
+                            <span class="out-of-stock">Out of stock</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions">
+                        <a href="{% url 'catalog:product_detail' related.id %}" class="btn-view">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeMainImage(imageUrl, thumbnail) {
+    document.getElementById('main-product-image').src = imageUrl;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnail.classList.add('active');
+}
+</script>
+{% endblock %}

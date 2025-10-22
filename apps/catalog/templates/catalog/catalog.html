@@ -1,0 +1,160 @@
+{% extends 'catalog/base_catalog.html' %}
+{% load catalog_extras %}
+
+{% block title %}Product Catalog - Becathlon{% endblock %}
+
+{% block content %}
+<div class="catalog-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <h3>Categories</h3>
+            <form id="filter-form" method="GET">
+                <div class="category-filters">
+                    {% for product_type in product_types %}
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="categories" value="{{ product_type.id }}"
+                               {% if product_type.id|stringformat:"s" in request.GET.getlist.categories %}checked{% endif %}>
+                        <span>{{ product_type.name }}</span>
+                        <span class="count">({{ category_counts|get_item:product_type.id|default:0 }})</span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <h3>Price Range</h3>
+                <div class="price-filters">
+                    <div class="price-input-group">
+                        <label for="min_price" class="sr-only">Minimum Price</label>
+                        <input type="number" id="min_price" name="min_price" placeholder="Min"
+                               value="{{ request.GET.min_price }}" step="0.01" min="0">
+                        <span aria-hidden="true">-</span>
+                        <label for="max_price" class="sr-only">Maximum Price</label>
+                        <input type="number" id="max_price" name="max_price" placeholder="Max"
+                               value="{{ request.GET.max_price }}" step="0.01" min="0">
+                    </div>
+                </div>
+
+                <h3>Stock</h3>
+                <label class="filter-checkbox">
+                    <input type="checkbox" name="in_stock_only" value="true"
+                           {% if request.GET.in_stock_only %}checked{% endif %}>
+                    <span>In Stock Only</span>
+                </label>
+
+                <h3>Search</h3>
+                <div class="search-box">
+                    <input type="text" name="search" placeholder="Search products..." 
+                           value="{{ request.GET.search }}">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">Apply Filters</button>
+                    <a href="{% url 'catalog:home' %}" class="btn-clear">Clear All</a>
+                </div>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="catalog-main">
+        <div class="catalog-header">
+            <h1>Product Catalog</h1>
+            <div class="catalog-controls">
+                <div class="results-count">
+                    Showing {{ products|length }} of {{ total_count }} products
+                </div>
+                <div class="sort-control">
+                    <label for="sort-select">Sort by:</label>
+                    <select id="sort-select" name="sort_by" form="filter-form">
+                        <option value="newest" {% if request.GET.sort_by == 'newest' or not request.GET.sort_by %}selected{% endif %}>Newest First</option>
+                        <option value="price_low" {% if request.GET.sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if request.GET.sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="name_asc" {% if request.GET.sort_by == 'name_asc' %}selected{% endif %}>Name: A to Z</option>
+                        <option value="name_desc" {% if request.GET.sort_by == 'name_desc' %}selected{% endif %}>Name: Z to A</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid" id="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.images.all %}
+                        <img src="{{ product.images.first.image_url }}" alt="{{ product.name }}">
+                    {% elif product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <span class="product-badge">{{ product.product_type.name }}</span>
+                    {% if product.stock == 0 %}
+                    <span class="stock-badge out-of-stock">Out of Stock</span>
+                    {% elif product.stock < 10 %}
+                    <span class="stock-badge low-stock">Low Stock</span>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-price">${{ product.price }}</p>
+                    <div class="product-stock">
+                        {% if product.stock > 0 %}
+                            <span class="in-stock">{{ product.stock }} in stock</span>
+                        {% else %}
+                            <span class="out-of-stock">Out of stock</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions">
+                        <a href="{% url 'catalog:product_detail' product.id %}" class="btn-view">View Details</a>
+                        <button class="btn-quick-view" data-product-id="{{ product.id }}">Quick View</button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-products">
+                <p>No products found matching your criteria.</p>
+                <a href="{% url 'catalog:home' %}" class="btn-clear">Clear Filters</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+        <div class="pagination">
+            {% if products.has_previous %}
+                <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">First</a>
+                <a href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">Previous</a>
+            {% endif %}
+
+            <span class="page-current">
+                Page {{ products.number }} of {{ products.paginator.num_pages }}
+            </span>
+
+            {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">Next</a>
+                <a href="?page={{ products.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-link">Last</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+<!-- Quick View Modal -->
+<div id="quick-view-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="quick-view-content">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('sort-select').addEventListener('change', function() {
+    document.getElementById('filter-form').submit();
+});
+</script>
+{% endblock %}

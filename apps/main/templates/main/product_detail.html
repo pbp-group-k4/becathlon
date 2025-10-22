@@ -1,0 +1,25 @@
+{% extends "main/home.html" %}
+{% block content %}
+
+<p><a href="{% url 'home' %}" style="color:#aaa;text-decoration:none;">← Back to catalog</a></p>
+
+<div class="container" style="padding:3rem;">
+    <h1>{{ product.name }}</h1>
+    <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width:300px;">
+    <p><strong>Category:</strong> {{ product.product_type.name }}</p>
+    <p><strong>Price:</strong> ${{ product.price }}</p>
+    <p><strong>Stock:</strong> {{ product.stock }}</p>
+    <p><strong>Description:</strong> {{ product.description }}</p>
+
+    <h3>Seller Info</h3>
+    {% if show_contact and customer %}
+        <p><strong>Phone:</strong> {{ customer.phone_number }}</p>
+        <p><strong>Address:</strong> {{ customer.address }}</p>
+    {% elif show_contact and not customer %}
+        <p>Seller has not added contact information.</p>
+    {% else %}
+        <p><em>Login to view seller’s contact details.</em></p>
+        <a href="{% url 'login' %}?next={{ request.path }}">Sign In</a>
+    {% endif %}
+</div>
+{% endblock %}
