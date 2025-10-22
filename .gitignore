@@ -121,6 +121,9 @@ dmypy.json
 *.swo
 *~
 
+# Agent files (Adra)
+.github/copilot-instructions.md
+
 # OS
 .DS_Store
 .DS_Store?
