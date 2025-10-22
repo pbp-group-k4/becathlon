@@ -663,6 +663,7 @@
     </div>
 
     <div class="container">
+        {% block content %}
         <section class="hero">
             <h1>Performance Elevated</h1>
             <p>Experience the intersection of precision engineering and athletic excellence. Curated equipment for those who demand more from their performance.</p>
@@ -727,12 +728,24 @@
 
         <section class="section">
             <h2>Equipment Catalog</h2>
+            <form id="filterForm" style="margin-bottom:2rem;display:flex;gap:1rem;flex-wrap:wrap;">
+                <input type="text" id="searchQuery" placeholder="Search keyword..." style="padding:0.5rem;">
+                <select id="filterType" style="padding:0.5rem;">
+                    <option value="">All Categories</option>
+                    {% for type in product_types %}
+                    <option value="{{ type.id }}">{{ type.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" id="minPrice" placeholder="Min price" step="0.01" style="padding:0.5rem;width:120px;">
+                <input type="number" id="maxPrice" placeholder="Max price" step="0.01" style="padding:0.5rem;width:120px;">
+                <button type="button" id="applyFilters" class="btn btn-secondary">Filter</button>
+            </form>
             <div id="productsGrid" class="products-grid">
                 <!-- Products will be loaded via AJAX -->
             </div>
         </section>
+        {% endblock %}
     </div>
-
     <div id="user-data" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}" data-username="{{ user.username }}"></div>
 
     <script>
@@ -771,7 +784,15 @@
         // Load products
         async function loadProducts() {
             try {
-                const response = await fetch('/api/products/');
+                const queryParams = new URLSearchParams({
+                    q: document.getElementById('searchQuery')?.value || '',
+                    type: document.getElementById('filterType')?.value || '',
+                    min_price: document.getElementById('minPrice')?.value || '',
+                    max_price: document.getElementById('maxPrice')?.value || ''
+                }).toString();
+
+                const response = await fetch(`/api/products/?${queryParams}`);
+
                 const data = await response.json();
 
                 const productsGrid = document.getElementById('productsGrid');
@@ -788,20 +809,27 @@
                 }
 
                 productsGrid.innerHTML = data.products.map(product => `
-                    <div class="product-card">
-                        <div class="product-image">
-                            ${product.image_url ? `<img src="${product.image_url}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="font-size: 3rem; opacity: 0.3;">─</div>'}
-                        </div>
-                        <div class="product-content">
-                            <span class="product-category">${product.product_type}</span>
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-description">${product.description}</div>
-                            <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
-                            <div class="product-stock">Quantity: ${product.stock} Available</div>
-                            <div class="product-meta">${product.created_by} • ${product.created_at}</div>
-                            ${product.can_delete ? `<button class="btn-danger" onclick="deleteProduct(${product.id})">Remove Listing</button>` : ''}
-                        </div>
+                <div class="product-card">
+                    <a href="/product/${product.id}/" style="text-decoration:none;color:inherit;">
+                    <div class="product-image">
+                        ${product.image_url
+                        ? `<img src="${product.image_url}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;">`
+                        : '<div style="font-size: 3rem; opacity: 0.3;">─</div>'}
                     </div>
+                    </a>
+
+                    <div class="product-content">
+                    <span class="product-category">${product.product_type}</span>
+                    <a href="/product/${product.id}/" style="text-decoration:none;color:inherit;">
+                        <div class="product-name">${product.name}</div>
+                    </a>
+                    <div class="product-description">${product.description}</div>
+                    <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
+                    <div class="product-stock">Quantity: ${product.stock} Available</div>
+                    <div class="product-meta">${product.created_by} • ${product.created_at}</div>
+                    ${product.can_delete ? `<button class="btn-danger" onclick="deleteProduct(${product.id})">Remove Listing</button>` : ''}
+                    </div>
+                </div>
                 `).join('');
             } catch (error) {
                 console.error('Error loading products:', error);
@@ -879,6 +907,7 @@
 
         // Load products on page load
         loadProducts();
+        document.getElementById('applyFilters').addEventListener('click', loadProducts);
     </script>
 </body>
 </html>
