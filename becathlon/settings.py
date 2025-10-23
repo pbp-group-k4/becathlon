@@ -16,6 +16,7 @@ import sys
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # Add apps directory to Python path
 sys.path.insert(0, str(BASE_DIR / 'apps'))
 
@@ -45,8 +46,9 @@ INSTALLED_APPS = [
     'apps.authentication.apps.AuthenticationConfig',
     'apps.catalog.apps.CatalogConfig',
     'apps.cart.apps.CartConfig',
+    'apps.profiles.apps.ProfilesConfig',
     'apps.recommendation.apps.RecommendationConfig',
-    'apps.order.apps.OrderConfig', 
+    'apps.order.apps.OrderConfig',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +66,7 @@ ROOT_URLCONF = 'becathlon.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,6 +129,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

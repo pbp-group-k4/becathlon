@@ -1,0 +1,198 @@
+{% extends 'profiles/base_profiles.html' %}
+{% block title %}Profile Overview — Becathlon{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Smooth glass panel */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+}
+
+/* Sidebar links */
+.sidebar-link {
+    color: #bfbfbf;
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+    font-size: 0.9rem;
+}
+.sidebar-link:hover,
+.sidebar-link.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Labels and text contrast */
+.field-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #a8a8a8;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.field-display {
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+
+.btn-primary {
+    background: #007bff;
+    color: #fff;
+    padding: 0.75rem 1.8rem;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.btn-primary:hover {
+    background: #0069d9;
+    transform: translateY(-2px);
+}
+
+
+/* iOS-style toggle */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(120, 120, 120, 0.3);
+    transition: 0.4s;
+    border-radius: 34px;
+}
+.slider::before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: #007bff;
+}
+input:checked + .slider::before {
+    transform: translateX(24px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row gap-10">
+
+  <!-- Sidebar -->
+  <aside class="md:w-1/4 w-full glass-panel p-6 h-fit">
+    <h3 class="text-base font-medium text-gray-300 mb-4 uppercase tracking-wide">Account</h3>
+    <nav class="flex flex-col gap-2">
+      <a href="{% url 'profiles:detail' %}" class="sidebar-link active">Profile Overview</a>
+      <a href="{% url 'profiles:edit' %}" class="sidebar-link">Edit Profile</a>
+    </nav>
+  </aside>
+
+  <!-- Main Section -->
+  <section class="md:w-3/4 w-full glass-panel p-8">
+    <h1 class="text-2xl font-light mb-8 text-white">Profile Details</h1>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <label class="field-label">First Name</label>
+        <p class="field-display">{{ profile.first_name|default:"Not provided" }}</p>
+      </div>
+      <div>
+        <label class="field-label">Last Name</label>
+        <p class="field-display">{{ profile.last_name|default:"Not provided" }}</p>
+      </div>
+      <div>
+        <label class="field-label">Email</label>
+        <p class="field-display">{{ profile.email }}</p>
+      </div>
+      <div>
+        <label class="field-label">Phone</label>
+        <p class="field-display">{{ profile.phone|default:"Not provided" }}</p>
+      </div>
+      <div class="md:col-span-2">
+        <label class="field-label">Preferred Sports</label>
+        <p class="field-display">{{ profile.preferred_sports|default:"None selected" }}</p>
+      </div>
+    </div>
+
+    <!-- Newsletter toggle -->
+    <div class="flex items-center gap-3 mt-10">
+      <label class="text-sm text-gray-300">Newsletter</label>
+      <label class="switch">
+        <input type="checkbox" id="newsletterToggle" {% if profile.newsletter_opt_in %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+      <span id="newsletterLabel" class="text-sm text-gray-400">
+        {% if profile.newsletter_opt_in %}Subscribed{% else %}Not subscribed{% endif %}
+      </span>
+    </div>
+
+    <a href="{% url 'profiles:edit' %}" class="btn-primary mt-8 inline-block">
+      Edit Profile
+    </a>
+  </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('newsletterToggle');
+  const label = document.getElementById('newsletterLabel');
+
+  toggle.addEventListener('change', async () => {
+    const isSubscribed = toggle.checked;
+    label.textContent = isSubscribed ? "Subscribed" : "Not subscribed";
+
+    try {
+      const response = await fetch("{% url 'profiles:toggle_newsletter_ajax' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({ newsletter_opt_in: isSubscribed }),
+      });
+      if (!response.ok) throw new Error("Network error");
+    } catch (err) {
+      console.error("Newsletter update failed:", err);
+      label.textContent = "Connection failed";
+    }
+  });
+
+  // Helper for CSRF
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+  }
+});
+</script>
+{% endblock %}
