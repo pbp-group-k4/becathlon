@@ -3,7 +3,7 @@
 > A Django-powered storefront that mirrors the visual polish and browsing experience of Decathlon—minus the heavy operational tooling.
 
 ## TODO !!!!!!
-- Finish dependency chain: catalog [DONE] -> cart [DONE]-> checkout [WIP] -> orders (Waiting for Gunta)
+- Finish dependency chain: catalog [DONE] -> cart [DONE]-> checkout [DONE] -> orders [WIP]
 - Add ability to add ratings once user has purchased an item (orders)
 - Aggregate ratings per item to make average rating (catalog)
 - Mock payment gateway in checkout
