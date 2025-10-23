@@ -124,6 +124,9 @@ dmypy.json
 # Agent files (Adra)
 .github/copilot-instructions.md
 
+# Claude Code configurations
+CLAUDE.md
+
 # OS
 .DS_Store
 .DS_Store?
