@@ -179,6 +179,10 @@ def process_checkout(request, cart, cart_items):
             status='SUCCESS'  # Mock successful payment
         )
 
+        # Update order status to PAID since payment was successful
+        order.status = Order.Status.PAID
+        order.save()
+
         logger.info(f"Order #{order.id} created successfully for user {request.user.id}")
         messages.success(request, f"Order #{order.id} created successfully!")
         return redirect('order:checkout_success', order_id=order.id)
@@ -193,6 +197,7 @@ def process_checkout(request, cart, cart_items):
         return redirect('order:checkout')
 
 
+@login_required
 def checkout_success(request, order_id):
     """
     Display checkout success page.
@@ -202,3 +207,27 @@ def checkout_success(request, order_id):
         'order': order,
     }
     return render(request, 'order/checkout_success.html', context)
+
+
+@login_required
+def order_list(request):
+    """
+    Display all orders for the logged-in user.
+    """
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'order/order_list.html', context)
+
+
+@login_required
+def order_detail(request, order_id):
+    """
+    Display detailed view of a specific order.
+    """
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    context = {
+        'order': order,
+    }
+    return render(request, 'order/order_detail.html', context)
