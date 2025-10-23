@@ -47,7 +47,7 @@
                     <span class="cart-badge" style="display: none;">0</span>
                 </a>
                 {% if user.is_authenticated %}
-                    <span class="user-info">{{ user.username }}</span>
+                    <a href="{% url 'profiles:detail' %}" class="user-info" style="text-decoration: none;">{{ user.username }}</a>
                     <form method="POST" action="{% url 'logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn-logout">Logout</button>

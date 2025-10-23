@@ -1,140 +1,463 @@
-{% extends 'profiles/base_profiles.html' %}
+{% extends 'catalog/base_catalog.html' %}
+{% load static %}
+
 {% block title %}Edit Profile — Becathlon{% endblock %}
+
 {% block extra_css %}
 <style>
-/* Buttons styling */
-.btn-primary {
-    background: #00c851;
-    color: #fff;
-    padding: 0.75rem 1.6rem;
-    border-radius: 8px;
-    transition: 0.3s;
-    border: none;
-}
-.btn-primary:hover {
-    background: #02e45c;
-    transform: translateY(-2px);
-}
+    .edit-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
 
-.btn-secondary {
-    background: #ff4444;
-    color: #fff;
-    padding: 0.75rem 1.6rem;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: 0.3s;
-    margin-left: 1rem;
-}
-.btn-secondary:hover {
-    background: #ff2d2d;
-    transform: translateY(-2px);
-}
+    /* Breadcrumb */
+    .edit-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        color: var(--light-gray);
+    }
 
-/* Inputs consistent with grey contrast */
-input, select, textarea {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #f5f5f5;
-    border-radius: 8px;
-    padding: 0.7rem 1rem;
-    width: 100%;
-}
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.12);
-    border-color: #007bff;
-}
+    .edit-breadcrumb a {
+        color: var(--accent-gold);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .edit-breadcrumb a:hover {
+        color: #e5c158;
+    }
+
+    /* Form container */
+    .edit-form-wrapper {
+        background: rgba(26, 26, 26, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 2.5rem;
+        border-radius: 16px;
+    }
+
+    .form-title {
+        font-size: 1.8rem;
+        font-weight: 300;
+        margin-bottom: 2rem;
+        color: var(--ultra-light);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--light-gray);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--light-gray);
+        font-weight: 500;
+    }
+
+    /* File input styling */
+    .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--ultra-light);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+
+    input[type="file"]::file-selector-button {
+        background: var(--accent-gold);
+        color: var(--primary-black);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-right: 0.75rem;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background: #e5c158;
+    }
+
+    .profile-picture-preview {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 1rem;
+    }
+
+    .preview-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--accent-gold);
+    }
+
+    .preview-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: 300;
+    }
+
+    .preview-info {
+        flex: 1;
+    }
+
+    .preview-info p {
+        font-size: 0.85rem;
+        color: var(--light-gray);
+        margin: 0.25rem 0;
+    }
+
+    /* Checkbox styling */
+    .form-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--accent-gold);
+    }
+
+    .form-checkbox label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    /* Error messages */
+    .form-errors {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-errors ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    /* Form actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-family: inherit;
+    }
+
+    .btn-primary {
+        background: var(--accent-gold);
+        color: var(--primary-black);
+    }
+
+    .btn-primary:hover {
+        background: #e5c158;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--accent-gold);
+        border: 1px solid var(--accent-gold);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: #e5c158;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: rgba(30, 30, 30, 0.95);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        animation: slideIn 0.3s ease-out;
+        border-left: 3px solid var(--accent-gold);
+    }
+
+    .toast.success {
+        border-left-color: var(--success-green);
+    }
+
+    .toast.error {
+        border-left-color: var(--danger-red);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .edit-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .edit-form-wrapper {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .profile-picture-preview {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="flex flex-col md:flex-row gap-10">
-  <!-- Sidebar -->
-  <aside class="md:w-1/4 w-full glass-panel p-6 rounded-xl h-fit">
-    <h3 class="text-base font-medium text-gray-300 mb-4 uppercase tracking-wide">Account</h3>
-    <nav class="flex flex-col gap-2">
-      <a href="{% url 'profiles:detail' %}" class="sidebar-link">Profile Overview</a>
-      <a href="{% url 'profiles:edit' %}" class="sidebar-link active">Edit Profile</a>
+<div class="edit-container">
+    <!-- Breadcrumb -->
+    <nav class="edit-breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="{% url 'profiles:detail' %}">Profile</a>
+        <span>/</span>
+        <span class="current">Edit</span>
     </nav>
-  </aside>
 
-  <!-- Edit Form -->
-  <section class="md:w-3/4 w-full glass-panel p-8 rounded-xl transition">
-    <h1 class="text-2xl font-light mb-8 text-white">Edit Your Profile</h1>
-    <form id="editProfileForm" method="post" class="grid md:grid-cols-2 gap-6">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+    <!-- Edit Form -->
+    <div class="edit-form-wrapper">
+        <h1 class="form-title">Edit Your Profile</h1>
+        
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
 
-      <div>
-        <label class="field-label" for="{{ form.first_name.id_for_label }}">First Name</label>
-        {{ form.first_name }}
-      </div>
-      <div>
-        <label class="field-label" for="{{ form.last_name.id_for_label }}">Last Name</label>
-        {{ form.last_name }}
-      </div>
-      <div>
-        <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
-        {{ form.email }}
-      </div>
-      <div>
-        <label class="field-label" for="{{ form.phone.id_for_label }}">Phone</label>
-        {{ form.phone }}
-      </div>
-      <div class="md:col-span-2">
-        <label class="field-label" for="{{ form.preferred_sports.id_for_label }}">Preferred Sports</label>
-        {{ form.preferred_sports }}
-      </div>
-      <div class="flex items-center gap-2 md:col-span-2">
-        {{ form.newsletter_opt_in }}
-        <label for="{{ form.newsletter_opt_in.id_for_label }}" class="text-sm text-gray-400">Subscribe to Newsletter</label>
-      </div>
+        <form id="editProfileForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-      <div class="md:col-span-2 mt-4">
-        <button type="submit" class="btn-primary">Save Changes</button>
-        <a href="{% url 'profiles:detail' %}" class="btn-secondary ml-3">Cancel</a>
-      </div>
-    </form>
-    <div id="formMessages" class="mt-6"></div>
-  </section>
+            <!-- Profile Picture Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Profile Picture</h2>
+                
+                {% if form.profile_picture.errors %}
+                <div class="form-errors">
+                    {{ form.profile_picture.errors }}
+                </div>
+                {% endif %}
+
+                <div class="profile-picture-preview">
+                    {% if form.instance.profile_picture %}
+                        <img src="{{ form.instance.profile_picture.url }}" alt="Current profile picture" class="preview-image">
+                    {% else %}
+                        <div class="preview-placeholder">{{ form.instance.get_full_name|first }}</div>
+                    {% endif %}
+                    <div class="preview-info">
+                        <p><strong>Upload a new profile picture</strong></p>
+                        <p>JPG, PNG (max 5MB)</p>
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label class="form-label" for="{{ form.profile_picture.id_for_label }}">Profile Picture</label>
+                    {{ form.profile_picture }}
+                </div>
+            </div>
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Personal Information</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                        {% if form.first_name.errors %}
+                        <div class="form-errors">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                        {{ form.first_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                        {% if form.last_name.errors %}
+                        <div class="form-errors">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                        {{ form.last_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.preferred_sports.id_for_label }}">{{ form.preferred_sports.label }}</label>
+                        {% if form.preferred_sports.errors %}
+                        <div class="form-errors">{{ form.preferred_sports.errors }}</div>
+                        {% endif %}
+                        {{ form.preferred_sports }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Contact Information</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                        {% if form.email.errors %}
+                        <div class="form-errors">{{ form.email.errors }}</div>
+                        {% endif %}
+                        {{ form.email }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                        {% if form.phone.errors %}
+                        <div class="form-errors">{{ form.phone.errors }}</div>
+                        {% endif %}
+                        {{ form.phone }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences Section -->
+            <div class="form-section">
+                <h2 class="form-section-title">Preferences</h2>
+                
+                <div class="form-group">
+                    <div class="form-checkbox">
+                        {{ form.newsletter_opt_in }}
+                        <label for="{{ form.newsletter_opt_in.id_for_label }}">{{ form.newsletter_opt_in.label }}</label>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--light-gray); margin-top: 0.5rem;">Receive updates about new products, sales, and exclusive offers</p>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'profiles:detail' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div id="formMessages"></div>
+    </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
 
 <script>
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-}
-
-document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const messages = document.getElementById('formMessages');
-  const data = new FormData(this);
-
-  try {
-    const res = await fetch('{% url "profiles:edit" %}', {
-      method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': getCookie("csrftoken"),  // Add this line
-      },
-      body: data
-    });
-    const json = await res.json();
-    if (json.success) {
-      showToast('Profile updated successfully', 'success');
-      messages.innerHTML = '<p class="text-green-400 mt-2">Saved successfully! <a href="{% url "profiles:detail" %}" class="underline">View changes</a></p>';
-    } else {
-      messages.innerHTML = '<p class="text-red-400 mt-2">Error updating profile</p>';
-      showToast('Error updating profile', 'error');
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
-  } catch {
-    messages.innerHTML = '<p class="text-red-400 mt-2">Connection failed.</p>';
-    showToast('Connection error', 'error');
-  }
-});
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('editProfileForm');
+        
+        form.addEventListener('submit', async (e) => {
+            // Let the form submit normally for file uploads
+            // No AJAX needed for file uploads
+        });
+    });
 </script>
 {% endblock %}

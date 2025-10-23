@@ -4,7 +4,7 @@ from .models import Profile
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ["first_name", "last_name", "phone","email","preferred_sports", "newsletter_opt_in"]
+        fields = ["first_name", "last_name", "phone","email","preferred_sports", "profile_picture", "newsletter_opt_in"]
         widgets = {
             "preferred_sports": forms.TextInput(attrs={"placeholder": "e.g. football, running"}),
         }
@@ -22,10 +22,16 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        classes = 'p-3 bg-[var(--secondary-black)] rounded border border-[var(--accent-gray)] focus:border-[var(--accent-blue)]'
+        classes = 'form-control'
         self.fields['first_name'].widget.attrs['class'] = classes
+        self.fields['first_name'].widget.attrs['placeholder'] = 'Enter your first name'
         self.fields['last_name'].widget.attrs['class'] = classes
+        self.fields['last_name'].widget.attrs['placeholder'] = 'Enter your last name'
         self.fields['email'].widget.attrs['class'] = classes
+        self.fields['email'].widget.attrs['placeholder'] = 'Enter your email address'
         self.fields['phone'].widget.attrs['class'] = classes
+        self.fields['phone'].widget.attrs['placeholder'] = '+1 (555) 000-0000'
         self.fields['preferred_sports'].widget.attrs['class'] = classes
-        self.fields['newsletter_opt_in'].widget.attrs['class'] = 'mr-2'
+        self.fields['preferred_sports'].widget.attrs['placeholder'] = 'e.g. football, running, cycling'
+        self.fields['profile_picture'].widget.attrs['class'] = classes
+        self.fields['newsletter_opt_in'].widget.attrs['class'] = ''
