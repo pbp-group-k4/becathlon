@@ -4,309 +4,7 @@
 {% block title %}Edit Profile — Becathlon{% endblock %}
 
 {% block extra_css %}
-<style>
-    .edit-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 3rem 2rem;
-    }
-
-    /* Breadcrumb */
-    .edit-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 2rem;
-        font-size: 0.85rem;
-        color: var(--light-gray);
-    }
-
-    .edit-breadcrumb a {
-        color: var(--accent-gold);
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .edit-breadcrumb a:hover {
-        color: #e5c158;
-    }
-
-    /* Form container */
-    .edit-form-wrapper {
-        background: rgba(26, 26, 26, 0.4);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 2.5rem;
-        border-radius: 16px;
-    }
-
-    .form-title {
-        font-size: 1.8rem;
-        font-weight: 300;
-        margin-bottom: 2rem;
-        color: var(--ultra-light);
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
-    .form-section-title {
-        font-size: 1rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--light-gray);
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .form-group.full {
-        grid-column: 1 / -1;
-    }
-
-    .form-label {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--light-gray);
-        font-weight: 500;
-    }
-
-    /* File input styling */
-    .form-control {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: var(--ultra-light);
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        background: rgba(255, 255, 255, 0.08);
-        border-color: var(--accent-gold);
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
-    }
-
-    input[type="file"]::file-selector-button {
-        background: var(--accent-gold);
-        color: var(--primary-black);
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        margin-right: 0.75rem;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-        background: #e5c158;
-    }
-
-    .profile-picture-preview {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        padding: 1rem;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        margin-bottom: 1rem;
-    }
-
-    .preview-image {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid var(--accent-gold);
-    }
-
-    .preview-placeholder {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 2rem;
-        font-weight: 300;
-    }
-
-    .preview-info {
-        flex: 1;
-    }
-
-    .preview-info p {
-        font-size: 0.85rem;
-        color: var(--light-gray);
-        margin: 0.25rem 0;
-    }
-
-    /* Checkbox styling */
-    .form-checkbox {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .form-checkbox input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        accent-color: var(--accent-gold);
-    }
-
-    .form-checkbox label {
-        margin: 0;
-        cursor: pointer;
-    }
-
-    /* Error messages */
-    .form-errors {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        color: #fca5a5;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-    }
-
-    .form-errors ul {
-        margin: 0;
-        padding-left: 1.5rem;
-    }
-
-    /* Form actions */
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2.5rem;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
-        font-weight: 500;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        font-family: inherit;
-    }
-
-    .btn-primary {
-        background: var(--accent-gold);
-        color: var(--primary-black);
-    }
-
-    .btn-primary:hover {
-        background: #e5c158;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: var(--accent-gold);
-        border: 1px solid var(--accent-gold);
-    }
-
-    .btn-secondary:hover {
-        background: rgba(212, 175, 55, 0.1);
-        border-color: #e5c158;
-    }
-
-    /* Toast notification */
-    .toast {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background: rgba(30, 30, 30, 0.95);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        z-index: 9999;
-        animation: slideIn 0.3s ease-out;
-        border-left: 3px solid var(--accent-gold);
-    }
-
-    .toast.success {
-        border-left-color: var(--success-green);
-    }
-
-    .toast.error {
-        border-left-color: var(--danger-red);
-    }
-
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .edit-container {
-            padding: 1.5rem 1rem;
-        }
-
-        .edit-form-wrapper {
-            padding: 1.5rem;
-        }
-
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .form-actions {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-        }
-
-        .profile-picture-preview {
-            flex-direction: column;
-            text-align: center;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'profiles/css/profile_edit.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -323,7 +21,7 @@
     <!-- Edit Form -->
     <div class="edit-form-wrapper">
         <h1 class="form-title">Edit Your Profile</h1>
-        
+
         {% if form.non_field_errors %}
         <div class="form-errors">
             {{ form.non_field_errors }}
@@ -336,7 +34,7 @@
             <!-- Profile Picture Section -->
             <div class="form-section">
                 <h2 class="form-section-title">Profile Picture</h2>
-                
+
                 {% if form.profile_picture.errors %}
                 <div class="form-errors">
                     {{ form.profile_picture.errors }}
@@ -364,7 +62,7 @@
             <!-- Personal Information Section -->
             <div class="form-section">
                 <h2 class="form-section-title">Personal Information</h2>
-                
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
@@ -395,7 +93,7 @@
             <!-- Contact Information Section -->
             <div class="form-section">
                 <h2 class="form-section-title">Contact Information</h2>
-                
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
@@ -418,7 +116,7 @@
             <!-- Preferences Section -->
             <div class="form-section">
                 <h2 class="form-section-title">Preferences</h2>
-                
+
                 <div class="form-group">
                     <div class="form-checkbox">
                         {{ form.newsletter_opt_in }}
@@ -453,7 +151,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('editProfileForm');
-        
+
         form.addEventListener('submit', async (e) => {
             // Let the form submit normally for file uploads
             // No AJAX needed for file uploads

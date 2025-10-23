@@ -1,15 +1,4 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Becathlon — Stores{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
+* {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -25,6 +14,9 @@
             --accent-blue: #0066ff;
             --gradient-start: #0a0a0a;
             --gradient-end: #1a1a1a;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning-orange: #f59e0b;
         }
 
         body {
@@ -114,24 +106,6 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .cart-badge {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #d4af37;
-            color: #0a0a0a;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 1;
-            padding: 0;
-        }
-
         .user-info {
             color: var(--ultra-light);
             font-weight: 400;
@@ -163,36 +137,6 @@
             padding: 3rem;
             position: relative;
             z-index: 1;
-        }
-
-        .section {
-            background: rgba(26, 26, 26, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 3rem;
-            margin-bottom: 3rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        }
-
-        .section h2 {
-            font-size: 2rem;
-            font-weight: 300;
-            margin-bottom: 2rem;
-            color: #ffffff;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            font-size: 1.2rem;
         }
 
         .messages {
@@ -242,6 +186,7 @@
             border-color: rgba(0, 102, 255, 0.3);
         }
 
+        /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -280,10 +225,6 @@
                 padding: 1.5rem;
             }
 
-            .section {
-                padding: 2rem 1.5rem;
-            }
-
             .messages {
                 top: 1rem;
                 right: 1rem;
@@ -291,59 +232,212 @@
                 max-width: none;
             }
         }
-    </style>
-    {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'stores/css/stores.css' %}" />\n    <link rel="stylesheet" href="{% static 'main/css/base.css' %}" />
-    {% endblock %}
-</head>
 
-<body>
-    <header class="header">
-        <nav class="nav">
-            <a href="/" class="logo" style="text-decoration: none; cursor: pointer;">BECATHLON</a>
-            <div class="nav-links">
-                {% if request.resolver_match.app_name != 'catalog' %}
-                    <a href="{% url 'catalog:home' %}">Catalog</a>
-                {% endif %}
-                {% if request.resolver_match.url_name != 'cart_view' %}
-                    <a href="{% url 'cart:cart_view' %}" style="position: relative;">
-                        Cart
-                        <span class="cart-badge" style="display: none;">0</span>
-                    </a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    {% if request.resolver_match.app_name != 'order' %}
-                        <a href="{% url 'order:order_list' %}">Orders</a>
-                    {% endif %}
-                    <a href="{% url 'profiles:detail' %}" class="user-info">{{ user.username }}</a>
-                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit">Sign Out</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}">Sign In</a>
-                    <a href="{% url 'signup' %}">Sign Up</a>
-                {% endif %}
-            </div>
-        </nav>
-    </header>
+        /* Common Form Styles */
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--ultra-light);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
 
-    <div class="messages" id="messagesContainer">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    </div>
+        .form-control:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
 
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+        input[type="file"]::file-selector-button {
+            background: var(--accent-gold);
+            color: var(--primary-black);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 0.75rem;
+        }
 
-    <div id="user-data" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}" data-username="{{ user.username }}"></div>
-    <div id="store-data" data-api-url="{% url 'stores:api' %}"></div>
+        input[type="file"]::file-selector-button:hover {
+            background: #e5c158;
+        }
 
-    <script src="{% static 'stores/js/stores.js' %}"></script>
-    {% block extra_js %}{% endblock %}
-</body>
-</html>
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--light-gray);
+            font-weight: 500;
+        }
+
+        .form-errors {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-errors ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        /* Common Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: var(--primary-black);
+        }
+
+        .btn-primary:hover {
+            background: #e5c158;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #e5c158;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            min-width: 300px;
+            max-width: 400px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification::before {
+            content: '';
+            width: 4px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .notification.success {
+            background: rgba(16, 185, 129, 0.95);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .notification.success::before {
+            background: #059669;
+        }
+
+        .notification.error {
+            background: rgba(239, 68, 68, 0.95);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .notification.error::before {
+            background: #dc2626;
+        }
+
+        .notification.warning {
+            background: rgba(245, 158, 11, 0.95);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .notification.warning::before {
+            background: #d97706;
+        }
+
+        .notification.info {
+            background: rgba(59, 130, 246, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .notification.info::before {
+            background: #2563eb;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Utility Classes for Inline Styles */
+        .link-plain {
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .inline {
+            display: inline;
+        }
