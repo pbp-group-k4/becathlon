@@ -2,6 +2,11 @@ from django.conf import settings
 from django.db import models
 
 class Profile(models.Model):
+    ACCOUNT_TYPE_CHOICES = (
+        ('BUYER', 'Buyer'),
+        ('SELLER', 'Seller'),
+    )
+    
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
     first_name = models.CharField(max_length=100, blank=True)
     last_name  = models.CharField(max_length=100, blank=True)
@@ -10,6 +15,7 @@ class Profile(models.Model):
     preferred_sports = models.CharField(max_length=200, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     newsletter_opt_in = models.BooleanField(default=False)
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='BUYER')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 

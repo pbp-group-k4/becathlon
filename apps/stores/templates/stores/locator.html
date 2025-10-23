@@ -1,0 +1,19 @@
+{% extends 'stores/base_stores.html' %}
+
+{% block title %}Store Locator — Becathlon{% endblock %}
+
+{% block content %}
+<div class="locator-wrapper">
+  <h1 class="locator-title">Find a Becathlon Store</h1>
+  <p class="locator-subtitle">Discover our performance hubs across Indonesia</p>
+
+  <div class="search-box">
+    <input type="text" id="storeSearch" placeholder="Search by city or store name..." autocomplete="off">
+    <button id="searchBtn" class="btn-search">Search</button>
+  </div>
+
+  <div id="resultsContainer" class="results-container">
+    <p class="no-results">Enter a city or store name to begin your search.</p>
+  </div>
+</div>
+{% endblock %}

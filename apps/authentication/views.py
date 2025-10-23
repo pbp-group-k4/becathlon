@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from .forms import SignUpForm
 from apps.main.models import Customer
+from apps.profiles.models import Profile
 from apps.cart.utils import transfer_guest_cart_to_user
 
 
@@ -15,6 +16,20 @@ def signup_view(request):
             user = form.save()
             # Create associated Customer profile
             Customer.objects.create(user=user)
+            
+            # Create or update Profile with account type
+            account_type = form.cleaned_data.get('account_type', 'BUYER')
+            first_name = form.cleaned_data.get('first_name', '')
+            last_name = form.cleaned_data.get('last_name', '')
+            email = form.cleaned_data.get('email', '')
+            
+            profile, created = Profile.objects.get_or_create(user=user)
+            profile.account_type = account_type
+            profile.first_name = first_name
+            profile.last_name = last_name
+            profile.email = email
+            profile.save()
+            
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}! You can now log in.')
             return redirect('login')
