@@ -67,13 +67,34 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        flex-wrap: wrap;
     }
 
-    .profile-username {
-        font-size: 0.95rem;
-        color: var(--light-gray);
+    .account-type-badge {
+        font-size: 2.2rem;
+        font-weight: 300;
+        letter-spacing: 0.02em;
+        color: rgba(160, 160, 160, 0.2);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        display: inline;
+        transition: color 0.3s ease;
+    }
+
+    .account-type-badge::before {
+        content: " | ";
+        margin: 0 0.5rem;
+        letter-spacing: 0.05em;
+    }
+
+    .account-type-badge:hover {
+        color: rgba(160, 160, 160, 0.65);
     }
 
     .profile-stats {
@@ -295,6 +316,13 @@
 
         .profile-name {
             font-size: 1.6rem;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .account-type-badge {
+            font-size: 1.6rem;
         }
 
         .info-grid {
@@ -403,7 +431,10 @@
 
         <!-- Profile Info -->
         <div class="profile-info-section">
-            <h1 class="profile-name">{{ profile.get_full_name }}</h1>
+            <h1 class="profile-name">
+                {{ profile.get_full_name }}
+                <span class="account-type-badge">{{ profile.get_account_type_display }}</span>
+            </h1>
             <p class="profile-username">@{{ user.username }}</p>
             
             <div class="profile-stats">

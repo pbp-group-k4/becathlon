@@ -30,6 +30,13 @@ def home(request):
 def add_product_ajax(request):
     """AJAX endpoint to add a product"""
     try:
+        # Check if user is a SELLER
+        if not hasattr(request.user, 'profile') or request.user.profile.account_type != 'SELLER':
+            return JsonResponse({
+                'success': False,
+                'error': 'Only seller accounts can list products'
+            }, status=403)
+        
         data = json.loads(request.body)
         
         product_type_id = data.get('product_type')
@@ -40,7 +47,6 @@ def add_product_ajax(request):
             description=data.get('description'),
             price=data.get('price'),
             product_type=product_type,
-            brand=data.get('brand', ''),
             stock=data.get('stock', 0),
             image_url=data.get('image_url', ''),
             created_by=request.user
@@ -54,7 +60,6 @@ def add_product_ajax(request):
                 'description': product.description,
                 'price': str(product.price),
                 'product_type': product.product_type.name,
-                'brand': product.brand,
                 'stock': product.stock,
                 'image_url': product.image_url,
                 'created_by': product.created_by.username,
@@ -70,6 +75,13 @@ def add_product_ajax(request):
 def delete_product_ajax(request, product_id):
     """AJAX endpoint to delete a product"""
     try:
+        # Check if user is a SELLER
+        if not hasattr(request.user, 'profile') or request.user.profile.account_type != 'SELLER':
+            return JsonResponse({
+                'success': False,
+                'error': 'Only seller accounts can delete products'
+            }, status=403)
+        
         product = get_object_or_404(Product, id=product_id)
         
         # Only allow the creator to delete their own product
