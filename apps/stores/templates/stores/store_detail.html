@@ -1,0 +1,23 @@
+{% extends "stores/base_stores.html" %}
+{% load static %}
+{% block title %}{{ store.name }} — Becathlon{% endblock %}
+
+{% block content %}
+<section class="section">
+
+    <h2 style="font-size:2rem; margin-bottom:1rem;">{{ store.name }}</h2>
+    <p style="color:#ccc;">{{ store.address }}, {{ store.city }}, {{ store.country }}</p>
+
+    <div style="margin-top:2rem;">
+        <h3 style="font-weight:400; margin-bottom:0.5rem;">Store Hours</h3>
+        {% if store.store_hours %}
+            <pre style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:4px; white-space:pre-wrap;">{{ store.store_hours }}</pre>
+        {% else %}
+            <p style="color:#888;">Store hours not available</p>
+        {% endif %}
+    </div>
+</section>
+    <nav style="margin-bottom: 2rem;">
+        <a href="{% url 'stores:locator' %}" class = "btn-back">← Back to Stores</a>
+    </nav>
+{% endblock %}

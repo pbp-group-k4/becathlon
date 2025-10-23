@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'apps.main.apps.MainConfig',
     'apps.authentication.apps.AuthenticationConfig',
     'apps.profiles.apps.ProfilesConfig',
+    'apps.stores.apps.StoresConfig',
 ]
 
 MIDDLEWARE = [

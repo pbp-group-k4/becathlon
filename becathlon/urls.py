@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('apps.main.urls')),
     path('auth/', include('apps.authentication.urls')),
     path("profiles/", include(("apps.profiles.urls","profiles"), namespace="profiles")),
+    path("stores/", include("apps.stores.urls")),
 ]
