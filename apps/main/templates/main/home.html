@@ -852,13 +852,13 @@
                         <a href="{% url 'order:order_list' %}">Orders</a>
                     {% endif %}
                     <a href="{% url 'profiles:detail' %}" class="user-info">{{ user.username }}</a>
-                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    <form method="post" action="{% url 'auth:logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit">Sign Out</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}">Sign In</a>
-                    <a href="{% url 'signup' %}">Sign Up</a>
+                    <a href="{% url 'auth:login' %}">Sign In</a>
+                    <a href="{% url 'auth:signup' %}">Sign Up</a>
                 {% endif %}
             </div>
         </nav>
@@ -913,13 +913,13 @@
                         <span>View Cart ({{ cart_item_count }})</span>
                     </a>
                 {% else %}
-                    <a href="{% url 'signup' %}" class="hero-btn hero-btn-primary">
+                    <a href="{% url 'auth:signup' %}" class="hero-btn hero-btn-primary">
                         <span>Get Started</span>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    <a href="{% url 'login' %}" class="hero-btn hero-btn-secondary">
+                    <a href="{% url 'auth:login' %}" class="hero-btn hero-btn-secondary">
                         <span>Sign In</span>
                     </a>
                 {% endif %}
@@ -954,8 +954,8 @@
             <h3>Access Exclusive Gear</h3>
             <p>Join an elite community of athletes and innovators. Unlock your potential with premium equipment designed for peak performance.</p>
             <div class="btn-group">
-                <a href="{% url 'signup' %}" class="btn btn-primary">Request Access</a>
-                <a href="{% url 'login' %}" class="btn btn-secondary">Member Login</a>
+                <a href="{% url 'auth:signup' %}" class="btn btn-primary">Request Access</a>
+                <a href="{% url 'auth:login' %}" class="btn btn-secondary">Member Login</a>
             </div>
         </section>
         {% endif %}
@@ -1208,7 +1208,7 @@
     <script>
         window.becathlon = window.becathlon || {};
         window.becathlon.isAuthenticated = '{{ user.is_authenticated|yesno:"true,false" }}' === 'true';
-        window.becathlon.loginUrl = "{% url 'login' %}?next={{ request.get_full_path|urlencode }}";
+        window.becathlon.loginUrl = "{% url 'auth:login' %}?next={{ request.get_full_path|urlencode }}";
     </script>
     {% load static %}
     <script src="{% static 'main/js/hero.js' %}"></script>

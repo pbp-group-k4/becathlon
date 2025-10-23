@@ -57,13 +57,13 @@
                         <a href="{% url 'order:order_list' %}">Orders</a>
                     {% endif %}
                     <a href="{% url 'profiles:detail' %}" class="user-info" style="text-decoration: none; cursor: pointer;">{{ user.username }}</a>
-                    <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                    <form method="POST" action="{% url 'auth:logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn-logout">Logout</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}">Login</a>
-                    <a href="{% url 'signup' %}">Sign Up</a>
+                    <a href="{% url 'auth:login' %}">Login</a>
+                    <a href="{% url 'auth:signup' %}">Sign Up</a>
                 {% endif %}
             </div>
         </nav>
@@ -82,7 +82,7 @@
     <script>
     window.becathlon = window.becathlon || {};
     window.becathlon.isAuthenticated = '{{ user.is_authenticated|yesno:"true,false" }}' === 'true';
-    window.becathlon.loginUrl = "{% url 'login' %}?next={{ request.get_full_path|urlencode }}";
+    window.becathlon.loginUrl = "{% url 'auth:login' %}?next={{ request.get_full_path|urlencode }}";
     </script>
     <script src="{% static 'catalog/js/catalog.js' %}"></script>
     <script src="{% static 'cart/js/cart.js' %}"></script>

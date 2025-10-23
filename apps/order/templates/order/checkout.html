@@ -1,7 +1,7 @@
-{% extends 'main/base.html' %}\n{% load static %}
+{% extends 'main/base.html' %}
 {% load static %}
 
-{% block title %}Checkout - Becathlon{% endblock %}
+{% block title %}Secure Checkout - Becathlon{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'order/css/checkout.css' %}" />
@@ -9,14 +9,43 @@
 
 {% block content %}
 <div class="checkout-container">
+    <!-- Page Header -->
+    <div class="checkout-header">
+        <h1>Secure Checkout</h1>
+        <p class="checkout-subtitle">Complete your order in a few simple steps</p>
+        
+        <!-- Progress Steps -->
+        <div class="checkout-steps">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-label">Shipping</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-label">Payment</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">Confirm</div>
+            </div>
+        </div>
+    </div>
+
     <div class="checkout-layout">
         <div class="checkout-main">
-            <h2>Checkout</h2>
-
             <!-- Shipping Information -->
             <div class="checkout-section">
                 <div class="section-header">
-                    <h5>Shipping Information</h5>
+                    <div class="section-title">
+                        <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <h3>Shipping Information</h3>
+                    </div>
+                    <p class="section-description">Where should we deliver your order?</p>
                 </div>
                 <div class="section-content">
                     <form method="post" id="checkout-form">
@@ -24,42 +53,43 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="full_name">Full Name *</label>
-                                <input type="text" id="full_name" name="full_name" required>
+                                <input type="text" id="full_name" name="full_name" placeholder="John Doe" required>
                             </div>
                             <div class="form-group">
                                 <label for="phone_number">Phone Number *</label>
-                                <input type="tel" id="phone_number" name="phone_number" required>
+                                <input type="tel" id="phone_number" name="phone_number" placeholder="+62 812 3456 7890" required>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="address_line1">Address Line 1 *</label>
-                            <input type="text" id="address_line1" name="address_line1" required>
+                            <label for="address_line1">Street Address *</label>
+                            <input type="text" id="address_line1" name="address_line1" placeholder="123 Main Street" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="address_line2">Address Line 2</label>
-                            <input type="text" id="address_line2" name="address_line2">
+                            <label for="address_line2">Apartment, Suite, etc. (Optional)</label>
+                            <input type="text" id="address_line2" name="address_line2" placeholder="Apt 4B">
                         </div>
 
-                        <div class="form-row">
+                        <div class="form-row form-row-triple">
                             <div class="form-group">
                                 <label for="city">City *</label>
-                                <input type="text" id="city" name="city" required>
+                                <input type="text" id="city" name="city" placeholder="Jakarta" required>
                             </div>
                             <div class="form-group">
                                 <label for="state">State/Province</label>
-                                <input type="text" id="state" name="state">
+                                <input type="text" id="state" name="state" placeholder="DKI Jakarta">
                             </div>
                             <div class="form-group">
                                 <label for="postal_code">Postal Code *</label>
-                                <input type="text" id="postal_code" name="postal_code" required>
+                                <input type="text" id="postal_code" name="postal_code" placeholder="12345" required>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="country">Country *</label>
                             <select id="country" name="country" required>
+                                <option value="" disabled>Select your country</option>
                                 <option value="Indonesia" selected>Indonesia</option>
                                 <option value="Malaysia">Malaysia</option>
                                 <option value="Singapore">Singapore</option>
@@ -67,74 +97,164 @@
                                 <option value="Philippines">Philippines</option>
                             </select>
                         </div>
-
-                        <!-- Payment Method -->
-                        <fieldset>
-                            <legend style="font-size: 1rem; font-weight: 400; color: #ffffff; margin-bottom: 1.5rem; letter-spacing: 0.05em; text-transform: uppercase;">Payment Method</legend>
-                            <div class="radio-group">
-                                <label class="radio-option">
-                                    <input type="radio" name="payment_method" value="CREDIT_CARD" checked>
-                                    <span class="radio-label">Credit Card</span>
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="payment_method" value="BANK_TRANSFER">
-                                    <span class="radio-label">Bank Transfer</span>
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="payment_method" value="E_WALLET">
-                                    <span class="radio-label">E-Wallet</span>
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="payment_method" value="COD">
-                                    <span class="radio-label">Cash on Delivery</span>
-                                </label>
-                            </div>
-                        </fieldset>
                     </form>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="checkout-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                        <h3>Payment Method</h3>
+                    </div>
+                    <p class="section-description">Choose your preferred payment option</p>
+                </div>
+                <div class="section-content">
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="payment_method" value="CREDIT_CARD" form="checkout-form" checked>
+                            <div class="radio-content">
+                                <div class="radio-header">
+                                    <span class="radio-label">Credit/Debit Card</span>
+                                    <div class="payment-icons">
+                                        <span class="payment-badge">💳</span>
+                                    </div>
+                                </div>
+                                <span class="radio-description">Secure payment via Visa, Mastercard, or American Express</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="payment_method" value="BANK_TRANSFER" form="checkout-form">
+                            <div class="radio-content">
+                                <div class="radio-header">
+                                    <span class="radio-label">Bank Transfer</span>
+                                    <div class="payment-icons">
+                                        <span class="payment-badge">🏦</span>
+                                    </div>
+                                </div>
+                                <span class="radio-description">Direct transfer to our bank account</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="payment_method" value="E_WALLET" form="checkout-form">
+                            <div class="radio-content">
+                                <div class="radio-header">
+                                    <span class="radio-label">E-Wallet</span>
+                                    <div class="payment-icons">
+                                        <span class="payment-badge">📱</span>
+                                    </div>
+                                </div>
+                                <span class="radio-description">Pay with GoPay, OVO, Dana, or LinkAja</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="payment_method" value="COD" form="checkout-form">
+                            <div class="radio-content">
+                                <div class="radio-header">
+                                    <span class="radio-label">Cash on Delivery</span>
+                                    <div class="payment-icons">
+                                        <span class="payment-badge">💵</span>
+                                    </div>
+                                </div>
+                                <span class="radio-description">Pay when your order arrives</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Indicators -->
+            <div class="trust-indicators">
+                <div class="trust-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>Secure Payment</span>
+                </div>
+                <div class="trust-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    <span>Fast Delivery</span>
+                </div>
+                <div class="trust-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Money-Back Guarantee</span>
                 </div>
             </div>
         </div>
 
-        <!-- Order Summary -->
+        <!-- Order Summary Sidebar -->
         <div class="checkout-sidebar">
             <div class="order-summary">
                 <div class="summary-header">
-                    <h5>Order Summary</h5>
+                    <h3>Order Summary</h3>
+                    <span class="item-count">{{ cart.get_total_items }} item{{ cart.get_total_items|pluralize }}</span>
                 </div>
                 <div class="summary-content">
                     {% if cart_items %}
-                        {% for item in cart_items %}
-                        <div class="summary-item">
-                            <div class="item-details">
-                                <div class="item-name">{{ item.product.name }}</div>
-                                <div class="item-quantity">Qty: {{ item.quantity }}</div>
+                        <div class="summary-items-list">
+                            {% for item in cart_items %}
+                            <div class="summary-item">
+                                <div class="item-details">
+                                    <div class="item-name">{{ item.product.name }}</div>
+                                    <div class="item-meta">
+                                        <span class="item-quantity">Qty: {{ item.quantity }}</span>
+                                        {% if item.product.product_type %}
+                                        <span class="item-category">{{ item.product.product_type.name }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="item-price">${{ item.get_subtotal|floatformat:2 }}</div>
                             </div>
-                            <div class="item-price">${{ item.get_subtotal|floatformat:2 }}</div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
-                        <div class="summary-divider"></div>
-                        <div class="summary-row">
-                            <span>Total Items:</span>
-                            <span>{{ cart.get_total_items }}</span>
+                        
+                        <div class="summary-breakdown">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span>${{ cart.get_subtotal|floatformat:2 }}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Shipping</span>
+                                <span class="free-shipping">Free</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax</span>
+                                <span>Calculated at next step</span>
+                            </div>
                         </div>
-                        <div class="summary-row">
-                            <span>Subtotal:</span>
-                            <span>${{ cart.get_subtotal|floatformat:2 }}</span>
-                        </div>
-                        <div class="summary-divider"></div>
+                        
                         <div class="summary-total">
-                            <span>Total:</span>
-                            <span>${{ cart.get_subtotal|floatformat:2 }}</span>
+                            <span class="total-label">Total</span>
+                            <span class="total-amount">${{ cart.get_subtotal|floatformat:2 }}</span>
                         </div>
                     {% else %}
-                        <p class="empty-cart">Your cart is empty.</p>
+                        <div class="empty-cart">
+                            <p>Your cart is empty.</p>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="summary-footer">
                     {% if cart_items %}
                         <button type="submit" form="checkout-form" class="checkout-btn">
-                            Complete Order
+                            <span>Complete Order</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
                         </button>
+                        <a href="{% url 'cart:cart_view' %}" class="back-to-cart-link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                            Back to Cart
+                        </a>
                     {% else %}
                         <a href="{% url 'catalog:home' %}" class="continue-shopping-btn">
                             Continue Shopping

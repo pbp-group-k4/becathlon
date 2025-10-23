@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
+from django.urls import reverse
+from urllib.parse import urlencode
 import logging
 import re
 
@@ -94,11 +96,16 @@ def validate_payment_method(payment_method):
     return True, None
 
 
-@login_required
 def checkout_view(request):
     """
     Checkout view - displays checkout form and processes orders.
+    Requires authentication - redirects to login if guest.
     """
+    if not request.user.is_authenticated:
+        login_url = f"{reverse('auth:login')}?{urlencode({'next': reverse('order:checkout')})}"
+        messages.info(request, 'Please log in to proceed to checkout.')
+        return redirect(login_url)
+    
     cart = get_or_create_cart(request)
     cart_items = cart.items.select_related('product')
     

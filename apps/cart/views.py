@@ -176,7 +176,7 @@ def checkout_view(request):
     Redirects to login if guest, retains cart after login via transfer_guest_cart_to_user
     """
     if not request.user.is_authenticated:
-        login_url = f"{reverse('login')}?{urlencode({'next': reverse('cart:checkout')})}"
+        login_url = f"{reverse('auth:login')}?{urlencode({'next': reverse('order:checkout')})}"
         messages.info(request, 'Please log in to proceed to checkout.')
         return redirect(login_url)
     

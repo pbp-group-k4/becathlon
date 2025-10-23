@@ -316,13 +316,13 @@
                         <a href="{% url 'order:order_list' %}">Orders</a>
                     {% endif %}
                     <a href="{% url 'profiles:detail' %}" class="user-info">{{ user.username }}</a>
-                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    <form method="post" action="{% url 'auth:logout' %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit">Sign Out</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}">Sign In</a>
-                    <a href="{% url 'signup' %}">Sign Up</a>
+                    <a href="{% url 'auth:login' %}">Sign In</a>
+                    <a href="{% url 'auth:signup' %}">Sign Up</a>
                 {% endif %}
             </div>
         </nav>
