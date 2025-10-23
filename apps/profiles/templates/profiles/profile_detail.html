@@ -177,13 +177,20 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest",
         },
         body: JSON.stringify({ newsletter_opt_in: isSubscribed }),
       });
-      if (!response.ok) throw new Error("Network error");
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Update failed");
+      }
+      showToast('Newsletter preference updated', 'success');
     } catch (err) {
       console.error("Newsletter update failed:", err);
+      toggle.checked = !toggle.checked; // Revert toggle on error
       label.textContent = "Connection failed";
+      showToast('Failed to update newsletter preference', 'error');
     }
   });
 

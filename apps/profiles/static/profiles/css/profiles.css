@@ -1,89 +1,203 @@
+/* Profiles CSS - Becathlon */
+
+/* Design System Variables (matching catalog) */
+:root {
+    --primary-black: #0a0a0a;
+    --secondary-black: #1a1a1a;
+    --accent-gray: #2a2a2a;
+    --light-gray: #a0a0a0;
+    --ultra-light: #f5f5f5;
+    --accent-gold: #d4af37;
+    --accent-blue: #0066ff;
+    --success-green: #10b981;
+    --danger-red: #ef4444;
+    --warning-orange: #f59e0b;
+}
+
+/* Base */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 100%);
+    color: var(--ultra-light);
+    line-height: 1.6;
+}
+
 /* ====== Panels & Fields ====== */
 .glass-panel {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
 }
 
 .field-label {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: #a8a8a8;
-  margin-bottom: .25rem;
-  display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--light-gray);
+    margin-bottom: 0.25rem;
+    display: block;
 }
 
 /* Light grey info box (solid so it's visible on dark bg) */
 .field-display {
-  background: #f1f1f1;
-  border: 1px solid #ddd;
-  color: #333;
-  padding: 0.8rem 1rem;
-  border-radius: 10px;
-  font-size: 0.95rem;
+    background: var(--ultra-light);
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
 }
 
 /* ====== Buttons ====== */
 .btn {
-  display: inline-block;
-  padding: 0.72rem 1.4rem;
-  border-radius: 8px;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: transform .15s ease, filter .15s ease, background .15s ease;
-  font-weight: 500;
+    display: inline-block;
+    padding: 0.72rem 1.4rem;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+    font-weight: 500;
 }
-.btn:hover { transform: translateY(-2px); }
+.btn:hover {
+    transform: translateY(-2px);
+}
 
 /* Blue: Edit */
-.btn-blue { background:#007bff; color:#fff; }
-.btn-blue:hover { background:#0069d9; }
+.btn-blue {
+    background: var(--accent-blue);
+    color: #fff;
+}
+.btn-blue:hover {
+    background: #0052cc;
+}
 
 /* Green: Save */
-.btn-green { background:#00c851; color:#fff; }
-.btn-green:hover { background:#02b74f; }
+.btn-green {
+    background: var(--success-green);
+    color: #fff;
+}
+.btn-green:hover {
+    background: #0d9d5e;
+}
 
 /* Red: Cancel */
-.btn-red { background:#ff4444; color:#fff; }
-.btn-red:hover { background:#e63b3b; }
+.btn-red {
+    background: var(--danger-red);
+    color: #fff;
+}
+.btn-red:hover {
+    background: #d63a3a;
+}
+
+/* Gold: Primary CTA */
+.btn-primary {
+    background: var(--accent-gold);
+    color: var(--primary-black);
+    font-weight: 600;
+}
+.btn-primary:hover {
+    background: #e5c158;
+    transform: translateY(-2px);
+}
 
 /* Sidebar link look */
 .sidebar-link {
-  color: #bfbfbf; text-decoration: none;
-  padding: .6rem 1rem; border-radius: 8px;
-  transition: all .3s ease; display: block; font-size: .9rem;
+    color: var(--light-gray);
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+    font-size: 0.9rem;
 }
-.sidebar-link:hover, .sidebar-link.active {
-  color: #fff; background: rgba(255,255,255,0.08);
+.sidebar-link:hover,
+.sidebar-link.active {
+    color: var(--ultra-light);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Navigation link styling */
+.nav-link {
+    color: var(--light-gray);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+.nav-link:hover {
+    color: var(--accent-gold);
 }
 
 /* ====== iOS-like toggle (works with your existing HTML) ====== */
-.switch { position:relative; display:inline-block; width:52px; height:28px; }
-.switch input { opacity:0; width:0; height:0; }
-.slider { position:absolute; inset:0; background:rgba(120,120,120,.3); border-radius:34px; transition:.3s; }
-.slider:before { content:""; position:absolute; height:22px; width:22px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
-.switch input:checked + .slider { background:#007bff; box-shadow:0 0 10px rgba(0,112,243,.6); }
-.switch input:checked + .slider:before { transform: translateX(24px); }
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(120, 120, 120, 0.3);
+    border-radius: 34px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.switch input:checked + .slider {
+    background: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(0, 102, 255, 0.6);
+}
+.switch input:checked + .slider:before {
+    transform: translateX(24px);
+}
 
 /* ====== Toasts ====== */
 .toast {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 24px;
-  background: rgba(30,30,30,.95);
-  color: #fff;
-  padding: .8rem 1.1rem;
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.35);
-  z-index: 9999;
-  font-size: 0.95rem;
-  animation: toast-in .2s ease-out;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    background: rgba(30, 30, 30, 0.95);
+    color: white;
+    padding: 0.8rem 1.1rem;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    font-size: 0.95rem;
+    animation: toast-in 0.2s ease-out;
 }
-.toast.success { background: #1f7a1f; }
-.toast.error   { background: #8b1a1a; }
+.toast.success {
+    background: var(--success-green);
+}
+.toast.error {
+    background: var(--danger-red);
+}
 
-@keyframes toast-in { from { opacity:0; transform: translate(-50%, 8px);} to { opacity:1; transform: translate(-50%, 0);} }
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 8px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+

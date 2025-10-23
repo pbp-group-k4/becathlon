@@ -32,4 +32,9 @@ def toggle_newsletter_ajax(request):
     prof = request.user.profile
     prof.newsletter_opt_in = not prof.newsletter_opt_in
     prof.save(update_fields=["newsletter_opt_in"])
-    return JsonResponse({"ok": True, "newsletter_opt_in": prof.newsletter_opt_in})
+    return JsonResponse({
+        "success": True,
+        "data": {"newsletter_opt_in": prof.newsletter_opt_in},
+        "error": None
+    })
+
