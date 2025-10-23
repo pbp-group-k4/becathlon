@@ -180,7 +180,7 @@
         }
 
         .hero h1 {
-            font-size: 4rem;
+            font-size: 6rem;
             font-weight: 300;
             letter-spacing: -0.02em;
             margin-bottom: 1.5rem;
@@ -199,6 +199,11 @@
             font-weight: 300;
             letter-spacing: 0.02em;
             line-height: 1.8;
+        }
+
+        /* Override for hero subtitle to provide proper spacing */
+        .hero p.hero-subtitle {
+            margin: 0 auto 2.5rem;
         }
 
         .auth-prompt {
@@ -299,13 +304,19 @@
         }
 
         .section {
-            background: rgba(26, 26, 26, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 3rem;
-            margin-bottom: 3rem;
+            background: rgba(26, 26, 26, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 4rem 3rem;
+            margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            background: rgba(26, 26, 26, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
         }
 
         .section::before {
@@ -315,17 +326,40 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
         }
 
         .section h2 {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 300;
-            margin-bottom: 2rem;
-            color: #ffffff;
-            letter-spacing: 0.05em;
+            margin-bottom: 3rem;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
         }
 
         .form-grid {
@@ -386,16 +420,16 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
         }
 
         .product-card {
-            background: rgba(26, 26, 26, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
+            background: rgba(26, 26, 26, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
@@ -406,15 +440,16 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
             opacity: 0;
             transition: opacity 0.3s;
         }
 
         .product-card:hover {
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(26, 26, 26, 0.5);
         }
 
         .product-card:hover::before {
@@ -423,12 +458,12 @@
 
         .product-image {
             width: 100%;
-            height: 220px;
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
+            height: 240px;
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(20, 20, 20, 0.9) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--light-gray);
+            color: rgba(255, 255, 255, 0.15);
             font-size: 3rem;
             position: relative;
             overflow: hidden;
@@ -441,7 +476,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
             animation: rotate 20s linear infinite;
         }
 
@@ -456,53 +491,53 @@
 
         .product-category {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light-gray);
-            padding: 0.4rem 1rem;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 0.4rem 0;
             font-size: 0.7rem;
             font-weight: 400;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .product-name {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 400;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.95);
             margin-bottom: 0.75rem;
             letter-spacing: 0.02em;
+            line-height: 1.4;
         }
 
         .product-description {
-            color: var(--light-gray);
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.6;
             font-weight: 300;
         }
 
         .product-price {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 300;
-            color: #ffffff;
-            margin-bottom: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
             letter-spacing: 0.05em;
         }
 
         .product-stock {
-            font-size: 0.85rem;
-            color: var(--light-gray);
-            margin-bottom: 1rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
             font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         .product-meta {
             font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
             margin-bottom: 1.25rem;
             letter-spacing: 0.05em;
             text-transform: uppercase;
@@ -714,6 +749,25 @@
             }
         }
 
+        @media (max-width: 1024px) {
+            .section {
+                padding: 3rem 2rem;
+            }
+
+            .section h2, .section-title {
+                font-size: 1.3rem;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.25rem;
+            }
+
+            .product-card {
+                font-size: 0.95rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 1rem 1.5rem;
@@ -728,6 +782,7 @@
                 width: 100%;
                 justify-content: center;
                 flex-wrap: wrap;
+                gap: 1rem;
             }
 
             .container {
@@ -747,7 +802,12 @@
             }
 
             .section {
-                padding: 2rem 1.5rem;
+                padding: 2.5rem 1.5rem;
+            }
+
+            .section h2, .section-title {
+                font-size: 1.2rem;
+                margin-bottom: 2rem;
             }
 
             .form-grid {
@@ -766,6 +826,8 @@
             }
         }
     </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'main/css/hero.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -810,13 +872,83 @@
         {% endif %}
     </div>
 
-    <div class="container">
-        {% block content %}
-        <section class="hero">
-            <h1>Performance Elevated</h1>
-            <p>Experience the intersection of precision engineering and athletic excellence. Curated equipment for those who demand more from their performance.</p>
-        </section>
+    {% block content %}
+    <!-- Dynamic Hero Section -->
+    <section class="hero">
+        <!-- Animated Background Elements -->
+        <div class="hero-canvas-container">
+            <canvas id="heroCanvas"></canvas>
+        </div>
+        
+        <!-- Floating Gradient Orbs -->
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        
+        <!-- Geometric Grid -->
+        <div class="hero-grid"></div>
+        
+        <!-- Orb Masking Layer (improves text readability) -->
+        <div class="hero-orb-mask"></div>
+        
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="hero-title-line">Where Tech Meets</span>
+                <span class="hero-title-line"><span class="hero-title-highlight">Performance</span></span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Experience the future of athletic excellence. Premium equipment engineered for champions, designed for those who push boundaries.
+            </p>
+            
+            <div class="hero-cta">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'catalog:home' %}" class="hero-btn hero-btn-primary">
+                        <span>Explore Catalog</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="{% url 'cart:cart_view' %}" class="hero-btn hero-btn-secondary">
+                        <span>View Cart ({{ cart_item_count }})</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="hero-btn hero-btn-primary">
+                        <span>Get Started</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="{% url 'login' %}" class="hero-btn hero-btn-secondary">
+                        <span>Sign In</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-target="12">0</div>
+                <div class="hero-stat-label">Sport Categories</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-target="500">0</div>
+                <div class="hero-stat-label">Premium Products</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" data-target="10000">0</div>
+                <div class="hero-stat-label">Athletes Worldwide</div>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="hero-scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
 
+    <div class="container">
         {% if not user.is_authenticated %}
         <section class="auth-prompt">
             <h3>Access Exclusive Gear</h3>
@@ -997,42 +1129,45 @@
 
         // Add product
         if (isAuthenticated) {
-            document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
+            const addProductForm = document.getElementById('addProductForm');
+            if (addProductForm) {
+                addProductForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
 
-                const formData = {
-                    name: document.getElementById('productName').value,
-                    description: document.getElementById('productDescription').value,
-                    price: parseFloat(document.getElementById('productPrice').value),
-                    product_type: document.getElementById('productType').value,
-                    stock: parseInt(document.getElementById('productStock').value),
-                    image_url: document.getElementById('productImage').value || ''
-                };
+                    const formData = {
+                        name: document.getElementById('productName').value,
+                        description: document.getElementById('productDescription').value,
+                        price: parseFloat(document.getElementById('productPrice').value),
+                        product_type: document.getElementById('productType').value,
+                        stock: parseInt(document.getElementById('productStock').value),
+                        image_url: document.getElementById('productImage').value || ''
+                    };
 
-                try {
-                    const response = await fetch('/api/products/add/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrftoken
-                        },
-                        body: JSON.stringify(formData)
-                    });
+                    try {
+                        const response = await fetch('/api/products/add/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken
+                            },
+                            body: JSON.stringify(formData)
+                        });
 
-                    const data = await response.json();
+                        const data = await response.json();
 
-                    if (data.success) {
-                        showMessage('Equipment listing submitted successfully', 'success');
-                        document.getElementById('addProductForm').reset();
-                        loadProducts();
-                    } else {
-                        showMessage(data.error || 'Unable to submit listing', 'error');
+                        if (data.success) {
+                            showMessage('Equipment listing submitted successfully', 'success');
+                            document.getElementById('addProductForm').reset();
+                            loadProducts();
+                        } else {
+                            showMessage(data.error || 'Unable to submit listing', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error adding product:', error);
+                        showMessage('Submission failed. Please try again', 'error');
                     }
-                } catch (error) {
-                    console.error('Error adding product:', error);
-                    showMessage('Submission failed. Please try again', 'error');
-                }
-            });
+                });
+            }
         }
 
         // Delete product
@@ -1065,7 +1200,10 @@
 
         // Load products on page load
         loadProducts();
-        document.getElementById('applyFilters').addEventListener('click', loadProducts);
+        const applyFiltersBtn = document.getElementById('applyFilters');
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', loadProducts);
+        }
     </script>
     <script>
         window.becathlon = window.becathlon || {};
@@ -1073,6 +1211,7 @@
         window.becathlon.loginUrl = "{% url 'login' %}?next={{ request.get_full_path|urlencode }}";
     </script>
     {% load static %}
+    <script src="{% static 'main/js/hero.js' %}"></script>
     <script src="{% static 'cart/js/cart.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
