@@ -179,8 +179,9 @@ def process_checkout(request, cart, cart_items):
             status='SUCCESS'  # Mock successful payment
         )
 
-        # Update order status to PAID since payment was successful
+        # Update order status to PAID and start delivery tracking
         order.status = Order.Status.PAID
+        order.start_delivery_tracking()  # Initialize delivery timer
         order.save()
 
         logger.info(f"Order #{order.id} created successfully for user {request.user.id}")
@@ -215,6 +216,12 @@ def order_list(request):
     Display all orders for the logged-in user.
     """
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Update delivery status for all orders before displaying
+    for order in orders:
+        if order.delivery_started_at:
+            order.update_delivery_status()
+    
     context = {
         'orders': orders,
     }
@@ -227,7 +234,115 @@ def order_detail(request, order_id):
     Display detailed view of a specific order.
     """
     order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # Update delivery status before displaying
+    order.update_delivery_status()
+    
+    # Get rated products for this order
+    rated_product_ids = order.product_ratings.values_list('product_id', flat=True)
+    
     context = {
         'order': order,
+        'rated_product_ids': list(rated_product_ids),
     }
     return render(request, 'order/order_detail.html', context)
+
+
+@login_required
+def check_delivery_status(request, order_id):
+    """
+    AJAX endpoint to check current delivery status of an order.
+    Returns JSON with current status, progress percentage, and time remaining.
+    """
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # Update and get current status
+    order.update_delivery_status()
+    current_status, seconds_remaining = order.get_current_delivery_status()
+    progress = order.get_delivery_progress_percentage()
+    
+    # Get rated products
+    rated_product_ids = list(order.product_ratings.values_list('product_id', flat=True))
+    
+    return JsonResponse({
+        'success': True,
+        'delivery_status': current_status,
+        'delivery_status_display': order.get_delivery_status_display(),
+        'progress_percentage': progress,
+        'seconds_remaining': seconds_remaining,
+        'is_delivered': current_status == Order.DeliveryStatus.DELIVERED,
+        'rated_product_ids': rated_product_ids,
+    })
+
+
+@login_required
+def submit_rating(request, order_id):
+    """
+    AJAX endpoint to submit a product rating.
+    Expects POST data: product_id, rating (1-5), review (optional)
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # Check if order is delivered
+    if order.delivery_status != Order.DeliveryStatus.DELIVERED:
+        return JsonResponse({
+            'success': False, 
+            'error': 'Can only rate products after delivery'
+        }, status=400)
+    
+    try:
+        product_id = int(request.POST.get('product_id'))
+        rating_value = int(request.POST.get('rating'))
+        review_text = request.POST.get('review', '').strip()
+        
+        # Validate rating
+        if rating_value < 1 or rating_value > 5:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Rating must be between 1 and 5'
+            }, status=400)
+        
+        # Verify product is in this order
+        product = get_object_or_404(Product, id=product_id)
+        if not order.items.filter(product=product).exists():
+            return JsonResponse({
+                'success': False, 
+                'error': 'Product not in this order'
+            }, status=400)
+        
+        # Create or update rating
+        from .models import ProductRating
+        rating_obj, created = ProductRating.objects.update_or_create(
+            user=request.user,
+            product=product,
+            order=order,
+            defaults={
+                'rating': rating_value,
+                'review': review_text,
+            }
+        )
+        
+        # Update product aggregate rating
+        product.update_aggregate_rating()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Rating submitted successfully!',
+            'product_id': product_id,
+            'new_aggregate_rating': float(product.rating),
+        })
+        
+    except (ValueError, TypeError) as e:
+        return JsonResponse({
+            'success': False, 
+            'error': 'Invalid data provided'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Rating submission error: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False, 
+            'error': 'An error occurred while submitting your rating'
+        }, status=500)

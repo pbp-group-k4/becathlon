@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, ShippingAddress, Payment
+from .models import Order, OrderItem, ShippingAddress, Payment, ProductRating
 
 
 class OrderItemInline(admin.TabularInline):
@@ -15,9 +15,10 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_name', 'status', 'total_price', 'created_at')
-    list_filter = ('status', 'created_at')
+    list_display = ('id', 'user_name', 'status', 'delivery_status', 'total_price', 'created_at')
+    list_filter = ('status', 'delivery_status', 'created_at')
     search_fields = ('user__username', 'id')
+    readonly_fields = ('delivery_started_at', 'created_at', 'updated_at')
     inlines = [OrderItemInline]
 
     def user_name(self, obj):
@@ -48,5 +49,13 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('order', 'method', 'status', 'amount', 'created_at')
     list_filter = ('method', 'status', 'created_at')
     search_fields = ('order__id', 'transaction_id')
+
+
+@admin.register(ProductRating)
+class ProductRatingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'order', 'rating', 'created_at')
+    list_filter = ('rating', 'created_at')
+    search_fields = ('user__username', 'product__name', 'order__id')
+    readonly_fields = ('created_at', 'updated_at')
 
 

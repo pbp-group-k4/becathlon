@@ -29,6 +29,14 @@
                                 {{ order.get_status_display }}
                             </span>
                         </div>
+                        {% if order.delivery_started_at %}
+                        <div class="order-delivery-status">
+                            <span class="label">Delivery</span>
+                            <span class="delivery-badge delivery-{{ order.delivery_status|lower }}">
+                                {{ order.get_delivery_status_display }}
+                            </span>
+                        </div>
+                        {% endif %}
                         <div class="order-total">
                             <span class="label">Total</span>
                             <span class="value">${{ order.total_price|floatformat:2 }}</span>
@@ -140,8 +148,8 @@
 
 .order-info-row {
     display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr 1.2fr 1fr 1fr 1fr;
+    gap: 1.5rem;
     align-items: center;
 }
 
@@ -218,6 +226,48 @@
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
     border-color: rgba(239, 68, 68, 0.3);
+}
+
+.order-delivery-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.order-delivery-status .label {
+    font-size: 0.75rem;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.delivery-badge {
+    padding: 0.4rem 0.9rem;
+    border-radius: 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+}
+
+.delivery-processing {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.delivery-en_route {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.delivery-delivered {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
 }
 
 .order-card-body {

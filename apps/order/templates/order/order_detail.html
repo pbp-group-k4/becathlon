@@ -28,6 +28,65 @@
         </div>
     </div>
 
+    <!-- Delivery Tracking Section -->
+    {% if order.delivery_started_at %}
+    <div class="delivery-tracking-card" id="delivery-tracking">
+        <div class="tracking-header">
+            <h2>Delivery Status</h2>
+            <span class="delivery-status-badge" id="delivery-status-badge">
+                {{ order.get_delivery_status_display }}
+            </span>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" data-initial-progress="{{ order.get_delivery_progress_percentage }}"></div>
+            </div>
+            <div class="progress-percentage" id="progress-percentage">{{ order.get_delivery_progress_percentage }}%</div>
+        </div>
+
+        <!-- Delivery Stages -->
+        <div class="delivery-stages">
+            <div class="stage {% if order.delivery_status == 'PROCESSING' %}active{% elif order.delivery_status == 'EN_ROUTE' or order.delivery_status == 'DELIVERED' %}completed{% endif %}" id="stage-processing">
+                <div class="stage-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <div class="stage-title">Processing</div>
+                    <div class="stage-time">Preparing your order</div>
+                </div>
+            </div>
+
+            <div class="stage {% if order.delivery_status == 'EN_ROUTE' %}active{% elif order.delivery_status == 'DELIVERED' %}completed{% endif %}" id="stage-enroute">
+                <div class="stage-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m-4 0v-6m4 6h6m0 0a2 2 0 104 0m-4 0a2 2 0 114 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <div class="stage-title">En Route</div>
+                    <div class="stage-time">On the way to you</div>
+                </div>
+            </div>
+
+            <div class="stage {% if order.delivery_status == 'DELIVERED' %}completed{% endif %}" id="stage-delivered">
+                <div class="stage-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <div class="stage-title">Delivered</div>
+                    <div class="stage-time" id="stage-delivered-time">Order complete!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Order Content -->
     <div class="order-content">
         <!-- Order Information -->
@@ -125,6 +184,86 @@
                     <span class="summary-value">${{ order.total_price|floatformat:2 }}</span>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rating Modal -->
+<div class="rating-modal" id="rating-modal">
+    <div class="rating-modal-overlay" id="rating-modal-overlay"></div>
+    <div class="rating-modal-content">
+        <div class="rating-modal-header">
+            <h2>Rate Your Products</h2>
+            <p class="rating-subtitle">Help other customers by sharing your experience</p>
+            <button class="rating-modal-close" id="rating-modal-close" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="rating-products-list" id="rating-products-list">
+            {% for item in order.items.all %}
+            <div class="rating-product-card" data-product-id="{{ item.product.id }}">
+                <div class="rating-product-info">
+                    <div class="rating-product-details">
+                        <h3 class="rating-product-name">{{ item.product.name }}</h3>
+                        <p class="rating-product-type">{{ item.product.product_type.name }}</p>
+                        {% if item.product.brand %}
+                        <p class="rating-product-brand">{{ item.product.brand }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="rating-input-section">
+                    <div class="star-rating" data-product-id="{{ item.product.id }}">
+                        <button class="star-btn" data-product-id="{{ item.product.id }}" data-rating="1">
+                            <svg class="star-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="star-btn" data-product-id="{{ item.product.id }}" data-rating="2">
+                            <svg class="star-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="star-btn" data-product-id="{{ item.product.id }}" data-rating="3">
+                            <svg class="star-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="star-btn" data-product-id="{{ item.product.id }}" data-rating="4">
+                            <svg class="star-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="star-btn" data-product-id="{{ item.product.id }}" data-rating="5">
+                            <svg class="star-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <input type="hidden" class="selected-rating" data-product-id="{{ item.product.id }}" value="0">
+                    
+                    <textarea 
+                        class="rating-review-input" 
+                        data-product-id="{{ item.product.id }}"
+                        placeholder="Share your thoughts about this product (optional)"
+                        rows="3"
+                    ></textarea>
+                    
+                    <button 
+                        class="submit-rating-btn" 
+                        data-product-id="{{ item.product.id }}"
+                        disabled
+                    >
+                        Submit Rating
+                    </button>
+                    
+                    <div class="rating-status" data-product-id="{{ item.product.id }}"></div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
@@ -476,6 +615,415 @@
     font-weight: 600;
 }
 
+/* Delivery Tracking Styles */
+.delivery-tracking-card {
+    background: linear-gradient(135deg, rgba(17, 17, 17, 0.98) 0%, rgba(26, 26, 26, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.tracking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.tracking-header h2 {
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.delivery-status-badge {
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #00ffc6);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.progress-percentage {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #00ffc6;
+    min-width: 50px;
+    text-align: right;
+}
+
+.delivery-stages {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.stage {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+.stage.active {
+    opacity: 1;
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+.stage.completed {
+    opacity: 1;
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stage-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    color: #9b9b9b;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.stage.active .stage-icon {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.stage.completed .stage-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.stage-info {
+    flex: 1;
+}
+
+.stage-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.stage-time {
+    font-size: 0.85rem;
+    color: #9b9b9b;
+}
+
+.stage.active .stage-time {
+    color: #3b82f6;
+}
+
+.stage.completed .stage-time {
+    color: #10b981;
+}
+
+/* Rating Modal Styles */
+.rating-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.rating-modal.show {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.rating-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+}
+
+.rating-modal-content {
+    position: relative;
+    background: linear-gradient(135deg, rgba(17, 17, 17, 0.98) 0%, rgba(26, 26, 26, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.rating-modal-header {
+    padding: 2.5rem 2.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 10;
+}
+
+.rating-modal-header h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+}
+
+.rating-subtitle {
+    color: #9b9b9b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.rating-modal-close {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #9b9b9b;
+    transition: all 0.3s ease;
+}
+
+.rating-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+.rating-products-list {
+    padding: 2rem 2.5rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.rating-product-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.rating-product-card.rated {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.rating-product-info {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rating-product-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.rating-product-type {
+    font-size: 0.85rem;
+    color: #9b9b9b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0.25rem 0;
+}
+
+.rating-product-brand {
+    font-size: 0.85rem;
+    color: #9b9b9b;
+    margin: 0.25rem 0;
+}
+
+.rating-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.star-rating {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: all 0.3s ease;
+    color: #4a4a4a;
+}
+
+.star-btn:hover {
+    transform: scale(1.1);
+}
+
+.star-btn.active {
+    color: #ffcf50;
+}
+
+.star-icon {
+    fill: currentColor;
+    transition: all 0.3s ease;
+}
+
+.rating-review-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.rating-review-input:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.rating-review-input::placeholder {
+    color: #6b6b6b;
+}
+
+.submit-rating-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.submit-rating-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.submit-rating-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rating-status {
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    display: none;
+}
+
+.rating-status.show {
+    display: block;
+}
+
+.rating-status.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.rating-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 @media (max-width: 768px) {
     .order-detail-container {
         padding: 1rem;
@@ -510,7 +1058,347 @@
         margin-right: 0.5rem;
         color: var(--light-gray);
     }
+    
+    .delivery-stages {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .rating-modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .rating-modal-header,
+    .rating-products-list {
+        padding: 1.5rem;
+    }
+    
+    .star-rating {
+        justify-content: center;
+    }
 }
 </style>
+
+<script id="order-data" type="application/json">
+{
+    "orderId": {{ order.id }},
+    "ratedProductIds": {{ rated_product_ids|safe }}
+}
+</script>
+
+<script>
+// CSRF Token helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Get data from JSON script tag
+const orderData = JSON.parse(document.getElementById('order-data').textContent);
+const csrftoken = getCookie('csrftoken');
+const orderId = orderData.orderId;
+let statusCheckInterval = null;
+let ratedProductIds = orderData.ratedProductIds;
+
+// Poll delivery status every 10 seconds
+function startStatusPolling() {
+    // Check immediately
+    checkDeliveryStatus();
+    
+    // Then check every 10 seconds
+    statusCheckInterval = setInterval(checkDeliveryStatus, 10000);
+}
+
+function checkDeliveryStatus() {
+    fetch(`/order/${orderId}/status/`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateDeliveryUI(data);
+            
+            // Update rated products list
+            ratedProductIds = data.rated_product_ids || [];
+            
+            // Show rating modal when delivered
+            if (data.is_delivered && !hasShownRatingModal()) {
+                showRatingModal();
+                markRatingModalShown();
+            }
+            
+            // Stop polling if delivered
+            if (data.is_delivered && statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error checking delivery status:', error);
+    });
+}
+
+function updateDeliveryUI(data) {
+    // Update status badge
+    const statusBadge = document.getElementById('delivery-status-badge');
+    if (statusBadge) {
+        statusBadge.textContent = data.delivery_status_display;
+    }
+    
+    // Update progress bar
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercentage = document.getElementById('progress-percentage');
+    if (progressFill && progressPercentage) {
+        progressFill.style.width = data.progress_percentage + '%';
+        progressPercentage.textContent = data.progress_percentage + '%';
+    }
+    
+    // Update stage classes
+    const stages = {
+        'PROCESSING': document.getElementById('stage-processing'),
+        'EN_ROUTE': document.getElementById('stage-enroute'),
+        'DELIVERED': document.getElementById('stage-delivered')
+    };
+    
+    // Remove all active/completed classes first
+    Object.values(stages).forEach(stage => {
+        if (stage) {
+            stage.classList.remove('active', 'completed');
+        }
+    });
+    
+    // Add appropriate classes based on current status
+    if (data.delivery_status === 'PROCESSING') {
+        stages.PROCESSING?.classList.add('active');
+    } else if (data.delivery_status === 'EN_ROUTE') {
+        stages.PROCESSING?.classList.add('completed');
+        stages.EN_ROUTE?.classList.add('active');
+    } else if (data.delivery_status === 'DELIVERED') {
+        stages.PROCESSING?.classList.add('completed');
+        stages.EN_ROUTE?.classList.add('completed');
+        stages.DELIVERED?.classList.add('completed');
+    }
+    
+    // Hidden timer (for realistic UX without countdown display)
+}
+
+// Rating Modal Functions
+function showRatingModal() {
+    const modal = document.getElementById('rating-modal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        updateRatedProducts();
+    }
+}
+
+function closeRatingModal() {
+    const modal = document.getElementById('rating-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+}
+
+function hasShownRatingModal() {
+    return sessionStorage.getItem(`rating-modal-shown-${orderId}`) === 'true';
+}
+
+function markRatingModalShown() {
+    sessionStorage.setItem(`rating-modal-shown-${orderId}`, 'true');
+}
+
+function updateRatedProducts() {
+    ratedProductIds.forEach(productId => {
+        const card = document.querySelector(`.rating-product-card[data-product-id="${productId}"]`);
+        if (card) {
+            card.classList.add('rated');
+            const statusDiv = card.querySelector('.rating-status');
+            if (statusDiv) {
+                statusDiv.textContent = '✓ Already Rated';
+                statusDiv.classList.add('show', 'success');
+            }
+        }
+    });
+}
+
+// Star Rating Functions
+function setRating(productId, rating) {
+    // Update hidden input
+    const hiddenInput = document.querySelector(`.selected-rating[data-product-id="${productId}"]`);
+    if (hiddenInput) {
+        hiddenInput.value = rating;
+    }
+    
+    // Update star visuals
+    const starRating = document.querySelector(`.star-rating[data-product-id="${productId}"]`);
+    if (starRating) {
+        const stars = starRating.querySelectorAll('.star-btn');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
+    
+    // Enable submit button
+    const submitBtn = document.querySelector(`.submit-rating-btn[data-product-id="${productId}"]`);
+    if (submitBtn) {
+        submitBtn.disabled = false;
+    }
+}
+
+function submitRating(productId) {
+    const ratingValue = document.querySelector(`.selected-rating[data-product-id="${productId}"]`)?.value;
+    const reviewText = document.querySelector(`.rating-review-input[data-product-id="${productId}"]`)?.value || '';
+    const statusDiv = document.querySelector(`.rating-status[data-product-id="${productId}"]`);
+    const submitBtn = document.querySelector(`.submit-rating-btn[data-product-id="${productId}"]`);
+    
+    if (!ratingValue || ratingValue === '0') {
+        if (statusDiv) {
+            statusDiv.textContent = 'Please select a rating';
+            statusDiv.classList.add('show', 'error');
+            statusDiv.classList.remove('success');
+            setTimeout(() => statusDiv.classList.remove('show'), 3000);
+        }
+        return;
+    }
+    
+    // Disable button during submission
+    if (submitBtn) submitBtn.disabled = true;
+    
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('rating', ratingValue);
+    formData.append('review', reviewText);
+    
+    fetch(`/order/${orderId}/rate/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (statusDiv) {
+                statusDiv.textContent = '✓ ' + data.message;
+                statusDiv.classList.add('show', 'success');
+                statusDiv.classList.remove('error');
+            }
+            
+            // Mark as rated
+            ratedProductIds.push(productId);
+            const card = document.querySelector(`.rating-product-card[data-product-id="${productId}"]`);
+            if (card) card.classList.add('rated');
+            
+            // Check if all products rated
+            checkAllProductsRated();
+        } else {
+            if (statusDiv) {
+                statusDiv.textContent = data.error || 'Failed to submit rating';
+                statusDiv.classList.add('show', 'error');
+                statusDiv.classList.remove('success');
+            }
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting rating:', error);
+        if (statusDiv) {
+            statusDiv.textContent = 'Network error. Please try again.';
+            statusDiv.classList.add('show', 'error');
+            statusDiv.classList.remove('success');
+        }
+        if (submitBtn) submitBtn.disabled = false;
+    });
+}
+
+function checkAllProductsRated() {
+    const allCards = document.querySelectorAll('.rating-product-card');
+    const allRated = Array.from(allCards).every(card => card.classList.contains('rated'));
+    
+    if (allRated) {
+        setTimeout(() => {
+            alert('Thank you for rating all products! 🌟');
+            closeRatingModal();
+        }, 1500);
+    }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial progress bar width
+    const progressFill = document.getElementById('progress-fill');
+    if (progressFill) {
+        const initialProgress = progressFill.getAttribute('data-initial-progress');
+        if (initialProgress) {
+            progressFill.style.width = initialProgress + '%';
+        }
+    }
+    
+    // Start polling if delivery tracking is active
+    const deliveryTracking = document.getElementById('delivery-tracking');
+    if (deliveryTracking) {
+        startStatusPolling();
+    }
+    
+    // Modal close handlers
+    const modalOverlay = document.getElementById('rating-modal-overlay');
+    const modalClose = document.getElementById('rating-modal-close');
+    
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', closeRatingModal);
+    }
+    
+    if (modalClose) {
+        modalClose.addEventListener('click', closeRatingModal);
+    }
+    
+    // Star rating click handlers
+    document.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const rating = parseInt(this.getAttribute('data-rating'));
+            setRating(productId, rating);
+        });
+    });
+    
+    // Submit rating button handlers
+    document.querySelectorAll('.submit-rating-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            submitRating(productId);
+        });
+    });
+    
+    // Update already rated products
+    updateRatedProducts();
+});
+
+// Clean up interval on page unload
+window.addEventListener('beforeunload', function() {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+    }
+});
+</script>
 {% endblock %}
 
