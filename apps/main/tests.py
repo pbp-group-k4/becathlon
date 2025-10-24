@@ -107,6 +107,7 @@ class ProductModelTestCase(TestCase):
 
     def test_product_ordering(self):
         """Test that products are ordered by created_at descending"""
+        import time
         product1 = Product.objects.create(
             name='Product 1',
             description='First',
@@ -115,6 +116,7 @@ class ProductModelTestCase(TestCase):
             stock=5,
             created_by=self.user
         )
+        time.sleep(0.01)  # Small delay to ensure different timestamps
         product2 = Product.objects.create(
             name='Product 2',
             description='Second',
@@ -224,10 +226,11 @@ class MainViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'main/home.html')
 
-    def test_home_page_displays_products(self):
-        """Test home page displays products"""
+    def test_home_page_has_products_grid(self):
+        """Test home page has products grid container"""
         response = self.client.get(reverse('home'))
-        self.assertContains(response, self.product.name)
+        self.assertContains(response, 'productsGrid')
+        self.assertContains(response, 'Equipment Catalog')
 
     def test_product_detail_view(self):
         """Test product detail view"""
@@ -244,4 +247,16 @@ class MainViewsTestCase(TestCase):
             reverse('product_detail', kwargs={'product_id': 99999})
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_products_api_endpoint(self):
+        """Test products API endpoint returns JSON"""
+        response = self.client.get('/api/products/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn('products', data)
+        self.assertIn('pagination', data)
+        
+        # Check that our product is in the results
+        product_names = [p['name'] for p in data['products']]
+        self.assertIn(self.product.name, product_names)
 

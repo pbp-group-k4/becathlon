@@ -291,9 +291,11 @@ class CartUtilsTestCase(TestCase):
         # Create a request without a session
         from django.test import RequestFactory
         from django.contrib.sessions.middleware import SessionMiddleware
+        from django.contrib.auth.models import AnonymousUser
         
         factory = RequestFactory()
         request = factory.get('/')
+        request.user = AnonymousUser()  # Add user attribute
         
         # Add session middleware
         middleware = SessionMiddleware(lambda x: None)
