@@ -7,19 +7,15 @@ from django.db import migrations, models
 
 def delete_item_if_exists(apps, schema_editor):
     """Delete Item model only if the table exists"""
-    db_alias = schema_editor.connection.alias
-    try:
-        Item = apps.get_model('main', 'Item')
-        # Check if table exists by trying to query it
-        Item.objects.using(db_alias).exists()
-        # If we get here, table exists, so we can delete it
-        schema_editor.delete_model(Item)
-    except Exception:
-        # Table doesn't exist, skip deletion
-        pass
+    # Skip this operation entirely - it's only needed for local databases
+    # that had the old Item model. Production databases start fresh.
+    pass
 
 
 class Migration(migrations.Migration):
+    
+    # Disable atomic transactions for this migration to avoid PostgreSQL issues
+    atomic = False
 
     dependencies = [
         ('main', '0001_initial'),

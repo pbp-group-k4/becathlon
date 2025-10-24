@@ -98,20 +98,25 @@ DB_SCHEMA = os.environ.get('SCHEMA')  # PostgreSQL schema name
 
 if DB_NAME and DB_USER and DB_PASSWORD and DB_HOST:
     # Use PostgreSQL with university-provided credentials
-    db_options = {}
+    db_config = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT or '5432',  # Default PostgreSQL port
+        'ATOMIC_REQUESTS': False,  # Allow non-atomic operations for complex migrations
+        'CONN_MAX_AGE': 0,  # Close connections immediately to avoid transaction issues
+    }
+    
+    # Add schema search path if specified
     if DB_SCHEMA:
-        db_options['options'] = f'-c search_path={DB_SCHEMA},public'
+        db_config['OPTIONS'] = {
+            'options': f'-c search_path={DB_SCHEMA},public'
+        }
     
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': DB_NAME,
-            'USER': DB_USER,
-            'PASSWORD': DB_PASSWORD,
-            'HOST': DB_HOST,
-            'PORT': DB_PORT or '5432',  # Default PostgreSQL port
-            **db_options,
-        }
+        'default': db_config
     }
 else:
     # Fallback to SQLite for local development
