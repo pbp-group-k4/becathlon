@@ -1,2 +1,2 @@
-release: python manage.py migrate --noinput
+release: bash pbp-deploy.sh
 web: gunicorn becathlon.wsgi --log-file -
