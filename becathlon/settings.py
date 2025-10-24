@@ -88,18 +88,24 @@ WSGI_APPLICATION = 'becathlon.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Use PostgreSQL if DATABASE_URL is provided, otherwise fallback to SQLite
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# Check if PostgreSQL credentials are provided
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_HOST = os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT')
 
-if DATABASE_URL:
-    # Parse PostgreSQL connection from DATABASE_URL
-    import dj_database_url
+if DB_NAME and DB_USER and DB_PASSWORD and DB_HOST:
+    # Use PostgreSQL with university-provided credentials
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT or '5432',  # Default PostgreSQL port
+        }
     }
 else:
     # Fallback to SQLite for local development
