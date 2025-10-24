@@ -1,0 +1,372 @@
+/* Checkout Success CSS - Becathlon */
+
+.success-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.success-content {
+    background: rgba(26, 26, 26, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.success-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.success-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.success-icon {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.success-icon svg {
+    filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.3));
+}
+
+.success-header h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+}
+
+.success-message {
+    font-size: 1.1rem;
+    color: var(--light-gray);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.order-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.order-info,
+.shipping-info,
+.payment-info {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 2rem;
+}
+
+.order-info h2,
+.shipping-info h3,
+.payment-info h3 {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: var(--light-gray);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.info-value {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.total-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+.status-pending {
+    color: #f59e0b;
+}
+
+.status-paid {
+    color: #10b981;
+}
+
+.status-shipped {
+    color: #3b82f6;
+}
+
+.status-completed {
+    color: #10b981;
+}
+
+.status-canceled {
+    color: #ef4444;
+}
+
+.status-success {
+    color: #10b981;
+}
+
+.status-failed {
+    color: #ef4444;
+}
+
+.status-refunded {
+    color: #f59e0b;
+}
+
+.address-details,
+.payment-details {
+    color: var(--light-gray);
+    line-height: 1.6;
+}
+
+.address-details p,
+.payment-details p {
+    margin-bottom: 0.5rem;
+}
+
+.address-details strong,
+.payment-details strong {
+    color: #ffffff;
+}
+
+.order-items {
+    margin-bottom: 3rem;
+}
+
+.order-items h2 {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.items-list {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.order-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.item-name {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.item-type {
+    color: var(--light-gray);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.item-brand {
+    color: var(--light-gray);
+    font-size: 0.8rem;
+}
+
+.item-quantity,
+.item-price,
+.item-subtotal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.quantity-label,
+.price-label,
+.subtotal-label {
+    color: var(--light-gray);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quantity-value,
+.price-value,
+.subtotal-value {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.subtotal-value {
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+.order-total {
+    background: rgba(0, 102, 255, 0.05);
+    border: 1px solid rgba(0, 102, 255, 0.2);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-top: 1rem;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-label {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.total-value {
+    color: var(--accent-blue);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.success-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 1rem 2.5rem;
+    font-weight: 400;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, #0052cc 100%);
+    color: white;
+    border-color: var(--accent-blue);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .success-container {
+        padding: 1rem;
+    }
+    
+    .success-content {
+        padding: 2rem 1.5rem;
+    }
+    
+    .order-details {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .order-item {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .item-quantity,
+    .item-price,
+    .item-subtotal {
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .success-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
