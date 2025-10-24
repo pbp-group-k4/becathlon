@@ -610,3 +610,85 @@ class CartViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data['count'], 3)
+
+    def test_checkout_view_redirects_to_cart_with_message(self):
+        """Test checkout view redirects to cart with coming soon message"""
+        self.client.login(username='testuser', password='testpass123')
+
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=1)
+
+        response = self.client.get(reverse('cart:checkout_view'))
+        # Should redirect to cart view
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/cart/', response['Location'])
+
+
+class CartFormsTestCase(TestCase):
+    """Test cases for cart forms"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+        self.product_type = ProductType.objects.create(
+            name='Running Shoes',
+            description='High-performance running shoes'
+        )
+
+        self.product = Product.objects.create(
+            name='Test Running Shoe',
+            description='A great running shoe for testing',
+            price=Decimal('99.99'),
+            product_type=self.product_type,
+            stock=10,
+            created_by=self.user
+        )
+
+    def test_add_to_cart_form_valid(self):
+        """Test AddToCartForm with valid data"""
+        from .forms import AddToCartForm
+        form = AddToCartForm(data={'quantity': 5}, product=self.product)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['quantity'], 5)
+
+    def test_add_to_cart_form_insufficient_stock(self):
+        """Test AddToCartForm rejects quantity exceeding stock"""
+        from .forms import AddToCartForm
+        form = AddToCartForm(data={'quantity': 20}, product=self.product)  # More than stock
+        self.assertFalse(form.is_valid())
+        self.assertIn('quantity', form.errors)
+        self.assertIn('available in stock', form.errors['quantity'][0])
+
+    def test_add_to_cart_form_zero_quantity(self):
+        """Test AddToCartForm rejects zero quantity"""
+        from .forms import AddToCartForm
+        form = AddToCartForm(data={'quantity': 0}, product=self.product)
+        self.assertFalse(form.is_valid())
+        self.assertIn('quantity', form.errors)
+
+    def test_update_quantity_form_valid(self):
+        """Test UpdateQuantityForm with valid data"""
+        from .forms import UpdateQuantityForm
+        form = UpdateQuantityForm(data={'quantity': 3}, product=self.product)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['quantity'], 3)
+
+    def test_update_quantity_form_insufficient_stock(self):
+        """Test UpdateQuantityForm rejects quantity exceeding stock"""
+        from .forms import UpdateQuantityForm
+        form = UpdateQuantityForm(data={'quantity': 15}, product=self.product)  # More than stock
+        self.assertFalse(form.is_valid())
+        self.assertIn('quantity', form.errors)
+        self.assertIn('available in stock', form.errors['quantity'][0])
+
+    def test_update_quantity_form_zero_quantity_allowed(self):
+        """Test UpdateQuantityForm allows zero quantity (for removal)"""
+        from .forms import UpdateQuantityForm
+        form = UpdateQuantityForm(data={'quantity': 0}, product=self.product)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['quantity'], 0)

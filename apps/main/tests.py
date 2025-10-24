@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from decimal import Decimal
 from apps.main.models import Product, ProductType, Customer
+from apps.profiles.models import Profile
 
 
 class ProductTypeModelTestCase(TestCase):
@@ -260,3 +261,185 @@ class MainViewsTestCase(TestCase):
         product_names = [p['name'] for p in data['products']]
         self.assertIn(self.product.name, product_names)
 
+    def test_add_product_ajax_seller_only(self):
+        """Test add product AJAX requires seller account"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create buyer profile (default)
+        Profile.objects.update_or_create(user=self.user, defaults={'account_type': 'BUYER'})
+
+        product_data = {
+            'name': 'New Product',
+            'description': 'Test product',
+            'price': '29.99',
+            'product_type': self.product_type.id,
+            'stock': 5
+        }
+
+        response = self.client.post(
+            reverse('add_product_ajax'),
+            data=product_data,
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 403)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertIn('seller accounts', data['error'])
+
+    def test_add_product_ajax_success(self):
+        """Test successful product addition via AJAX"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create seller profile
+        Profile.objects.update_or_create(user=self.user, defaults={'account_type': 'SELLER'})
+
+        product_data = {
+            'name': 'New Seller Product',
+            'description': 'Product added by seller',
+            'price': '49.99',
+            'product_type': self.product_type.id,
+            'stock': 10,
+            'image_url': 'https://example.com/image.jpg'
+        }
+
+        response = self.client.post(
+            reverse('add_product_ajax'),
+            data=product_data,
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['product']['name'], 'New Seller Product')
+        self.assertEqual(data['product']['stock'], 10)
+
+        # Verify product was created
+        product = Product.objects.get(name='New Seller Product')
+        self.assertEqual(product.created_by, self.user)
+        self.assertEqual(product.price, Decimal('49.99'))
+
+    def test_delete_product_ajax_wrong_account_type(self):
+        """Test delete product AJAX requires seller account"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create buyer profile
+        Profile.objects.update_or_create(user=self.user, defaults={'account_type': 'BUYER'})
+
+        response = self.client.delete(
+            reverse('delete_product_ajax', kwargs={'product_id': self.product.id})
+        )
+        self.assertEqual(response.status_code, 403)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertIn('seller accounts', data['error'])
+
+    def test_delete_product_ajax_wrong_owner(self):
+        """Test delete product AJAX requires ownership"""
+        # Create another seller user
+        other_user = User.objects.create_user(
+            username='otherseller',
+            password='testpass123'
+        )
+        Profile.objects.update_or_create(user=other_user, defaults={'account_type': 'SELLER'})
+
+        self.client.login(username='otherseller', password='testpass123')
+
+        response = self.client.delete(
+            reverse('delete_product_ajax', kwargs={'product_id': self.product.id})
+        )
+        self.assertEqual(response.status_code, 403)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertIn('own products', data['error'])
+
+    def test_delete_product_ajax_success(self):
+        """Test successful product deletion via AJAX"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create seller profile
+        Profile.objects.update_or_create(user=self.user, defaults={'account_type': 'SELLER'})
+
+        response = self.client.delete(
+            reverse('delete_product_ajax', kwargs={'product_id': self.product.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+
+        # Verify product was deleted
+        self.assertFalse(Product.objects.filter(id=self.product.id).exists())
+
+    def test_get_products_ajax_filtering(self):
+        """Test products AJAX endpoint with filtering"""
+        # Create additional products for testing
+        product2 = Product.objects.create(
+            name='Basketball',
+            description='Sports ball',
+            price=Decimal('25.00'),
+            product_type=self.product_type,
+            stock=5,
+            created_by=self.user
+        )
+
+        # Test search filtering
+        response = self.client.get(
+            reverse('get_products_ajax'),
+            {'q': 'running'}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        product_names = [p['name'] for p in data['products']]
+        self.assertIn('Test Running Shoe', product_names)
+        self.assertNotIn('Basketball', product_names)
+
+    def test_get_products_ajax_price_filtering(self):
+        """Test products AJAX endpoint with price filtering"""
+        # Create product with different price
+        Product.objects.create(
+            name='Cheap Product',
+            description='Low price item',
+            price=Decimal('10.00'),
+            product_type=self.product_type,
+            stock=1,
+            created_by=self.user
+        )
+
+        # Test price range filtering
+        response = self.client.get(
+            reverse('get_products_ajax'),
+            {'min_price': '20', 'max_price': '150'}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+
+        # Should only return the original product (99.99)
+        self.assertEqual(len(data['products']), 1)
+        self.assertEqual(data['products'][0]['name'], 'Test Running Shoe')
+
+    def test_get_products_ajax_pagination(self):
+        """Test products AJAX endpoint pagination"""
+        # Create many products for pagination testing
+        for i in range(25):
+            Product.objects.create(
+                name=f'Product {i}',
+                description=f'Description {i}',
+                price=Decimal('20.00'),
+                product_type=self.product_type,
+                stock=1,
+                created_by=self.user
+            )
+
+        # Test pagination
+        response = self.client.get(
+            reverse('get_products_ajax'),
+            {'per_page': '10', 'page': '2'}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['products']), 10)  # Should return 10 items per page
+        self.assertEqual(data['pagination']['page'], 2)
+        self.assertTrue(data['pagination']['has_next'])
+        self.assertTrue(data['pagination']['has_previous'])

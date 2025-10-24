@@ -1,8 +1,10 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.urls import reverse
 from django.utils import timezone
 from django.db import IntegrityError
 from django.db.models import F
+from urllib.parse import urlencode
 from decimal import Decimal
 from datetime import timedelta
 from apps.main.models import Product, ProductType
@@ -536,3 +538,374 @@ class ProductRatingModelTestCase(TestCase):
         )
         self.assertEqual(rating.review, '')
 
+
+class OrderViewsTestCase(TestCase):
+    """Test cases for order views"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+        self.product_type = ProductType.objects.create(
+            name='Running Shoes',
+            description='High-performance running shoes'
+        )
+
+        self.product = Product.objects.create(
+            name='Test Running Shoe',
+            description='A great running shoe for testing',
+            price=Decimal('99.99'),
+            product_type=self.product_type,
+            stock=10,
+            created_by=self.user
+        )
+
+        self.shipping_address = ShippingAddress.objects.create(
+            user=self.user,
+            full_name='John Doe',
+            phone_number='+62123456789',
+            address_line1='123 Main St',
+            city='Jakarta',
+            postal_code='12345',
+            country='Indonesia'
+        )
+
+        # Create a completed order for testing
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=2)
+        self.order = Order.create_from_cart(cart, self.shipping_address)
+        self.order.status = Order.Status.PAID
+        self.order.start_delivery_tracking()
+        self.order.save()
+
+        Payment.objects.create(
+            order=self.order,
+            method=Payment.Method.CREDIT_CARD,
+            amount=self.order.total_price,
+            status=Payment.Status.SUCCESS
+        )
+
+    def test_checkout_view_requires_authentication(self):
+        """Test that checkout view redirects unauthenticated users to login"""
+        response = self.client.get(reverse('order:checkout'))
+        login_url = f"{reverse('auth:login')}?{urlencode({'next': reverse('order:checkout')})}"
+        self.assertRedirects(response, login_url)
+
+    def test_checkout_view_empty_cart_redirects(self):
+        """Test that checkout view redirects when cart is empty"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create an empty cart (no items)
+        Cart.objects.filter(user=self.user).delete()  # Remove existing cart
+        empty_cart = Cart.objects.create(user=self.user)  # Create empty cart
+
+        response = self.client.get(reverse('order:checkout'))
+        self.assertRedirects(response, reverse('catalog:home'))
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertIn('empty', messages[0].message.lower())
+
+    def test_checkout_view_get_renders_form(self):
+        """Test checkout form renders correctly for authenticated user with items"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Remove the cart created in setUp and create a fresh one with items
+        Cart.objects.filter(user=self.user).delete()
+        test_cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=test_cart, product=self.product, quantity=1)
+
+        response = self.client.get(reverse('order:checkout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'checkout')
+        self.assertContains(response, self.product.name)
+
+    def test_checkout_success_view(self):
+        """Test checkout success page displays correctly"""
+        self.client.login(username='testuser', password='testpass123')
+
+        response = self.client.get(reverse('order:checkout_success', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"#{self.order.id}")
+        self.assertContains(response, 'Order Confirmed')
+
+    def test_checkout_success_view_wrong_user_404(self):
+        """Test checkout success view returns 404 for wrong user"""
+        other_user = User.objects.create_user(username='other', password='test')
+        self.client.login(username='other', password='test')
+
+        response = self.client.get(reverse('order:checkout_success', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_order_list_view(self):
+        """Test order list view displays user's orders"""
+        self.client.login(username='testuser', password='testpass123')
+
+        response = self.client.get(reverse('order:order_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"{self.order.id}")
+        self.assertContains(response, 'Paid')
+
+    def test_order_detail_view(self):
+        """Test order detail view displays order information"""
+        self.client.login(username='testuser', password='testpass123')
+
+        response = self.client.get(reverse('order:order_detail', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.order.shipping_address.full_name)
+        self.assertContains(response, self.product.name)
+
+    def test_order_detail_view_wrong_user_404(self):
+        """Test order detail view returns 404 for wrong user"""
+        other_user = User.objects.create_user(username='other', password='test')
+        self.client.login(username='other', password='test')
+
+        response = self.client.get(reverse('order:order_detail', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_process_checkout_valid_data(self):
+        """Test successful checkout processing with valid data"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create a fresh cart for this test
+        Cart.objects.filter(user=self.user).delete()
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=1)
+
+        # Valid checkout data
+        checkout_data = {
+            'full_name': 'Jane Doe',
+            'phone_number': '+62987654321',
+            'address_line1': '456 Second St',
+            'city': 'Bandung',
+            'postal_code': '54321',
+            'country': 'Indonesia',
+            'payment_method': 'CREDIT_CARD'
+        }
+
+        response = self.client.post(reverse('order:checkout'), checkout_data)
+        self.assertEqual(response.status_code, 302)  # Redirect to success page
+
+        # Check that order was created
+        orders = Order.objects.filter(user=self.user)
+        self.assertEqual(orders.count(), 2)  # Original + new order
+
+        new_order = orders.latest('created_at')
+        self.assertEqual(new_order.status, Order.Status.PAID)
+        self.assertIsNotNone(new_order.payment)
+
+    def test_process_checkout_invalid_address_validation(self):
+        """Test checkout fails with invalid address data"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create a fresh cart
+        Cart.objects.filter(user=self.user).delete()
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=1)
+
+        # Invalid address data (missing required fields)
+        invalid_data = {
+            'phone_number': '+62123456789',
+            'city': 'Jakarta',
+            'payment_method': 'CREDIT_CARD'
+        }
+
+        response = self.client.post(reverse('order:checkout'), invalid_data)
+        self.assertEqual(response.status_code, 302)  # Redirect back to checkout
+        self.assertRedirects(response, reverse('order:checkout'))
+
+        # Check that no new order was created
+        order_count_before = Order.objects.filter(user=self.user).count()
+        # Should still be 1 (the one created in setUp)
+        self.assertEqual(order_count_before, 1)
+
+    def test_process_checkout_invalid_payment_method(self):
+        """Test checkout fails with invalid payment method"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create a fresh cart
+        Cart.objects.filter(user=self.user).delete()
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=1)
+
+        # Valid address but invalid payment method
+        invalid_data = {
+            'full_name': 'John Doe',
+            'phone_number': '+62123456789',
+            'address_line1': '123 Main St',
+            'city': 'Jakarta',
+            'postal_code': '12345',
+            'country': 'Indonesia',
+            'payment_method': 'INVALID_METHOD'
+        }
+
+        response = self.client.post(reverse('order:checkout'), invalid_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('order:checkout'))
+
+    def test_process_checkout_insufficient_stock(self):
+        """Test checkout fails when stock is insufficient"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create a fresh cart with more items than available stock
+        Cart.objects.filter(user=self.user).delete()
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=self.product, quantity=20)  # More than stock
+
+        valid_data = {
+            'full_name': 'John Doe',
+            'phone_number': '+62123456789',
+            'address_line1': '123 Main St',
+            'city': 'Jakarta',
+            'postal_code': '12345',
+            'country': 'Indonesia',
+            'payment_method': 'CREDIT_CARD'
+        }
+
+        response = self.client.post(reverse('order:checkout'), valid_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('order:checkout'))
+
+    def test_check_delivery_status_processing(self):
+        """Test delivery status API during processing phase"""
+        self.client.login(username='testuser', password='testpass123')
+
+        response = self.client.get(reverse('order:check_delivery_status', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['delivery_status'], 'PROCESSING')
+        self.assertGreater(data['seconds_remaining'], 0)
+
+    def test_check_delivery_status_delivered(self):
+        """Test delivery status API when order is delivered"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Advance order to delivered state
+        self.order.delivery_started_at = timezone.now() - timedelta(seconds=150)  # Past delivery time
+        self.order.save()
+
+        response = self.client.get(reverse('order:check_delivery_status', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['delivery_status'], 'DELIVERED')
+        self.assertEqual(data['seconds_remaining'], 0)
+        self.assertTrue(data['is_delivered'])
+
+    def test_submit_rating_valid(self):
+        """Test submitting a valid product rating"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Mark order as delivered by advancing delivery tracking past completion
+        self.order.delivery_started_at = timezone.now() - timedelta(seconds=150)  # Past delivery time
+        self.order.update_delivery_status()  # This should set status to DELIVERED
+        self.order.save()
+
+        rating_data = {
+            'product_id': self.product.id,
+            'rating': 5,
+            'review': 'Excellent product!'
+        }
+
+        response = self.client.post(
+            reverse('order:submit_rating', kwargs={'order_id': self.order.id}),
+            rating_data
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['message'], 'Rating submitted successfully!')
+
+        # Check rating was created
+        from .models import ProductRating
+        rating = ProductRating.objects.get(user=self.user, product=self.product, order=self.order)
+        self.assertEqual(rating.rating, 5)
+        self.assertEqual(rating.review, 'Excellent product!')
+
+    def test_submit_rating_not_delivered_fails(self):
+        """Test rating submission fails for undelivered orders"""
+        self.client.login(username='testuser', password='testpass123')
+
+        rating_data = {
+            'product_id': self.product.id,
+            'rating': 4,
+            'review': 'Good product'
+        }
+
+        response = self.client.post(
+            reverse('order:submit_rating', kwargs={'order_id': self.order.id}),
+            rating_data
+        )
+        self.assertEqual(response.status_code, 400)
+
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertIn('after delivery', data['error'])
+
+    def test_submit_rating_invalid_rating_value(self):
+        """Test rating submission fails with invalid rating value"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Mark order as delivered
+        self.order.delivery_started_at = timezone.now() - timedelta(seconds=150)
+        self.order.update_delivery_status()
+        self.order.save()
+
+        rating_data = {
+            'product_id': self.product.id,
+            'rating': 6,  # Invalid rating (should be 1-5)
+            'review': 'Good product'
+        }
+
+        response = self.client.post(
+            reverse('order:submit_rating', kwargs={'order_id': self.order.id}),
+            rating_data
+        )
+        self.assertEqual(response.status_code, 400)
+
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertIn('between 1 and 5', data['error'])
+
+    def test_submit_rating_wrong_product(self):
+        """Test rating submission fails for product not in order"""
+        self.client.login(username='testuser', password='testpass123')
+
+        # Mark order as delivered
+        self.order.delivery_started_at = timezone.now() - timedelta(seconds=150)
+        self.order.update_delivery_status()
+        self.order.save()
+
+        # Create another product not in this order
+        other_product = Product.objects.create(
+            name='Other Product',
+            description='Test',
+            price=Decimal('50.00'),
+            product_type=self.product_type,
+            stock=5,
+            created_by=self.user
+        )
+
+        rating_data = {
+            'product_id': other_product.id,
+            'rating': 4,
+            'review': 'Good product'
+        }
+
+        response = self.client.post(
+            reverse('order:submit_rating', kwargs={'order_id': self.order.id}),
+            rating_data
+        )
+        self.assertEqual(response.status_code, 400)
+
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertIn('not in this order', data['error'])
