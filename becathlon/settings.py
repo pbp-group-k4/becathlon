@@ -33,6 +33,28 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
 
+# CSRF Protection Settings
+# Required for Django 4.0+ when using HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    'https://muhammad-vegard-becathlon.pbp.cs.ui.ac.id',
+    'https://pbp.cs.ui.ac.id',
+    'https://muhammad.vegard.pbp.cs.ui.ac.id',
+]
+
+# Security Settings for Production
+if not DEBUG:
+    # HTTPS/SSL Settings
+    SECURE_SSL_REDIRECT = False  # PWS handles SSL termination
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Cookie settings for cross-subdomain support
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
 
 # Application definition
 
