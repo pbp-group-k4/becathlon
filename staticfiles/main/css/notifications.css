@@ -1,0 +1,98 @@
+/* Notification Toast Styles - Global */
+
+.notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    backdrop-filter: blur(10px);
+}
+
+.notification::before {
+    content: '';
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 8px 0 0 8px;
+}
+
+.notification.success {
+    background: rgba(16, 185, 129, 0.95);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.notification.success::before {
+    background: #059669;
+}
+
+.notification.error {
+    background: rgba(239, 68, 68, 0.95);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.notification.error::before {
+    background: #dc2626;
+}
+
+.notification.warning {
+    background: rgba(245, 158, 11, 0.95);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.notification.warning::before {
+    background: #d97706;
+}
+
+.notification.info {
+    background: rgba(59, 130, 246, 0.95);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.notification.info::before {
+    background: #2563eb;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .notification {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        min-width: auto;
+        max-width: none;
+    }
+}

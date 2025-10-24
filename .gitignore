@@ -138,7 +138,7 @@ ehthumbs.db
 Thumbs.db
 
 # Static and media files
-staticfiles/
+# staticfiles/  # Commented out - need to commit for PWS deployment
 media/
 
 # Temporary files
