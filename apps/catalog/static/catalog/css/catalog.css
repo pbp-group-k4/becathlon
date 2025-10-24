@@ -1,5 +1,13 @@
 /* Catalog CSS - Becathlon */
 
+/* HIDE ALL NOTIFICATION POPUPS */
+.notification {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 /* Base Styles */
 .btn-logout {
     font-family: inherit;

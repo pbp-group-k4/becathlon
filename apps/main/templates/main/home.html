@@ -242,6 +242,12 @@
 
         // Show message
         function showMessage(message, type) {
+            // Hide error messages - just log to console
+            if (type === 'error') {
+                console.log(`[ERROR]: ${message}`);
+                return;
+            }
+            
             const messagesContainer = document.getElementById('messagesContainer');
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type}`;

@@ -19,6 +19,14 @@
             --warning-orange: #f59e0b;
         }
 
+        /* HIDE ALL NOTIFICATION POPUPS */
+        .notification {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);

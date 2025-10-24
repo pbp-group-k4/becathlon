@@ -187,17 +187,30 @@ USE_TZ = True
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 STATIC_ROOT = os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles')
 
-# WhiteNois e storage backend for production static file serving
+# WhiteNoise storage backend for production static file serving
 # Use CompressedStaticFilesStorage instead of CompressedManifestStaticFilesStorage
 # to avoid strict manifest checking that can cause 500 errors
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
+# For local development without whitenoise, use Django's default static files storage
+try:
+    import whitenoise
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+except ImportError:
+    # Fallback for local development without whitenoise
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 # Only add STATICFILES_DIRS if the directory exists (avoids warnings in production)
 static_dir = BASE_DIR / "static"

@@ -8,6 +8,11 @@ function getCSRFToken() {
 
 // Show notification
 function showNotification(message, type = 'success') {
+    // Hide ALL notifications - just log to console
+    console.log(`[${type.toUpperCase()}]:`, message);
+    return; // Don't show any popups
+    
+    /* Original code kept for reference
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
@@ -17,6 +22,7 @@ function showNotification(message, type = 'success') {
     setTimeout(() => {
         notification.remove();
     }, 3000);
+    */
 }
 
 // Add to cart

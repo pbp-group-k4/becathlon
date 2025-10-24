@@ -1,5 +1,13 @@
 /* Cart CSS - Becathlon */
 
+/* HIDE ALL NOTIFICATION POPUPS */
+.notification {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 /* Breadcrumb */
 .breadcrumb {
     display: flex;
