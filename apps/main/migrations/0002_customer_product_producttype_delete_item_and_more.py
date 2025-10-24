@@ -5,7 +5,17 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def delete_item_if_exists(apps, schema_editor):
+    """Delete Item model only if the table exists"""
+    # Skip this operation entirely - it's only needed for local databases
+    # that had the old Item model. Production databases start fresh.
+    pass
+
+
 class Migration(migrations.Migration):
+    
+    # Disable atomic transactions for this migration to avoid PostgreSQL issues
+    atomic = False
 
     dependencies = [
         ('main', '0001_initial'),
@@ -51,8 +61,12 @@ class Migration(migrations.Migration):
                 'ordering': ['name'],
             },
         ),
-        migrations.DeleteModel(
-            name='Item',
+        migrations.RunPython(delete_item_if_exists, reverse_code=migrations.RunPython.noop),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.DeleteModel(name='Item'),
+            ],
+            database_operations=[],
         ),
         migrations.AddField(
             model_name='product',

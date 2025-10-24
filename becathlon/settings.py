@@ -94,18 +94,29 @@ DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = os.environ.get('DB_HOST')
 DB_PORT = os.environ.get('DB_PORT')
+DB_SCHEMA = os.environ.get('SCHEMA')  # PostgreSQL schema name
 
 if DB_NAME and DB_USER and DB_PASSWORD and DB_HOST:
     # Use PostgreSQL with university-provided credentials
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': DB_NAME,
-            'USER': DB_USER,
-            'PASSWORD': DB_PASSWORD,
-            'HOST': DB_HOST,
-            'PORT': DB_PORT or '5432',  # Default PostgreSQL port
+    db_config = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT or '5432',  # Default PostgreSQL port
+        'ATOMIC_REQUESTS': False,  # Allow non-atomic operations for complex migrations
+        'CONN_MAX_AGE': 0,  # Close connections immediately to avoid transaction issues
+    }
+    
+    # Add schema search path if specified
+    if DB_SCHEMA:
+        db_config['OPTIONS'] = {
+            'options': f'-c search_path={DB_SCHEMA},public'
         }
+    
+    DATABASES = {
+        'default': db_config
     }
 else:
     # Fallback to SQLite for local development
@@ -154,13 +165,73 @@ USE_TZ = True
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 STATIC_ROOT = os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles')
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+# WhiteNois e storage backend for production static file serving
+# Use CompressedStaticFilesStorage instead of CompressedManifestStaticFilesStorage
+# to avoid strict manifest checking that can cause 500 errors
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+# Only add STATICFILES_DIRS if the directory exists (avoids warnings in production)
+static_dir = BASE_DIR / "static"
+if static_dir.exists():
+    STATICFILES_DIRS = [static_dir]
+else:
+    STATICFILES_DIRS = []
 
 # Media files (User uploads)
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / 'media')
+
+# Logging Configuration
+# Helps debug issues in production by capturing detailed error information
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

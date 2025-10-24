@@ -23,15 +23,31 @@ jobs:
       env:
         PWS_URL: ${{ secrets.PWS_URL }}
       run: |
+          # Debug: Check if PWS_URL is set
+          if [ -z "$PWS_URL" ]; then
+            echo "ERROR: PWS_URL secret is not set!"
+            echo "Please go to: https://github.com/pbp-group-k4/becathlon/settings/secrets/actions"
+            echo "And add a secret named 'PWS_URL' with your PWS git URL"
+            exit 1
+          fi
+          
+          echo "PWS_URL is set (length: ${#PWS_URL})"
+          
           # Get current branch name
           current_branch=$(git branch --show-current)
           echo "Current branch: $current_branch"
           
+          # Add PWS as remote
+          git remote add pws "$PWS_URL" || git remote set-url pws "$PWS_URL"
+          
           # Push current branch to PWS master branch
-          push_output=$(git push $PWS_URL $current_branch:master 2>&1)
-          if [[ $? -ne 0 ]]; then
-            echo "Push failed with output: $push_output"
-            echo "Error: Unable to push changes. Please check the error message above and resolve any conflicts manually."
+          echo "Pushing $current_branch to PWS master..."
+          git push -u pws "$current_branch:master" 2>&1
+          
+          if [ $? -eq 0 ]; then
+            echo "✓ Successfully pushed to PWS!"
+          else
+            echo "✗ Push to PWS failed"
             exit 1
           fi
           echo "Push successful with output: $push_output"
