@@ -2,12 +2,6 @@
 
 > A Django-powered storefront that mirrors the visual polish and browsing experience of Decathlon—minus the heavy operational tooling.
 
-## TODO !!!!!!
-- Finish dependency chain: catalog [DONE] -> cart [DONE]-> checkout [DONE] -> orders [WIP]
-- Add ability to add ratings once user has purchased an item (orders)
-- Aggregate ratings per item to make average rating (catalog)
-- Mock payment gateway in checkout
-- Mock store locations in stores app
 
 ## Team Members
 
@@ -20,7 +14,39 @@
 
 ## Application Story & Benefits
 
-_Becathlon_ is an online multisport equipment catalogue that recreates the look, feel, and partial functionality of the Decathlon website. 
+### 1. 🏠 Landing Page
+Users start on the homepage, where they can explore the **Catalog** or **Sign In / Sign Up** to create an account.
+
+---
+
+### 2. 👥 Account Selection
+When registering, users choose between:
+- **Buyer** — can browse and order products.  
+- **Seller** — can list and manage products.
+
+---
+
+### 3. 🧑‍💼 Seller Features
+Sellers can:
+- Add new product listings with name, price, and details.  
+- Edit or delete their listings.  
+- View and track buyer orders.
+
+---
+
+### 4. 🧍 Buyer Features
+Buyers can:
+- Browse products by category.  
+- Add items to the cart.  
+- Checkout to place orders.  
+- Track their order status in the **Orders** tab.
+
+---
+
+### 5. 🛒 Cart & Orders
+- The **Cart** stores selected items before checkout.  
+- The **Orders** tab lets buyers monitor order progress (Pending → Shipped → Delivered).
+
 
 ## Modules
 
@@ -53,5 +79,5 @@ _Becathlon_ is an online multisport equipment catalogue that recreates the look,
 
 ## PWS deployment link and design link
 
-https://pbp.cs.ui.ac.id/muhammad.vegard/becathlon
+https://muhammad-vegard-becathlon.pbp.cs.ui.ac.id/
 
