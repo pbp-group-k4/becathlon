@@ -66,6 +66,12 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.RunPython(delete_item_if_exists, reverse_code=migrations.RunPython.noop),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.DeleteModel(name='Item'),
+            ],
+            database_operations=[],
+        ),
         migrations.AddField(
             model_name='product',
             name='product_type',

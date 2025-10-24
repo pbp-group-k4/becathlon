@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0005_delete_item'),
+        ('main', '0004_remove_product_rating_count_alter_product_brand_and_more'),
         ('order', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
