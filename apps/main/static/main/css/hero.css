@@ -4,6 +4,7 @@
     position: relative;
     min-height: 85vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
@@ -11,7 +12,7 @@
     backdrop-filter: none;
     border: none;
     margin-bottom: 2rem;
-    padding: 0;
+    padding: 2rem 1rem;
 }
 
 /* Animated Canvas Background */
@@ -269,10 +270,8 @@
 
 /* Scroll Indicator */
 .hero-scroll-indicator {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    margin-top: 3rem;
     z-index: 10;
     animation: bounce 2s ease-in-out infinite;
 }
@@ -300,10 +299,10 @@
 
 @keyframes bounce {
     0%, 100% {
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
     50% {
-        transform: translateX(-50%) translateY(10px);
+        transform: translateY(10px);
     }
 }
 
@@ -320,15 +319,16 @@
 
 /* Stats Counter Section */
 .hero-stats {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     display: flex;
     gap: 4rem;
     z-index: 10;
     opacity: 0;
     animation: fadeInUpStats 1.2s ease-out 0.6s forwards;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 4rem;
 }
 
 .hero-stat {
@@ -359,11 +359,11 @@
 @keyframes fadeInUpStats {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(40px);
+        transform: translateY(40px);
     }
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 }
 
@@ -394,7 +394,7 @@
 
     .hero-stats {
         gap: 3rem;
-        bottom: 90px;
+        margin-top: 3rem;
     }
 
     .hero-stat-value {
@@ -405,11 +405,7 @@
 @media (max-width: 768px) {
     .hero {
         min-height: 75vh;
-    }
-
-    .hero-orb-1, .hero-orb-2 {
-        width: 250px;
-        height: 250px;
+        padding: 1.5rem 0.75rem;
     }
 
     .hero-content {
@@ -439,8 +435,7 @@
 
     .hero-stats {
         gap: 2rem;
-        bottom: 80px;
-        flex-wrap: wrap;
+        margin-top: 3rem;
     }
 
     .hero-stat-value {
@@ -453,9 +448,36 @@
 }
 
 @media (max-width: 480px) {
+    .hero {
+        min-height: 70vh;
+        padding: 1rem 0.5rem;
+    }
+
+    .hero-title {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(0.9rem, 1.4vw, 1rem);
+        margin-bottom: 2rem;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+    }
+
     .hero-stats {
         flex-direction: column;
         gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .hero-stat-value {
+        font-size: 1.75rem;
+    }
+
+    .hero-stat-label {
+        font-size: 0.75rem;
     }
 }
 
