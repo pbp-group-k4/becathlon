@@ -99,13 +99,15 @@ def delete_product_ajax(request, product_id):
 
 @require_http_methods(["GET"])
 def get_products_ajax(request):
-    """AJAX endpoint to get filtered products"""
+    """AJAX endpoint to get filtered products with pagination"""
     products = Product.objects.all().select_related('product_type', 'created_by')
 
     q = request.GET.get('q')             # search keyword
     product_type = request.GET.get('type')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
+    page = request.GET.get('page', '1')  # pagination page number
+    per_page = request.GET.get('per_page', '20')  # items per page (default 20)
 
     if q:
         products = products.filter(Q(name__icontains=q) | Q(description__icontains=q))
@@ -122,6 +124,23 @@ def get_products_ajax(request):
         except ValueError:
             pass
 
+    # Get total count before pagination
+    total_count = products.count()
+    
+    # Apply pagination
+    try:
+        page_num = int(page)
+        per_page_num = int(per_page)
+        # Limit per_page to reasonable values
+        per_page_num = min(max(per_page_num, 1), 100)
+    except (ValueError, TypeError):
+        page_num = 1
+        per_page_num = 20
+    
+    start = (page_num - 1) * per_page_num
+    end = start + per_page_num
+    products_paginated = products[start:end]
+    
     products_data = [{
         'id': p.id,
         'name': p.name,
@@ -133,9 +152,20 @@ def get_products_ajax(request):
         'created_by': p.created_by.username,
         'created_at': p.created_at.strftime('%Y-%m-%d %H:%M'),
         'can_delete': request.user.is_authenticated and p.created_by == request.user
-    } for p in products]
+    } for p in products_paginated]
 
-    return JsonResponse({'success': True, 'products': products_data})
+    return JsonResponse({
+        'success': True, 
+        'products': products_data,
+        'pagination': {
+            'page': page_num,
+            'per_page': per_page_num,
+            'total_count': total_count,
+            'total_pages': (total_count + per_page_num - 1) // per_page_num,
+            'has_next': end < total_count,
+            'has_previous': page_num > 1
+        }
+    })
 
 
 def product_detail(request, product_id):

@@ -45,7 +45,7 @@ function extractAndApplyColor(img, container) {
         // Draw image scaled down
         ctx.drawImage(img, 0, 0, 100, 100);
         
-        // Get image data
+        // Get image data - this will throw an error if CORS is not allowed
         const imageData = ctx.getImageData(0, 0, 100, 100).data;
         
         // Calculate weighted average color (focusing on mid-tones)
@@ -102,7 +102,9 @@ function extractAndApplyColor(img, container) {
             applyWhiteGlow(container);
         }
     } catch (e) {
-        console.log('Could not extract color from image:', e);
+        // CORS error or other image processing error
+        console.log('Could not extract color from image (likely CORS restricted):', e.message);
+        // Apply a subtle white glow as fallback
         applyWhiteGlow(container);
     }
 }

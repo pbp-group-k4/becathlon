@@ -253,23 +253,30 @@
             }, 5000);
         }
 
-        // Load products
-        async function loadProducts() {
+        // Load products with pagination
+        let currentPage = 1;
+        let isLoadingMore = false;
+        
+        async function loadProducts(resetPage = true) {
             try {
+                if (resetPage) {
+                    currentPage = 1;
+                }
+                
                 const queryParams = new URLSearchParams({
                     q: document.getElementById('searchQuery')?.value || '',
                     type: document.getElementById('filterType')?.value || '',
                     min_price: document.getElementById('minPrice')?.value || '',
-                    max_price: document.getElementById('maxPrice')?.value || ''
+                    max_price: document.getElementById('maxPrice')?.value || '',
+                    page: currentPage,
+                    per_page: 20  // Initial load: 20 items
                 }).toString();
 
                 const response = await fetch(`/api/products/?${queryParams}`);
-
                 const data = await response.json();
-
                 const productsGrid = document.getElementById('productsGrid');
 
-                if (data.products.length === 0) {
+                if (data.products.length === 0 && currentPage === 1) {
                     productsGrid.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">─</div>
@@ -280,7 +287,7 @@
                     return;
                 }
 
-                productsGrid.innerHTML = data.products.map(product => `
+                const productsHTML = data.products.map(product => `
                 <div class="product-card">
                     <a href="/product/${product.id}/" style="text-decoration:none;color:inherit;">
                     <div class="product-image">
@@ -303,9 +310,64 @@
                     </div>
                 </div>
                 `).join('');
+                
+                if (resetPage || currentPage === 1) {
+                    productsGrid.innerHTML = productsHTML;
+                } else {
+                    // Append to existing products
+                    productsGrid.innerHTML += productsHTML;
+                }
+                
+                // Handle Load More button
+                updateLoadMoreButton(data.pagination);
+                isLoadingMore = false;
+                
             } catch (error) {
                 console.error('Error loading products:', error);
                 showMessage('Error loading products', 'error');
+                isLoadingMore = false;
+            }
+        }
+        
+        // Update or create "Load More" button
+        function updateLoadMoreButton(pagination) {
+            let loadMoreContainer = document.getElementById('load-more-container');
+            
+            if (!loadMoreContainer) {
+                loadMoreContainer = document.createElement('div');
+                loadMoreContainer.id = 'load-more-container';
+                loadMoreContainer.style.cssText = 'text-align:center;margin:3rem 0;';
+                document.getElementById('productsGrid').parentElement.appendChild(loadMoreContainer);
+            }
+            
+            if (pagination.has_next) {
+                const showing = currentPage * pagination.per_page;
+                const remaining = pagination.total_count - showing;
+                
+                loadMoreContainer.innerHTML = `
+                    <p style="color:var(--light-gray);margin-bottom:1rem;">
+                        Showing ${Math.min(showing, pagination.total_count)} of ${pagination.total_count} products
+                    </p>
+                    <button id="load-more-btn" class="btn btn-secondary" style="min-width:200px;">
+                        Load More (${Math.min(remaining, pagination.per_page)} more)
+                    </button>
+                `;
+                
+                document.getElementById('load-more-btn').addEventListener('click', function() {
+                    if (!isLoadingMore) {
+                        isLoadingMore = true;
+                        this.textContent = 'Loading...';
+                        this.disabled = true;
+                        currentPage++;
+                        loadProducts(false);
+                    }
+                });
+            } else {
+                loadMoreContainer.innerHTML = `
+                    <p style="color:var(--light-gray);">
+                        Showing all ${pagination.total_count} products
+                    </p>
+                `;
             }
         }
 

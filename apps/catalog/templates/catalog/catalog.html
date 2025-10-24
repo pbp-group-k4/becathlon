@@ -10,15 +10,32 @@
         <div class="sidebar-section">
             <h3>Categories</h3>
             <form id="filter-form" method="GET">
-                <div class="category-filters">
-                    {% for product_type in product_types %}
-                    <label class="filter-checkbox">
-                        <input type="checkbox" name="categories" value="{{ product_type.id }}"
-                               {% if product_type.id|stringformat:"s" in request.GET.getlist.categories %}checked{% endif %}>
-                        <span>{{ product_type.name }}</span>
-                        <span class="count">({{ category_counts|get_item:product_type.id|default:0 }})</span>
-                    </label>
-                    {% endfor %}
+                <!-- Category Toggle Button -->
+                <button type="button" class="category-toggle-btn" id="category-toggle">
+                    <span id="selected-count">{{ request.GET.getlist.categories|length|default:"0" }} selected</span>
+                    <svg class="toggle-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                
+                <!-- Collapsible Category List -->
+                <div class="category-filters-wrapper" id="category-filters">
+                    <div class="category-search">
+                        <input type="text" id="category-search-input" placeholder="Search categories..." autocomplete="off">
+                    </div>
+                    <div class="category-filters scrollable-list">
+                        {% for product_type in product_types %}
+                        <label class="filter-checkbox" data-category-name="{{ product_type.name|lower }}">
+                            <input type="checkbox" name="categories" value="{{ product_type.id }}"
+                                   {% if product_type.id|stringformat:"s" in request.GET.getlist.categories %}checked{% endif %}>
+                            <span>{{ product_type.name }}</span>
+                            <span class="count">({{ category_counts|get_item:product_type.id|default:0 }})</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="no-results" id="no-category-results" style="display:none;">
+                        <p>No categories found</p>
+                    </div>
                 </div>
 
                 <h3>Price Range</h3>

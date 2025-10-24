@@ -173,6 +173,7 @@ def process_checkout(request, cart, cart_items):
         )
 
         # Create order using the create_from_cart method
+        # This will automatically decrement stock atomically
         order = Order.create_from_cart(
             cart=cart,
             shipping_address=shipping_address
@@ -195,6 +196,11 @@ def process_checkout(request, cart, cart_items):
         messages.success(request, f"Order #{order.id} created successfully!")
         return redirect('order:checkout_success', order_id=order.id)
 
+    except ValueError as e:
+        # Handle insufficient stock error
+        messages.error(request, str(e))
+        logger.warning(f"Insufficient stock during checkout for user {request.user.id}: {str(e)}")
+        return redirect('order:checkout')
     except ShippingAddress.DoesNotExist as e:
         messages.error(request, "Error creating shipping address. Please try again.")
         logger.error(f"Shipping address creation error for user {request.user.id}: {str(e)}")

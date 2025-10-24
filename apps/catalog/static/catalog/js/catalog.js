@@ -1,6 +1,9 @@
 // Catalog JavaScript - Becathlon
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Category Filter Toggle and Search
+    initCategoryFilters();
+    
     // Quick View Modal
     initQuickView();
     
@@ -8,6 +11,79 @@ document.addEventListener('DOMContentLoaded', function() {
     // Can be expanded for dynamic filtering without page reload
     initAjaxFilters();
 });
+
+// Category Filter Toggle and Search Functionality
+function initCategoryFilters() {
+    const toggleBtn = document.getElementById('category-toggle');
+    const filtersWrapper = document.getElementById('category-filters');
+    const searchInput = document.getElementById('category-search-input');
+    const checkboxes = document.querySelectorAll('.category-filters input[type="checkbox"]');
+    const selectedCountSpan = document.getElementById('selected-count');
+    const noResultsDiv = document.getElementById('no-category-results');
+    
+    if (!toggleBtn || !filtersWrapper) return;
+    
+    // Toggle dropdown
+    toggleBtn.addEventListener('click', function() {
+        const isExpanded = filtersWrapper.classList.toggle('expanded');
+        toggleBtn.classList.toggle('expanded');
+        
+        // Focus search input when opening
+        if (isExpanded && searchInput) {
+            setTimeout(() => searchInput.focus(), 100);
+        }
+    });
+    
+    // Update selected count
+    function updateSelectedCount() {
+        const checkedCount = document.querySelectorAll('.category-filters input[type="checkbox"]:checked').length;
+        if (selectedCountSpan) {
+            selectedCountSpan.textContent = `${checkedCount} selected`;
+        }
+    }
+    
+    // Listen to checkbox changes
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+    
+    // Category search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const categoryLabels = document.querySelectorAll('.filter-checkbox');
+            let visibleCount = 0;
+            
+            categoryLabels.forEach(label => {
+                const categoryName = label.getAttribute('data-category-name') || '';
+                const categoryText = label.textContent.toLowerCase();
+                
+                if (categoryName.includes(searchTerm) || categoryText.includes(searchTerm)) {
+                    label.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    label.classList.add('hidden');
+                }
+            });
+            
+            // Show/hide no results message
+            if (noResultsDiv) {
+                noResultsDiv.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        });
+    }
+    
+    // Initialize selected count on load
+    updateSelectedCount();
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!toggleBtn.contains(e.target) && !filtersWrapper.contains(e.target)) {
+            filtersWrapper.classList.remove('expanded');
+            toggleBtn.classList.remove('expanded');
+        }
+    });
+}
 
 // Quick View Modal Functionality
 function initQuickView() {

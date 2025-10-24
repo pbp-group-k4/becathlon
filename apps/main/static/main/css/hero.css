@@ -171,6 +171,23 @@
     background-clip: text;
     position: relative;
     display: inline-block;
+    filter: drop-shadow(0 0 20px rgba(0, 102, 255, 0.4)) 
+            drop-shadow(0 0 40px rgba(0, 204, 255, 0.3))
+            drop-shadow(0 0 60px rgba(0, 102, 255, 0.2));
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(0, 102, 255, 0.4)) 
+                drop-shadow(0 0 40px rgba(0, 204, 255, 0.3))
+                drop-shadow(0 0 60px rgba(0, 102, 255, 0.2));
+    }
+    50% {
+        filter: drop-shadow(0 0 30px rgba(0, 102, 255, 0.6)) 
+                drop-shadow(0 0 50px rgba(0, 204, 255, 0.5))
+                drop-shadow(0 0 80px rgba(0, 102, 255, 0.3));
+    }
 }
 
 @keyframes shimmer {

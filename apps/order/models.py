@@ -152,22 +152,42 @@ class Order(models.Model):
     @classmethod
     def create_from_cart(cls, cart, shipping_address=None):
         """
-        Convert an existing Cart into an Order
+        Convert an existing Cart into an Order and decrement product stock.
+        Uses select_for_update() to prevent race conditions.
+        Raises ValueError if insufficient stock is detected.
         """
+        from django.db import transaction
+        
         # Create order without cart reference to avoid unique constraint issues
         order = cls.objects.create(
             user=cart.user,
             shipping_address=shipping_address,
         )
 
-        # Copy items into OrderItem table
-        for item in cart.items.select_related('product'):
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.price,  # snapshot current price
-            )
+        # Copy items into OrderItem table and decrement stock atomically
+        with transaction.atomic():
+            for item in cart.items.select_related('product'):
+                # Lock the product row to prevent race conditions
+                product = Product.objects.select_for_update().get(pk=item.product.pk)
+                
+                # Double-check stock availability
+                if product.stock < item.quantity:
+                    raise ValueError(
+                        f"Insufficient stock for {product.name}. "
+                        f"Available: {product.stock}, Requested: {item.quantity}"
+                    )
+                
+                # Decrement stock using F() expression for atomic update
+                product.stock = F('stock') - item.quantity
+                product.save(update_fields=['stock'])
+                
+                # Create order item
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item.product.price,  # snapshot current price
+                )
 
         # Set total and clear cart
         order.calculate_total()

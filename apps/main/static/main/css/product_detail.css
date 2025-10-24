@@ -42,27 +42,28 @@ body {
 .product-image {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1;
     min-height: 400px;
+    max-height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3rem;
+    padding: 2rem;
     background: transparent;
     border: none;
     overflow: visible;
 }
 
 .product-image img {
-    width: 100%;
-    height: auto;
     max-width: 100%;
+    max-height: 450px;
+    width: auto;
+    height: auto;
     display: block;
     object-fit: contain;
     object-position: center center;
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    transition: box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 /* Dynamic ambient glow applied directly to the image - YouTube style */

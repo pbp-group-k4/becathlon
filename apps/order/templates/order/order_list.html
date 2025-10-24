@@ -31,7 +31,6 @@
                         </div>
                         {% if order.delivery_started_at %}
                         <div class="order-delivery-status">
-                            <span class="label">Delivery</span>
                             <span class="delivery-badge delivery-{{ order.delivery_status|lower }}">
                                 {{ order.get_delivery_status_display }}
                             </span>
