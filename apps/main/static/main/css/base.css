@@ -27,6 +27,10 @@
             pointer-events: none !important;
         }
 
+        html {
+            height: 100%;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
@@ -34,6 +38,8 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Animated background */
@@ -448,4 +454,20 @@
 
         .inline {
             display: inline;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            background: rgba(10, 10, 10, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            text-align: center;
+            color: var(--light-gray);
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .footer p {
+            margin: 0;
         }

@@ -13,38 +13,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <header class="header">
-        <nav class="nav">
-            <a href="/" class="logo" style="text-decoration: none; cursor: pointer;">BECATHLON</a>
-            <div class="nav-links">
-                {% if request.resolver_match.app_name != 'catalog' %}
-                    <a href="{% url 'catalog:home' %}">Catalog</a>
-                {% endif %}
-                {% if request.resolver_match.app_name != 'stores' %}
-                    <a href="{% url 'stores:locator' %}">Stores</a>
-                {% endif %}
-                {% if request.resolver_match.url_name != 'cart_view' %}
-                    <a href="{% url 'cart:cart_view' %}" style="position: relative;">
-                        Cart
-                        <span class="cart-badge" style="display: none;">0</span>
-                    </a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    {% if request.resolver_match.app_name != 'order' %}
-                        <a href="{% url 'order:order_list' %}">Orders</a>
-                    {% endif %}
-                    <a href="{% url 'profiles:detail' %}" class="user-info">{{ user.username }}</a>
-                    <form method="post" action="{% url 'auth:logout' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit">Sign Out</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'auth:login' %}">Sign In</a>
-                    <a href="{% url 'auth:signup' %}">Sign Up</a>
-                {% endif %}
-            </div>
-        </nav>
-    </header>
+    {% include 'includes/navigation.html' %}
 
     <div class="messages" id="messagesContainer">
         {% if messages %}
