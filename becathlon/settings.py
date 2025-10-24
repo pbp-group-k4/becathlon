@@ -94,9 +94,14 @@ DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = os.environ.get('DB_HOST')
 DB_PORT = os.environ.get('DB_PORT')
+DB_SCHEMA = os.environ.get('SCHEMA')  # PostgreSQL schema name
 
 if DB_NAME and DB_USER and DB_PASSWORD and DB_HOST:
     # Use PostgreSQL with university-provided credentials
+    db_options = {}
+    if DB_SCHEMA:
+        db_options['options'] = f'-c search_path={DB_SCHEMA},public'
+    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -105,6 +110,7 @@ if DB_NAME and DB_USER and DB_PASSWORD and DB_HOST:
             'PASSWORD': DB_PASSWORD,
             'HOST': DB_HOST,
             'PORT': DB_PORT or '5432',  # Default PostgreSQL port
+            **db_options,
         }
     }
 else:
@@ -154,9 +160,12 @@ USE_TZ = True
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 STATIC_ROOT = os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles')
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+# Only add STATICFILES_DIRS if the directory exists (avoids warnings in production)
+static_dir = BASE_DIR / "static"
+if static_dir.exists():
+    STATICFILES_DIRS = [static_dir]
+else:
+    STATICFILES_DIRS = []
 
 # Media files (User uploads)
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
