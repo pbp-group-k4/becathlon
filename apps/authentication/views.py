@@ -32,7 +32,7 @@ def signup_view(request):
             
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}! You can now log in.')
-            return redirect('login')
+            return redirect('auth:login')
     else:
         form = SignUpForm()
     return render(request, 'authentication/signup.html', {'form': form})

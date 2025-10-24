@@ -1,0 +1,188 @@
+/* Profiles CSS - Becathlon */
+
+/* Design System Variables (matching catalog) */
+:root {
+    --success-green: #10b981;
+    --danger-red: #ef4444;
+    --warning-orange: #f59e0b;
+}
+
+/* Base */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+}
+
+/* Field Label */
+.field-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--light-gray);
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+/* Light grey info box (solid so it's visible on dark bg) */
+.field-display {
+    background: var(--ultra-light);
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+/* ====== Buttons ====== */
+.btn {
+    display: inline-block;
+    padding: 0.72rem 1.4rem;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+    font-weight: 500;
+}
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Blue: Edit */
+.btn-blue {
+    background: var(--accent-blue);
+    color: #fff;
+}
+.btn-blue:hover {
+    background: #0052cc;
+}
+
+/* Green: Save */
+.btn-green {
+    background: var(--success-green);
+    color: #fff;
+}
+.btn-green:hover {
+    background: #0d9d5e;
+}
+
+/* Red: Cancel */
+.btn-red {
+    background: var(--danger-red);
+    color: #fff;
+}
+.btn-red:hover {
+    background: #d63a3a;
+}
+
+/* Gold: Primary CTA */
+.btn-primary {
+    background: var(--accent-gold);
+    color: var(--primary-black);
+    font-weight: 600;
+}
+.btn-primary:hover {
+    background: #e5c158;
+    transform: translateY(-2px);
+}
+
+/* Sidebar link look */
+.sidebar-link {
+    color: var(--light-gray);
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+    font-size: 0.9rem;
+}
+.sidebar-link:hover,
+.sidebar-link.active {
+    color: var(--ultra-light);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Navigation link styling */
+.nav-link {
+    color: var(--light-gray);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+.nav-link:hover {
+    color: var(--accent-gold);
+}
+
+/* ====== iOS-like toggle (works with your existing HTML) ====== */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(120, 120, 120, 0.3);
+    border-radius: 34px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.switch input:checked + .slider {
+    background: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(0, 102, 255, 0.6);
+}
+.switch input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/* ====== Toasts ====== */
+.toast {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    background: rgba(30, 30, 30, 0.95);
+    color: white;
+    padding: 0.8rem 1.1rem;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    font-size: 0.95rem;
+    animation: toast-in 0.2s ease-out;
+}
+.toast.success {
+    background: var(--success-green);
+}
+.toast.error {
+    background: var(--danger-red);
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 8px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
