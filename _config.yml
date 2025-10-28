@@ -13,6 +13,19 @@ include: ['.github']
 markdown: GFM
 markdown_ext: markdown,mkdown,mkdn,mkd,md
 
+# Jekyll Processing
+kramdown:
+  input: GFM
+  hard_wrap: false
+  parse_block_html: true
+
+# Disable Jekyll plugins that might interfere with code samples
+plugins_dir: []
+plugins: []
+
+# Security
+safe: false
+
 # Navigation
 header_pages:
   - DOCUMENTATION.md
