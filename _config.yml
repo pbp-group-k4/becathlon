@@ -1,0 +1,25 @@
+# GitHub Pages Configuration
+theme: minimal
+title: Becathlon Documentation
+description: Comprehensive Django E-Commerce Project Documentation
+show_downloads: true
+
+# GitHub Pages Settings
+future: false
+garbage_collection: true
+include: ['.github']
+
+# Markdown Settings
+markdown: GFM
+markdown_ext: markdown,mkdown,mkdn,mkd,md
+
+# Navigation
+header_pages:
+  - DOCUMENTATION.md
+  - docs/01-getting-started.md
+  - docs/02-architecture-overview.md
+  - docs/03-database-models.md
+  - docs/04-api-endpoints.md
+  - docs/05-frontend-architecture.md
+  - docs/06-development-guide.md
+  - docs/07-deployment-guide.md
