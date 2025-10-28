@@ -39,12 +39,15 @@ Total Endpoints: 40+
 All POST requests require CSRF token:
 
 **Form method** (HTML):
+
+{% raw %}
 ```django
 <form method="post">
   {% csrf_token %}
   <!-- form fields here -->
 </form>
 ```
+{% endraw %}
 
 **AJAX header** (JavaScript):
 ```javascript
