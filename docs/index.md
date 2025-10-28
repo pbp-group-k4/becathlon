@@ -8,7 +8,7 @@ permalink: /
 
 Welcome to the **Becathlon** documentation. This is your complete guide to the Django 5.2.5 e-commerce platform that recreates the shopping experience of a multisport retailer.
 
-## 📚 Documentation Guides
+## Documentation Guides
 
 Start with these guides to understand and work with Becathlon:
 
@@ -22,7 +22,7 @@ Start with these guides to understand and work with Becathlon:
 | **[6. Development Guide](06-development-guide.md)** | Common workflows and patterns |
 | **[7. Deployment Guide](07-deployment-guide.md)** | Production setup and deployment |
 
-## 🚀 Quick Start
+## Quick Start
 
 Get up and running in 5 minutes:
 
@@ -51,7 +51,7 @@ python manage.py runserver
 # Visit http://127.0.0.1:8000/
 ```
 
-## 💻 Tech Stack
+## Tech Stack
 
 - **Backend**: Django 5.2.5
 - **Database**: SQLite (development) / PostgreSQL (production)
@@ -59,7 +59,7 @@ python manage.py runserver
 - **Static Files**: WhiteNoise
 - **Server**: Gunicorn
 
-## 🎯 Key Features
+## Key Features
 
 - ✅ **Multi-app Architecture** - Clean separation of concerns
 - ✅ **Hybrid Cart System** - Session-based for guests, persistent for users
@@ -70,7 +70,7 @@ python manage.py runserver
 - ✅ **Mock Payment Gateway** - Production-quality checkout experience
 - ✅ **Delivery Tracking** - Real-time order status simulation
 
-## 📊 Project Statistics
+## Project Statistics
 
 | Metric | Count |
 |--------|-------|
@@ -81,7 +81,7 @@ python manage.py runserver
 | JavaScript Lines | 1,000+ |
 | Test Coverage | Comprehensive |
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 becathlon/
@@ -101,7 +101,7 @@ becathlon/
 └── db.sqlite3              # Development database
 ```
 
-## 📖 How to Use This Documentation
+## How to Use This Documentation
 
 1. **New to Becathlon?** Start with [Getting Started](01-getting-started.md)
 2. **Understanding the system?** Read [Architecture Overview](02-architecture-overview.md)
@@ -111,7 +111,7 @@ becathlon/
 6. **Writing code?** Consult [Development Guide](06-development-guide.md)
 7. **Deploying?** Follow [Deployment Guide](07-deployment-guide.md)
 
-## 🔍 Common Questions
+## Common Questions
 
 ### Where do I start?
 → Read [Getting Started](01-getting-started.md)
@@ -128,23 +128,13 @@ becathlon/
 ### Where are the API routes?
 → Full listing in [API Endpoints](04-api-endpoints.md)
 
-## 👥 Team
+## Team
 
-- Muhammad Adra Prakoso
-- Berguegou Briana Yadjam
-- Zahran Musyaffa Ramadhan Mulya
-- Gunata Prajna Putra Sakri
-- Muhammad Vegard Fathul Islam
-- Kent Wilbert Wijaya
-
-## 📝 License
-
-Internally developed for educational purposes.
-
----
-
-**Last Updated**: October 28, 2025
-
-**Status**: ✅ Production Ready
+- Adra 
+- Briana
+- Gunata 
+- Vegard
+- Zahran (non participating)
+- Kent (non participating)
 
 [View on GitHub](https://github.com/pbp-group-k4/becathlon/tree/docs/comprehensive-documentation)
