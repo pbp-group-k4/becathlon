@@ -2,314 +2,214 @@
 
 Instructions for deploying Becathlon to production environments.
 
-## Deployment Platforms
-
-### Current Deployment
-
-**Platform:** PWS (Python Web Service)  
-**URL:** https://pbp.cs.ui.ac.id/muhammad.vegard/becathlon  
-**Database:** PostgreSQL  
-**Server:** Gunicorn via WSGI  
-
-### Supported Platforms
-
-- PWS (Python Web Service) - Current
-- Heroku (if configured)
-- AWS / Azure (with proper setup)
-- DigitalOcean App Platform
-- PythonAnywhere
-
 ## Pre-Deployment Checklist
 
-Before deploying, verify:
-
-- [ ] All tests pass locally
-- [ ] No hardcoded secrets in code
-- [ ] `.gitignore` includes sensitive files
+- [ ] All tests passing: `python manage.py test`
+- [ ] No DEBUG warnings: Check settings.py
+- [ ] Environment variables configured
+- [ ] Database migrations applied
 - [ ] Static files collected
-- [ ] Database migrations up-to-date
-- [ ] Environment variables documented
-- [ ] Error logging configured
-- [ ] DEBUG=False for production
-- [ ] ALLOWED_HOSTS includes domain
-- [ ] Email configuration working
+- [ ] CSS/JS minified
+- [ ] Security headers configured
+- [ ] HTTPS certificate ready
+- [ ] Database backed up
+- [ ] Error monitoring configured (e.g., Sentry)
 
-## Environment Variables
+## Environment Setup
 
-Create `.env` file (not committed) or set system variables:
+### Production Environment Variables
+
+Create `.env` or configure hosting platform:
 
 ```bash
-# Django Configuration
+# Django Settings
 DEBUG=False
-SECRET_KEY=your-production-secret-key-here
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,api.yourdomain.com
+SECRET_KEY=<generate-secure-key>
+ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+ENVIRONMENT=production
 
-# Database
-DATABASE_URL=postgres://user:password@host:5432/becathlon_db
+# Database (PostgreSQL recommended)
+DATABASE_URL=postgres://user:password@host:5432/becathlon_prod
+
+# AWS S3 (optional, for static/media files)
+AWS_STORAGE_BUCKET_NAME=becathlon-prod
+AWS_S3_REGION_NAME=us-east-1
+AWS_ACCESS_KEY_ID=<key>
+AWS_SECRET_ACCESS_KEY=<secret>
+
+# Email Configuration
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=<email>
+EMAIL_HOST_PASSWORD=<password>
 
 # Security
 SECURE_SSL_REDIRECT=True
 SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
-
-# Email (if sending emails)
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
-
-# AWS S3 (if using S3 for static/media)
-USE_S3=True
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_STORAGE_BUCKET_NAME=your-bucket
-AWS_S3_REGION_NAME=us-east-1
 ```
 
-## PWS Deployment Steps
+### Deployment Platforms
 
-### 1. Prepare Repository
+#### PWS (Current Platform)
 
-Ensure `.gitignore` contains:
+Becathlon is deployed on PWS at: pbp.cs.ui.ac.id
+
+**Deployment Process:**
+
+1. Push to GitHub repository
+2. PWS webhook detects push
+3. Automatic deployment triggered
+4. Tests run in CI/CD pipeline
+5. Static files collected
+6. Application restarted
+
+**Configuration Files:**
+
+`Procfile`:
 ```
-*.pyc
-__pycache__/
-*.env
-db.sqlite3
-.DS_Store
-node_modules/
-venv/
-staticfiles/
-media/
-.coverage
-```
-
-### 2. Create Procfile
-
-```
-web: gunicorn becathlon.wsgi:application --log-file -
-worker: python manage.py process_tasks
-clock: python manage.py clock
+web: gunicorn becathlon.wsgi --log-file -
+release: python manage.py migrate
 ```
 
-### 3. Prepare requirements.txt
-
-```bash
-pip freeze > requirements.txt
-```
-
-Or manually ensure includes:
-```
-Django==5.2.5
-psycopg2-binary==2.9.9
-gunicorn==21.2.0
-whitenoise==6.6.0
-dj-database-url==2.1.0
-python-dotenv==0.21.0
-pillow==12.0.0
-```
-
-### 4. Create runtime.txt (Optional)
-
+`runtime.txt`:
 ```
 python-3.11.0
 ```
 
-### 5. Configure settings.py for Production
-
-```python
-import os
-import dj_database_url
-
-# Security
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-SECRET_KEY = os.environ.get('SECRET_KEY', 'changeme')
-
-# Database
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
-}
-
-# Static Files
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Security Headers
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-
-# CORS
-CSRF_TRUSTED_ORIGINS = [
-    'https://yourdomain.com',
-    'https://www.yourdomain.com',
-]
-
-# Allowed Hosts
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
-```
-
-### 6. Create PWS Configuration
-
-Contact PWS support or use their management panel to:
-
-1. Set environment variables from `.env`
-2. Configure PostgreSQL database
-3. Set Python version to 3.9+
-4. Configure domain and SSL
-
-### 7. Deploy
-
-**Via Git Push (if configured):**
-```bash
-git push origin main
-```
-
-**Via PWS Dashboard:**
-1. Connect GitHub repository
-2. Select main branch
-3. Set environment variables
-4. Deploy
-
-### 8. Post-Deployment
+#### Heroku
 
 ```bash
-# Via PWS shell or SSH
+# Install Heroku CLI
+# Log in
+heroku login
+
+# Create app
+heroku create becathlon-prod
+
+# Add PostgreSQL
+heroku addons:create heroku-postgresql:standard-0
+
+# Configure environment variables
+heroku config:set DEBUG=False
+heroku config:set SECRET_KEY=<key>
+heroku config:set ALLOWED_HOSTS=becathlon-prod.herokuapp.com
+
+# Deploy
+git push heroku main
 
 # Run migrations
+heroku run python manage.py migrate
+```
+
+#### AWS EC2
+
+```bash
+# SSH into instance
+ssh -i key.pem ubuntu@instance-ip
+
+# Setup
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3-pip python3-venv postgresql nginx
+
+# Clone repo
+git clone <repo-url>
+cd becathlon
+
+# Virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Database setup
 python manage.py migrate
 
 # Collect static files
 python manage.py collectstatic --no-input
 
-# Create superuser
-python manage.py createsuperuser
-
-# Load seed data
-python seed_product_types.py
+# Configure Gunicorn + Nginx (omitted for brevity)
 ```
 
-## Heroku Deployment (Alternative)
+## Database Migration
 
-### 1. Create Heroku App
+### From SQLite to PostgreSQL
 
 ```bash
-heroku create your-app-name
+# Export data from SQLite
+python manage.py dumpdata > db.json
+
+# Configure DATABASE_URL for PostgreSQL
+export DATABASE_URL=postgres://user:password@host/becathlon
+
+# Run migrations
+python manage.py migrate
+
+# Load data
+python manage.py loaddata db.json
 ```
 
-### 2. Add PostgreSQL
+## Security Hardening
 
-```bash
-heroku addons:create heroku-postgresql:hobby-dev
-```
-
-### 3. Set Environment Variables
-
-```bash
-heroku config:set DEBUG=False
-heroku config:set SECRET_KEY=your-secret-key
-heroku config:set ALLOWED_HOSTS=your-app.herokuapp.com
-```
-
-### 4. Deploy
-
-```bash
-git push heroku main
-```
-
-### 5. Run Migrations
-
-```bash
-heroku run python manage.py migrate
-heroku run python manage.py createsuperuser
-```
-
-## AWS S3 for Static/Media Files
-
-### 1. Install boto3
-
-```bash
-pip install boto3
-```
-
-### 2. Configure settings.py
+### Django Settings
 
 ```python
-if os.environ.get('USE_S3') == 'True':
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-    
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# settings.py for production
+
+DEBUG = False
+ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
+
+# HTTPS/SSL
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Security headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Content Security Policy
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'")  # Tighten as needed
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+
+# CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'https://yourdomain.com',
+    'https://www.yourdomain.com',
+]
+
+# Database
+if os.getenv('DATABASE_URL'):
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+    )
 ```
 
-### 3. Set AWS Credentials
+### Dependencies Security
 
 ```bash
-export AWS_ACCESS_KEY_ID=your-access-key
-export AWS_SECRET_ACCESS_KEY=your-secret-key
+# Check for vulnerable packages
+pip-audit
+
+# Update all packages safely
+pip install --upgrade pip setuptools wheel
+pip install --upgrade -r requirements.txt
+
+# Generate new requirements
+pip freeze > requirements.txt
 ```
 
 ## Monitoring & Logging
 
-### Error Logging
-
-```python
-# settings.py
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/django/error.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
-```
-
-### Health Check Endpoint
-
-```python
-# urls.py
-from django.http import JsonResponse
-
-def health_check(request):
-    return JsonResponse({'status': 'healthy'})
-
-urlpatterns += [
-    path('health/', health_check),
-]
-```
-
-Monitor with:
-```bash
-curl https://yourdomain.com/health/
-```
-
-### Sentry Integration (Error Tracking)
+### Sentry Integration
 
 ```bash
 pip install sentry-sdk
@@ -321,39 +221,63 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 sentry_sdk.init(
-    dsn=os.environ.get('SENTRY_DSN'),
+    dsn=os.getenv('SENTRY_DSN'),
     integrations=[DjangoIntegration()],
     traces_sample_rate=0.1,
     send_default_pii=False,
 )
 ```
 
-## Database Backup
-
-### Manual Backup (PostgreSQL)
-
-```bash
-# Backup
-pg_dump becathlon_db > backup.sql
-
-# Restore
-psql becathlon_db < backup.sql
-```
-
-### Automated Backups
-
-Most hosting platforms (PWS, Heroku) include automatic backups. Verify in dashboard.
-
-## Performance Optimization for Production
-
-### 1. Database Connection Pooling
+### Logging Configuration
 
 ```python
-# settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/becathlon/error.log',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['file', 'console'],
+        'level': 'INFO',
+    },
+}
+```
+
+### Health Check Endpoint
+
+```python
+# urls.py
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+
+@require_http_methods(["GET"])
+def health_check(request):
+    return JsonResponse({'status': 'healthy', 'version': '1.0'})
+
+urlpatterns = [
+    # ...
+    path('health/', health_check),
+]
+```
+
+## Performance Tuning
+
+### Database Query Optimization
+
+```python
+# Use connection pooling
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'CONN_MAX_AGE': 600,  # 10 minutes
+        'CONN_MAX_AGE': 600,  # Connection pooling
         'OPTIONS': {
             'connect_timeout': 10,
         }
@@ -361,183 +285,177 @@ DATABASES = {
 }
 ```
 
-### 2. Caching
+### Caching
 
 ```python
-# Use Redis for caching
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+        },
+        'KEY_PREFIX': 'becathlon',
+        'TIMEOUT': 300,  # 5 minutes
     }
 }
 
-# Cache session
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# Cache views
+from django.views.decorators.cache import cache_page
+
+@cache_page(60)  # Cache for 60 seconds
+def catalog_home(request):
+    # ...
 ```
 
-### 3. Compress Static Files
+### Static Files (WhiteNoise)
 
 ```python
 # settings.py
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 ```
 
-### 4. Image Optimization
-
 ```bash
-# Install
-pip install Pillow
-
-# Configure
-# Use Pillow to compress images on upload
-```
-
-## Security Hardening
-
-### 1. HTTPS/SSL
-
-Ensure your domain uses:
-- HTTPS for all traffic
-- Valid SSL certificate
-- HSTS headers enabled
-
-```python
-# settings.py
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-```
-
-### 2. CSRF Protection
-
-Verify all forms include CSRF token:
-```html
-<form method="post">
-  {% csrf_token %}
-  ...
-</form>
-```
-
-### 3. SQL Injection Prevention
-
-Always use Django ORM (parameterized queries):
-```python
-# Good
-User.objects.filter(username=username)
-
-# Bad (never do this!)
-User.objects.raw(f"SELECT * FROM auth_user WHERE username = '{username}'")
-```
-
-### 4. XSS Prevention
-
-Always escape user input in templates:
-```html
-<!-- Good -->
-<p>{{ user.bio }}</p>
-
-<!-- Bad (never use safe without sanitizing!) -->
-<p>{{ user.bio|safe }}</p>
-```
-
-### 5. Dependency Updates
-
-```bash
-# Check for security vulnerabilities
-pip-audit
-
-# Update packages
-pip install --upgrade -r requirements.txt
-```
-
-## Rollback Plan
-
-If deployment fails:
-
-### 1. Identify Issue
-- Check error logs
-- Review recent commits
-- Test locally
-
-### 2. Rollback
-
-**Via Git (if available):**
-```bash
-git revert <commit-hash>
-git push origin main
-```
-
-**Via PWS:**
-1. Redeploy previous version from dashboard
-2. Restore database from backup if needed
-
-### 3. Post-Rollback
-
-- Verify application works
-- Investigate issue offline
-- Test thoroughly before re-deploying
-
-## Monitoring Checklist
-
-Daily:
-- [ ] Check error logs for exceptions
-- [ ] Monitor database disk usage
-- [ ] Verify email notifications working
-- [ ] Check slow query logs
-
-Weekly:
-- [ ] Review performance metrics
-- [ ] Check security logs
-- [ ] Verify backups completing
-- [ ] Update packages (if security patches)
-
-Monthly:
-- [ ] Review cost and resource usage
-- [ ] Update documentation
-- [ ] Plan maintenance window
-- [ ] Audit security settings
-
-## Troubleshooting
-
-### Deployment Hangs
-
-**Cause:** Long-running migrations  
-**Solution:** Run migrations locally first, test thoroughly
-
-### Static Files Not Loading
-
-**Cause:** collectstatic not run  
-**Solution:**
-```bash
+# Before deployment
 python manage.py collectstatic --no-input
 ```
 
-### Database Connection Error
+## Backup & Recovery
 
-**Cause:** DATABASE_URL not set correctly  
-**Solution:**
+### Database Backup
+
 ```bash
-# Verify URL format
-postgres://user:password@host:5432/dbname
+# PostgreSQL backup
+pg_dump -U postgres becathlon_prod > backup_$(date +%Y%m%d).sql
+
+# Restore from backup
+psql -U postgres becathlon_prod < backup_20251028.sql
 ```
 
-### Out of Memory
+### Automated Backups
 
-**Cause:** Memory limit exceeded  
-**Solution:**
-1. Optimize queries (add indexes)
-2. Implement caching
-3. Upgrade server tier
+Set up cron jobs:
+
+```bash
+# /etc/cron.d/becathlon_backup
+0 2 * * * /home/ubuntu/becathlon/backup.sh
+```
+
+`backup.sh`:
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+pg_dump -U postgres becathlon_prod > /backups/db_$DATE.sql
+gzip /backups/db_$DATE.sql
+```
+
+## Rollback Procedure
+
+### If Deployment Fails
+
+```bash
+# PWS - Revert to previous version
+git revert <commit-sha>
+git push origin main
+# PWS will auto-deploy previous version
+
+# Or manually rollback
+git checkout <previous-commit>
+git push -f origin main
+```
+
+### Database Rollback
+
+```bash
+# If migrations fail
+python manage.py migrate <app> <previous-migration>
+
+# Or restore from backup
+psql -U postgres becathlon_prod < backup_20251027.sql
+```
+
+## Monitoring & Alerts
+
+### Key Metrics to Monitor
+
+- Error rate (500 errors)
+- Response time (API latency)
+- Database connection pool usage
+- Disk space on server
+- Memory/CPU usage
+- Checkout completion rate
+- Cart abandonment rate
+
+### Setting Up Alerts
+
+```bash
+# Example with Sentry
+# Configure alerts for:
+# - Error rate threshold
+# - Spike in 404 errors
+# - Database connection failures
+# - Performance regression
+```
+
+## Post-Deployment Verification
+
+```bash
+# Verify deployment
+curl https://yourdomain.com/health/
+
+# Check logs
+tail -f /var/log/becathlon/error.log
+
+# Smoke test
+python manage.py shell
+>>> from apps.main.models import Product
+>>> Product.objects.count()
+# Should return a number
+
+# Test key features
+# - Homepage loads
+# - Product browsing works
+# - Cart functionality
+# - Checkout flow
+# - Order confirmation
+```
+
+## Scaling Considerations
+
+### Horizontal Scaling
+
+```bash
+# Multiple app servers
+# - Load balancer (nginx, HAProxy)
+# - Shared database (PostgreSQL)
+# - Shared static files (S3, CDN)
+# - Session store (Redis, database)
+```
+
+### Vertical Scaling
+
+```bash
+# Larger instances
+# - More CPU cores
+# - More RAM
+# - Faster storage (SSD)
+```
+
+### Database Optimization
+
+```sql
+-- Index frequently queried columns
+CREATE INDEX idx_product_type ON product(product_type_id);
+CREATE INDEX idx_order_user ON order(user_id);
+CREATE INDEX idx_cart_user ON cart(user_id);
+
+-- Analyze query plans
+EXPLAIN ANALYZE SELECT * FROM product WHERE product_type_id = 1;
+```
 
 ---
 
-**Helpful Resources:**
-- [Django Deployment Documentation](https://docs.djangoproject.com/en/5.2/howto/deployment/)
-- [Gunicorn Documentation](https://gunicorn.org/)
-- [WhiteNoise Documentation](https://whitenoise.readthedocs.io/)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+**Resources**: [Django Deployment Checklist](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/)
