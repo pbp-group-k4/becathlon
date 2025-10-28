@@ -37,14 +37,17 @@ Total Endpoints: 40+
 
 ### CSRF Protection
 All POST requests require CSRF token:
-```html
-<!-- Form method -->
+
+**Form method** (HTML):
+```django
 <form method="post">
   {% csrf_token %}
-  ...
+  <!-- form fields here -->
 </form>
+```
 
-<!-- AJAX header -->
+**AJAX header** (JavaScript):
+```javascript
 fetch(url, {
   method: 'POST',
   headers: {
@@ -56,8 +59,8 @@ fetch(url, {
 ## Main App Endpoints
 
 ### GET / (Homepage)
-**View**: `apps.main.views.home`
-**Template**: `main/home.html`
+**View**: `apps.main.views.home`  
+**Template**: `main/home.html`  
 **Authentication**: Not required
 
 **Context Variables:**
@@ -76,14 +79,14 @@ fetch(url, {
 - Search bar integration
 - User greeting (if logged in)
 
-**Response**: HTML page
+**Response**: HTML page  
 **Status**: 200 OK
 
 ---
 
 ### GET /product/<product_id>/
-**View**: `apps.main.views.product_detail`
-**Template**: `main/product_detail.html`
+**View**: `apps.main.views.product_detail`  
+**Template**: `main/product_detail.html`  
 **Authentication**: Not required
 
 **URL Parameters:**
@@ -106,13 +109,13 @@ fetch(url, {
 **Errors:**
 - 404: Product not found
 
-**Response**: HTML page with detailed product info
+**Response**: HTML page with detailed product info  
 **Status**: 200 OK or 404 Not Found
 
 ---
 
 ### POST /api/products/ (Get Products AJAX)
-**View**: `apps.main.views.get_products_ajax`
+**View**: `apps.main.views.get_products_ajax`  
 **Authentication**: Not required
 
 **Request Format:**
@@ -151,7 +154,7 @@ fetch(url, {
 ---
 
 ### POST /api/products/add/ (Create Product - Admin Only)
-**View**: `apps.main.views.add_product_ajax`
+**View**: `apps.main.views.add_product_ajax`  
 **Authentication**: Required (admin only)
 
 **Request Format:**
@@ -191,7 +194,7 @@ fetch(url, {
 ---
 
 ### POST /api/products/<product_id>/delete/ (Delete Product - Admin Only)
-**View**: `apps.main.views.delete_product_ajax`
+**View**: `apps.main.views.delete_product_ajax`  
 **Authentication**: Required (admin only)
 
 **Response:**
@@ -216,7 +219,7 @@ fetch(url, {
 ## Authentication Endpoints
 
 ### GET /auth/signup/
-**View**: `apps.authentication.views.signup`
+**View**: `apps.authentication.views.signup`  
 **Template**: `authentication/signup.html`
 
 **Form Fields:**
@@ -251,13 +254,13 @@ password_confirm=SecurePass123
 - Passwords match
 - Password meets security requirements
 
-**Response**: Redirect to /auth/login/
+**Response**: Redirect to /auth/login/  
 **Status**: 302 Found
 
 ---
 
 ### GET /auth/login/
-**View**: `apps.authentication.views.login`
+**View**: `apps.authentication.views.login`  
 **Template**: `authentication/login.html`
 
 **Response**: HTML form
@@ -283,7 +286,7 @@ password=SecurePass123
 - User exists
 - Password correct
 
-**Response**: Redirect to referrer or /
+**Response**: Redirect to referrer or /  
 **Status**: 302 Found
 
 ---
@@ -296,13 +299,13 @@ password=SecurePass123
 2. Clear user context
 3. Redirect to homepage
 
-**Response**: Redirect to /
+**Response**: Redirect to /  
 **Status**: 302 Found
 
 ## Cart Endpoints
 
 ### GET /cart/
-**View**: `apps.cart.views.cart_view`
+**View**: `apps.cart.views.cart_view`  
 **Authentication**: Not required (works for guests too)
 
 **Context Variables:**
@@ -316,13 +319,13 @@ password=SecurePass123
 }
 ```
 
-**Response**: HTML cart page
+**Response**: HTML cart page  
 **Status**: 200 OK
 
 ---
 
 ### POST /cart/add/<product_id>/
-**View**: `apps.cart.views.add_to_cart`
+**View**: `apps.cart.views.add_to_cart`  
 **Authentication**: Not required
 
 **Form Data:**
@@ -464,8 +467,8 @@ csrfmiddlewaretoken=...
 ## Order Endpoints
 
 ### GET /order/checkout/
-**View**: `apps.order.views.checkout_view`
-**Authentication**: Required (login to checkout)
+**View**: `apps.order.views.checkout_view`  
+**Authentication**: Required (login to checkout)  
 **Template**: `order/checkout.html`
 
 **Context Variables:**
@@ -490,7 +493,7 @@ csrfmiddlewaretoken=...
 ---
 
 ### POST /order/checkout/
-**View**: `apps.order.views.process_checkout`
+**View**: `apps.order.views.process_checkout`  
 **Authentication**: Required
 
 **Form Data:**
@@ -522,8 +525,8 @@ csrfmiddlewaretoken=...
 ---
 
 ### GET /order/checkout/success/<order_id>/
-**View**: `apps.order.views.checkout_success`
-**Authentication**: Not required
+**View**: `apps.order.views.checkout_success`  
+**Authentication**: Not required  
 **Template**: `order/checkout_success.html`
 
 **Context Variables:**
@@ -549,8 +552,8 @@ csrfmiddlewaretoken=...
 ---
 
 ### GET /order/
-**View**: `apps.order.views.order_list`
-**Authentication**: Required
+**View**: `apps.order.views.order_list`  
+**Authentication**: Required  
 **Template**: `order/order_list.html`
 
 **Context Variables:**
@@ -572,8 +575,8 @@ csrfmiddlewaretoken=...
 ---
 
 ### GET /order/<order_id>/
-**View**: `apps.order.views.order_detail`
-**Authentication**: Required (if not owner, 403)
+**View**: `apps.order.views.order_detail`  
+**Authentication**: Required (if not owner, 403)  
 **Template**: `order/order_detail.html`
 
 **Context Variables:**
@@ -617,7 +620,7 @@ csrfmiddlewaretoken=...
 ---
 
 ### POST /order/<order_id>/rate/
-**View**: `apps.order.views.submit_rating`
+**View**: `apps.order.views.submit_rating`  
 **Authentication**: Required
 
 **Form Data:**
