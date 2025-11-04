@@ -1314,33 +1314,18 @@ csrfmiddlewaretoken=...
 
 **Status**: 201 Created or 400 Bad Request
 
-
-
 ## Error Codes Reference
 
-
-
 | Status | Meaning | Example |
-
 |--------|---------|---------|
-
 | 200 | OK | Successful GET/POST |
-
 | 201 | Created | Product/Rating created |
-
 | 302 | Found (Redirect) | Login redirect |
-
 | 400 | Bad Request | Invalid form data |
-
 | 403 | Forbidden | Not admin, not owner |
-
 | 404 | Not Found | Product not found |
-
 | 405 | Method Not Allowed | GET on POST endpoint |
-
 | 500 | Server Error | Database error |
-
-
 
 ## Common Error Messages
 

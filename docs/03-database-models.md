@@ -227,32 +227,18 @@ class Product(models.Model):
 **Fields Explanation:**
 
 | Field | Type | Purpose |
-
 |-------|------|---------|
-
 | name | CharField | Product title |
-
 | description | TextField | Detailed description |
-
 | price | DecimalField | Current selling price |
-
 | product_type | ForeignKey | Category reference |
-
 | brand | CharField | Manufacturer/brand |
-
 | image_url | URLField | External image URL |
-
 | stock | IntegerField | Available quantity |
-
 | rating | DecimalField | Aggregated average (1-5) |
-
 | created_by | ForeignKey | User who added product |
-
 | created_at | DateTimeField | When product was added |
-
 | updated_at | DateTimeField | Last modification time |
-
-
 
 **Key Relationships:**
 

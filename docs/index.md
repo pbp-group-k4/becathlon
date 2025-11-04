@@ -24,27 +24,15 @@ Welcome to the **Becathlon** documentation. This is your complete guide to the D
 
 Start with these guides to understand and work with Becathlon:
 
-
-
 | Guide | Description |
-
 |-------|-------------|
-
 | **[1. Getting Started](01-getting-started.md)** | Setup, installation, and first run |
-
 | **[2. Architecture Overview](02-architecture-overview.md)** | Project structure and app organization |
-
 | **[3. Database & Models](03-database-models.md)** | Complete data schema reference |
-
 | **[4. API Endpoints](04-api-endpoints.md)** | All HTTP routes and endpoints |
-
 | **[5. Frontend Architecture](05-frontend-architecture.md)** | CSS, JavaScript, and templates |
-
 | **[6. Development Guide](06-development-guide.md)** | Common workflows and patterns |
-
 | **[7. Deployment Guide](07-deployment-guide.md)** | Production setup and deployment |
-
-
 
 ## Quick Start
 
@@ -144,25 +132,14 @@ python manage.py runserver
 
 ## Project Statistics
 
-
-
 | Metric | Count |
-
 |--------|-------|
-
 | Django Apps | 8 |
-
 | Models | 12+ |
-
 | API Endpoints | 40+ |
-
 | CSS Lines | 1,179+ |
-
 | JavaScript Lines | 1,000+ |
-
 | Test Coverage | Comprehensive |
-
-
 
 ## Project Structure
 
