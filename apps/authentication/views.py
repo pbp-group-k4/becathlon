@@ -5,11 +5,15 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 import json
+import logging
 from .forms import SignUpForm
 from apps.main.models import Customer
 from apps.profiles.models import Profile
 from apps.cart.utils import transfer_guest_cart_to_user
+
+logger = logging.getLogger(__name__)
 
 
 def signup_view(request):
@@ -111,9 +115,13 @@ def login_json(request):
                     "message": "Invalid username or password."
                 }, status=401)
         except Exception as e:
+            # Log the actual error for debugging
+            logger.error(f"Login error: {str(e)}", exc_info=True)
+            # Return a generic error message to avoid exposing sensitive information
+            error_message = str(e) if settings.DEBUG else "An error occurred during login."
             return JsonResponse({
                 "status": False,
-                "message": str(e)
+                "message": error_message
             }, status=400)
     return JsonResponse({
         "status": False,
@@ -191,9 +199,13 @@ def signup_json(request):
             }, status=200)
             
         except Exception as e:
+            # Log the actual error for debugging
+            logger.error(f"Signup error: {str(e)}", exc_info=True)
+            # Return a generic error message to avoid exposing sensitive information
+            error_message = str(e) if settings.DEBUG else "An error occurred during signup."
             return JsonResponse({
                 "status": False,
-                "message": str(e)
+                "message": error_message
             }, status=400)
     return JsonResponse({
         "status": False,
@@ -215,9 +227,13 @@ def logout_json(request):
                 "message": "Logout successful!"
             }, status=200)
         except Exception as e:
+            # Log the actual error for debugging
+            logger.error(f"Logout error: {str(e)}", exc_info=True)
+            # Return a generic error message to avoid exposing sensitive information
+            error_message = str(e) if settings.DEBUG else "An error occurred during logout."
             return JsonResponse({
                 "status": False,
-                "message": str(e)
+                "message": error_message
             }, status=400)
     return JsonResponse({
         "status": False,

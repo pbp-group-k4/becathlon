@@ -307,7 +307,3 @@ CORS_ALLOW_HEADERS = [
 
 # CSRF Configuration for Flutter compatibility
 CSRF_COOKIE_NAME = "csrftoken"
-CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
-SESSION_COOKIE_SECURE = not DEBUG
