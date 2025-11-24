@@ -6,6 +6,7 @@ from apps.profiles.models import Profile
 from apps.cart.models import Cart, CartItem
 from apps.main.models import Product, ProductType
 from decimal import Decimal
+import json
 
 
 class SignUpViewTestCase(TestCase):
@@ -147,4 +148,219 @@ class LogoutViewTestCase(TestCase):
         # Follow redirect to check user is logged out
         response = self.client.get(reverse('home'))
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+
+class LoginJsonTestCase(TestCase):
+    """Test cases for JSON login view"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+    def test_login_json_success(self):
+        """Test JSON login with valid credentials"""
+        response = self.client.post(
+            reverse('auth:login_json'),
+            data=json.dumps({
+                'username': 'testuser',
+                'password': 'testpass123',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['status'])
+        self.assertEqual(data['username'], 'testuser')
+        self.assertEqual(data['message'], 'Login successful!')
+
+    def test_login_json_invalid_credentials(self):
+        """Test JSON login with invalid credentials"""
+        response = self.client.post(
+            reverse('auth:login_json'),
+            data=json.dumps({
+                'username': 'testuser',
+                'password': 'wrongpassword',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertEqual(data['message'], 'Invalid username or password.')
+
+    def test_login_json_invalid_method(self):
+        """Test JSON login with invalid method"""
+        response = self.client.get(reverse('auth:login_json'))
+        
+        self.assertEqual(response.status_code, 405)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+
+    def test_login_json_missing_fields(self):
+        """Test JSON login with missing required fields"""
+        response = self.client.post(
+            reverse('auth:login_json'),
+            data=json.dumps({'username': 'testuser'}),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertIn('required', data['message'].lower())
+
+
+class SignupJsonTestCase(TestCase):
+    """Test cases for JSON signup view"""
+
+    def setUp(self):
+        """Set up test client"""
+        self.client = Client()
+
+    def test_signup_json_success(self):
+        """Test JSON signup with valid data"""
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'newuser',
+                'password1': 'ComplexPass123!',
+                'password2': 'ComplexPass123!',
+                'email': 'newuser@example.com',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'account_type': 'BUYER',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['status'])
+        self.assertEqual(data['username'], 'newuser')
+        
+        # Verify user was created
+        user = User.objects.get(username='newuser')
+        self.assertEqual(user.email, 'newuser@example.com')
+        
+        # Verify customer was created
+        customer = Customer.objects.get(user=user)
+        self.assertIsNotNone(customer)
+        
+        # Verify profile was created
+        profile = Profile.objects.get(user=user)
+        self.assertEqual(profile.account_type, 'BUYER')
+
+    def test_signup_json_password_mismatch(self):
+        """Test JSON signup with mismatched passwords"""
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'newuser',
+                'password1': 'ComplexPass123!',
+                'password2': 'DifferentPass123!',
+                'email': 'newuser@example.com',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertEqual(data['message'], 'Passwords do not match.')
+
+    def test_signup_json_existing_username(self):
+        """Test JSON signup with existing username"""
+        # Create a user first
+        User.objects.create_user(username='existinguser', password='pass123')
+        
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'existinguser',
+                'password1': 'ComplexPass123!',
+                'password2': 'ComplexPass123!',
+                'email': 'newuser@example.com',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertEqual(data['message'], 'Username already exists.')
+
+    def test_signup_json_missing_required_fields(self):
+        """Test JSON signup with missing required fields"""
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'newuser',
+                'password1': 'ComplexPass123!',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertIn('required', data['message'].lower())
+
+    def test_signup_json_invalid_account_type(self):
+        """Test JSON signup with invalid account type"""
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'newuser',
+                'password1': 'ComplexPass123!',
+                'password2': 'ComplexPass123!',
+                'email': 'newuser@example.com',
+                'account_type': 'INVALID_TYPE',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertIn('Invalid account type', data['message'])
+
+
+class LogoutJsonTestCase(TestCase):
+    """Test cases for JSON logout view"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+    def test_logout_json_success(self):
+        """Test JSON logout"""
+        # Login first
+        self.client.login(username='testuser', password='testpass123')
+        
+        response = self.client.post(reverse('auth:logout_json'))
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['status'])
+        self.assertEqual(data['username'], 'testuser')
+
+    def test_logout_json_invalid_method(self):
+        """Test JSON logout with invalid method"""
+        response = self.client.get(reverse('auth:logout_json'))
+        
+        self.assertEqual(response.status_code, 405)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
 
