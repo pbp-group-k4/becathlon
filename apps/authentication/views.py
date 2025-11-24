@@ -184,8 +184,9 @@ def signup_json(request):
             # Create associated Customer profile
             Customer.objects.create(user=user)
             
-            # Create or update Profile with account type
+            # Get or create Profile (signal may have already created it)
             profile, created = Profile.objects.get_or_create(user=user)
+            # Update profile with user-provided information
             profile.account_type = account_type
             profile.first_name = first_name
             profile.last_name = last_name
