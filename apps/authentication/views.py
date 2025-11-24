@@ -82,10 +82,19 @@ def login_json(request):
             username = data.get('username')
             password = data.get('password')
             
+            # Validate required fields
+            if not username or not password:
+                return JsonResponse({
+                    "status": False,
+                    "message": "Username and password are required."
+                }, status=400)
+            
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    # Transfer guest cart to user cart (consistent with web login)
+                    transfer_guest_cart_to_user(request)
                     return JsonResponse({
                         "status": True,
                         "username": user.username,
@@ -126,11 +135,26 @@ def signup_json(request):
             last_name = data.get('last_name', '')
             account_type = data.get('account_type', 'BUYER')
             
+            # Validate required fields
+            if not username or not password1 or not password2:
+                return JsonResponse({
+                    "status": False,
+                    "message": "Username, password1, and password2 are required."
+                }, status=400)
+            
             # Validate passwords match
             if password1 != password2:
                 return JsonResponse({
                     "status": False,
                     "message": "Passwords do not match."
+                }, status=400)
+            
+            # Validate account_type
+            valid_account_types = [choice[0] for choice in Profile.ACCOUNT_TYPE_CHOICES]
+            if account_type not in valid_account_types:
+                return JsonResponse({
+                    "status": False,
+                    "message": f"Invalid account type. Must be one of: {', '.join(valid_account_types)}."
                 }, status=400)
             
             # Check if username already exists
@@ -182,7 +206,8 @@ def logout_json(request):
     """Handle user logout for Flutter (JSON response)"""
     if request.method == 'POST':
         try:
-            username = request.user.username
+            # Check if user is authenticated to avoid AttributeError
+            username = request.user.username if request.user.is_authenticated else "Anonymous"
             logout(request)
             return JsonResponse({
                 "status": True,

@@ -203,6 +203,19 @@ class LoginJsonTestCase(TestCase):
         data = json.loads(response.content)
         self.assertFalse(data['status'])
 
+    def test_login_json_missing_fields(self):
+        """Test JSON login with missing required fields"""
+        response = self.client.post(
+            reverse('auth:login_json'),
+            data=json.dumps({'username': 'testuser'}),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertIn('required', data['message'].lower())
+
 
 class SignupJsonTestCase(TestCase):
     """Test cases for JSON signup view"""
@@ -282,6 +295,41 @@ class SignupJsonTestCase(TestCase):
         data = json.loads(response.content)
         self.assertFalse(data['status'])
         self.assertEqual(data['message'], 'Username already exists.')
+
+    def test_signup_json_missing_required_fields(self):
+        """Test JSON signup with missing required fields"""
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'newuser',
+                'password1': 'ComplexPass123!',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertIn('required', data['message'].lower())
+
+    def test_signup_json_invalid_account_type(self):
+        """Test JSON signup with invalid account type"""
+        response = self.client.post(
+            reverse('auth:signup_json'),
+            data=json.dumps({
+                'username': 'newuser',
+                'password1': 'ComplexPass123!',
+                'password2': 'ComplexPass123!',
+                'email': 'newuser@example.com',
+                'account_type': 'INVALID_TYPE',
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['status'])
+        self.assertIn('Invalid account type', data['message'])
 
 
 class LogoutJsonTestCase(TestCase):
