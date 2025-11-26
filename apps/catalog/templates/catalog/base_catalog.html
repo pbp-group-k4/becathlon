@@ -37,38 +37,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <a href="/" class="logo" style="text-decoration: none; cursor: pointer;">BECATHLON</a>
-            <div class="nav-links">
-                {% if request.resolver_match.app_name != 'catalog' %}
-                    <a href="{% url 'catalog:home' %}">Catalog</a>
-                {% endif %}
-                {% if request.resolver_match.app_name != 'stores' %}
-                    <a href="{% url 'stores:locator' %}">Stores</a>
-                {% endif %}
-                {% if request.resolver_match.url_name != 'cart_view' %}
-                    <a href="{% url 'cart:cart_view' %}" class="cart-link">
-                        Cart
-                        <span class="cart-badge" style="display: none;">0</span>
-                    </a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    {% if request.resolver_match.app_name != 'order' %}
-                        <a href="{% url 'order:order_list' %}">Orders</a>
-                    {% endif %}
-                    <a href="{% url 'profiles:detail' %}" class="user-info" style="text-decoration: none; cursor: pointer;">{{ user.username }}</a>
-                    <form method="POST" action="{% url 'auth:logout' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-logout">Logout</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'auth:login' %}">Login</a>
-                    <a href="{% url 'auth:signup' %}">Sign Up</a>
-                {% endif %}
-            </div>
-        </nav>
-    </header>
+    {% include 'includes/navigation.html' %}
 
     <!-- Main Content -->
     <div class="catalog-container">

@@ -33,6 +33,28 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
 
+# CSRF Protection Settings
+# Required for Django 4.0+ when using HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    'https://muhammad-vegard-becathlon.pbp.cs.ui.ac.id',
+    'https://pbp.cs.ui.ac.id',
+    'https://muhammad.vegard.pbp.cs.ui.ac.id',
+]
+
+# Security Settings for Production
+if not DEBUG:
+    # HTTPS/SSL Settings
+    SECURE_SSL_REDIRECT = False  # PWS handles SSL termination
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Cookie settings for cross-subdomain support
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
 
 # Application definition
 
@@ -43,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',  # Add for mobile API
     'apps.main.apps.MainConfig',
     'apps.authentication.apps.AuthenticationConfig',
     'apps.catalog.apps.CatalogConfig',
@@ -56,6 +79,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files in production
+    'corsheaders.middleware.CorsMiddleware',  # Add CORS middleware for mobile API
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -168,14 +192,27 @@ STATIC_ROOT = os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles')
 # WhiteNoise storage backend for production static file serving
 # Use CompressedStaticFilesStorage instead of CompressedManifestStaticFilesStorage
 # to avoid strict manifest checking that can cause 500 errors
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
+# For local development without whitenoise, use Django's default static files storage
+try:
+    import whitenoise
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+except ImportError:
+    # Fallback for local development without whitenoise
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 # Only add STATICFILES_DIRS if the directory exists (avoids warnings in production)
 static_dir = BASE_DIR / "static"
@@ -237,3 +274,17 @@ LOGGING = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS Settings for Mobile API
+CORS_ALLOW_ALL_ORIGINS = True  # For development - restrict in production
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://10.0.2.2:8000',  # Android emulator
+]
+
+# Mobile API specific settings
+if not DEBUG:
+    CSRF_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SAMESITE = 'None'

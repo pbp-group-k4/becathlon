@@ -289,3 +289,156 @@ def api_product_quick_view(request, product_id):
         return JsonResponse(data)
     except Product.DoesNotExist:
         return JsonResponse({'error': 'Product not found'}, status=404)
+
+# Mobile API endpoints for Flutter
+
+def mobile_products_list(request):
+    """Get all products or filter by category/search for mobile app - Returns Django-style pk/fields JSON format"""
+    try:
+        products = Product.objects.select_related('product_type').prefetch_related(
+            Prefetch('images', queryset=ProductImage.objects.filter(is_primary=True))
+        )
+        
+        # Category filter
+        category = request.GET.get('category')
+        if category:
+            products = products.filter(product_type__name__icontains=category)
+        
+        # Search filter
+        search = request.GET.get('search', '').strip()
+        if search:
+            products = products.filter(
+                Q(name__icontains=search) | 
+                Q(description__icontains=search) |
+                Q(product_type__name__icontains=search)
+            )
+        
+        # Stock filter
+        if request.GET.get('in_stock_only') == 'true':
+            products = products.filter(stock__gt=0)
+        
+        # Price range
+        min_price = request.GET.get('min_price')
+        max_price = request.GET.get('max_price')
+        if min_price:
+            try:
+                products = products.filter(price__gte=float(min_price))
+            except ValueError:
+                pass
+        if max_price:
+            try:
+                products = products.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
+        
+        # Sorting
+        sort_by = request.GET.get('sort_by', 'newest')
+        if sort_by == 'price_low':
+            products = products.order_by('price')
+        elif sort_by == 'price_high':
+            products = products.order_by('-price')
+        elif sort_by == 'name_asc':
+            products = products.order_by('name')
+        elif sort_by == 'name_desc':
+            products = products.order_by('-name')
+        else:  # newest
+            products = products.order_by('-created_at')
+        
+        # Limit for mobile (optional pagination)
+        limit = request.GET.get('limit')
+        if limit:
+            try:
+                products = products[:int(limit)]
+            except ValueError:
+                pass
+        
+        # Build JSON response in Django pk/fields format
+        products_data = []
+        for product in products:
+            primary_image = product.images.first()
+            
+            products_data.append({
+                'pk': product.id,
+                'fields': {
+                    'name': product.name,
+                    'description': product.description,
+                    'price': str(product.price),
+                    'category': product.product_type.name,
+                    'brand': product.brand,
+                    'image': primary_image.image_url if primary_image else (product.image_url or ''),
+                    'stock': product.stock,
+                    'rating': str(product.rating) if product.rating else '0.00',
+                }
+            })
+        
+        return JsonResponse(products_data, safe=False, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': False,
+            'message': str(e)
+        }, status=500)
+
+
+def mobile_product_detail(request, product_id):
+    """Get single product detail for mobile app"""
+    try:
+        product = Product.objects.select_related('product_type').prefetch_related('images').get(id=product_id)
+        
+        # Get all images
+        images = [img.image_url for img in product.images.all()]
+        if not images and product.image_url:
+            images = [product.image_url]
+        
+        data = {
+            'pk': product.id,
+            'fields': {
+                'name': product.name,
+                'description': product.description,
+                'price': str(product.price),
+                'category': product.product_type.name,
+                'brand': product.brand,
+                'image': images[0] if images else '',
+                'images': images,
+                'stock': product.stock,
+                'rating': str(product.rating) if product.rating else '0.00',
+                'in_stock': product.stock > 0,
+            }
+        }
+        
+        return JsonResponse(data, status=200)
+        
+    except Product.DoesNotExist:
+        return JsonResponse({
+            'status': False,
+            'message': 'Product not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': False,
+            'message': str(e)
+        }, status=500)
+
+
+def mobile_categories_list(request):
+    """Get all product categories for mobile app"""
+    try:
+        categories = ProductType.objects.all()
+        
+        categories_data = []
+        for category in categories:
+            product_count = Product.objects.filter(product_type=category).count()
+            categories_data.append({
+                'id': category.id,
+                'name': category.name,
+                'description': category.description,
+                'product_count': product_count,
+            })
+        
+        return JsonResponse(categories_data, safe=False, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': False,
+            'message': str(e)
+        }, status=500)

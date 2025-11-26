@@ -2,12 +2,6 @@
 
 > A Django-powered storefront that mirrors the visual polish and browsing experience of Decathlon—minus the heavy operational tooling.
 
-## TODO !!!!!!
-- Finish dependency chain: catalog [DONE] -> cart [DONE]-> checkout [DONE] -> orders [WIP]
-- Add ability to add ratings once user has purchased an item (orders)
-- Aggregate ratings per item to make average rating (catalog)
-- Mock payment gateway in checkout
-- Mock store locations in stores app
 
 ## Team Members
 
@@ -20,7 +14,57 @@
 
 ## Application Story & Benefits
 
-_Becathlon_ is an online multisport equipment catalogue that recreates the look, feel, and partial functionality of the Decathlon website. 
+### What is Becathlon?
+
+_Becathlon_ is a Django-powered e-commerce platform that brings the world of multisport equipment shopping online. Inspired by Decathlon's user-friendly design and comprehensive product offerings, Becathlon recreates the browsing experience of a modern sports retailer while serving as a learning platform for full-stack web development.
+
+### The Story
+
+In the digital age, sports enthusiasts need more than just a product catalog—they need an intuitive, engaging shopping experience that helps them find the right equipment for their passion. Whether you're a weekend cyclist, a yoga practitioner, or a serious mountaineer, Becathlon aims to make finding and purchasing sports equipment seamless and enjoyable.
+
+Our platform bridges the gap between traditional brick-and-mortar sports stores and modern e-commerce, offering:
+- **Comprehensive Product Catalog**: Browse thousands of sports products across multiple categories
+- **Personalized Experience**: Get recommendations based on your interests and browsing history
+- **Seamless Shopping Flow**: From discovery to checkout, every step is optimized for ease of use
+- **Store Integration**: Find physical store locations when you need hands-on product experience
+
+### Key Benefits
+
+**For Customers:**
+- **Easy Discovery**: Intuitive navigation and powerful search to find exactly what you need
+- **Visual Excellence**: Clean, modern interface that makes browsing a pleasure
+- **Smart Shopping**: Compare products, read details, and make informed decisions
+- **Order Tracking**: Keep tabs on your purchases from checkout to delivery
+- **Personalized Experience**: Tailored recommendations and saved preferences
+
+**For Administrators:**
+- **Complete Control**: Manage products, categories, and inventory through Django admin
+- **User Management**: Handle customer accounts and permissions efficiently
+- **Data Insights**: Track orders, popular products, and user behavior
+- **Store Management**: Maintain store locations and information
+
+**For Developers:**
+- **Modern Stack**: Built with Django, demonstrating best practices in web development
+- **Well Tested**: 90% code coverage ensuring reliability and maintainability
+- **Learning Resource**: Clean architecture suitable for studying Django patterns
+- **Scalable Design**: Modular app structure ready for expansion
+
+### Website Flow
+
+**For Guest Visitors:** You land on the homepage, browse sport categories, check out product listings with search/filter options, dive into product details, toss items in your cart, or find nearby stores. To actually buy stuff, you'll need to register or log in first.
+
+**For Registered Customers:** After logging in, you hit the homepage with featured products, browse or search the catalog, check product details with personalized recommendations, add to cart, manage your cart quantities, proceed to checkout with shipping details, review and place your order, get confirmation, track the order status, and view your order history. You can also edit your profile info anytime.
+
+**For Administrators:** Log into the Django admin dashboard to manage users (add/edit/delete), handle products (add/edit/delete/categorize), process orders and refunds, and manage store locations.
+
+### User Journey Highlights
+
+1. **Discovery Phase**: Users land on a visually appealing homepage with featured products and categories
+2. **Exploration Phase**: Intuitive navigation allows browsing by sport, category, or using advanced search filters
+3. **Decision Phase**: Detailed product pages with images, descriptions, and specifications help inform purchases
+4. **Shopping Phase**: Seamless cart management with real-time updates and quantity adjustments
+5. **Checkout Phase**: Streamlined checkout process with address management and order review
+6. **Post-Purchase Phase**: Order tracking and history management for returning customers 
 
 ## Modules
 
@@ -55,3 +99,24 @@ _Becathlon_ is an online multisport equipment catalogue that recreates the look,
 
 https://pbp.cs.ui.ac.id/muhammad.vegard/becathlon
 
+## Test Coverage
+
+### Overall Summary
+**Total Coverage: 90%**
+
+Check coverage_output.txt for detailed report.
+
+
+
+### Running Tests
+
+```bash
+# Run all tests
+coverage run --source='apps' manage.py test; coverage report
+
+# Run tests for a specific app
+coverage run --source='apps/<app_name>' manage.py test apps.<app_name>; coverage
+
+# Generate coverage report (will be written to coverage_output.txt)
+coverage report -m | Out-File -FilePath coverage_output.txt -Encoding utf8; Get-Content coverage_output.txt
+```

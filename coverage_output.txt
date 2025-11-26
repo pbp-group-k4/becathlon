@@ -1,0 +1,92 @@
+﻿Name                                                                                          Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------------------------------------------------------------
+apps\__init__.py                                                                                  0      0   100%
+apps\authentication\__init__.py                                                                   0      0   100%
+apps\authentication\admin.py                                                                      1      0   100%
+apps\authentication\apps.py                                                                       4      0   100%
+apps\authentication\forms.py                                                                     11      0   100%
+apps\authentication\migrations\__init__.py                                                        0      0   100%
+apps\authentication\models.py                                                                     1      0   100%
+apps\authentication\tests.py                                                                     61      0   100%
+apps\authentication\urls.py                                                                       4      0   100%
+apps\authentication\views.py                                                                     49      1    98%   56
+apps\cart\__init__.py                                                                             0      0   100%
+apps\cart\admin.py                                                                               32      6    81%   17-19, 23, 27, 36
+apps\cart\apps.py                                                                                 4      0   100%
+apps\cart\context_processors.py                                                                   4      0   100%
+apps\cart\forms.py                                                                               22      0   100%
+apps\cart\migrations\0001_initial.py                                                              7      0   100%
+apps\cart\migrations\__init__.py                                                                  0      0   100%
+apps\cart\models.py                                                                              47      0   100%
+apps\cart\tests.py                                                                              341      0   100%
+apps\cart\urls.py                                                                                 4      0   100%
+apps\cart\utils.py                                                                               27      2    93%   22, 26
+apps\cart\views.py                                                                               90     14    84%   75-78, 89, 113-116, 179-181, 186-187
+apps\catalog\__init__.py                                                                          0      0   100%
+apps\catalog\admin.py                                                                            25      4    84%   20-21, 32-33
+apps\catalog\apps.py                                                                              4      0   100%
+apps\catalog\forms.py                                                                            14      0   100%
+apps\catalog\migrations\0001_initial.py                                                           6      0   100%
+apps\catalog\migrations\__init__.py                                                               0      0   100%
+apps\catalog\models.py                                                                           18      1    94%   14
+apps\catalog\templatetags\__init__.py                                                             0      0   100%
+apps\catalog\templatetags\catalog_extras.py                                                       7      1    86%   9
+apps\catalog\tests.py                                                                            95      0   100%
+apps\catalog\urls.py                                                                              4      0   100%
+apps\catalog\views.py                                                                           145     37    74%   50, 52, 54, 70-73, 105, 107, 111, 116, 123, 125, 127, 129, 139-142, 195, 201-204, 206-209, 213, 218, 225, 227, 229, 231, 241-242, 276
+apps\main\__init__.py                                                                             0      0   100%
+apps\main\admin.py                                                                               17      0   100%
+apps\main\apps.py                                                                                 4      0   100%
+apps\main\migrations\0001_initial.py                                                              5      0   100%
+apps\main\migrations\0002_customer_product_producttype_delete_item_and_more.py                    9      0   100%
+apps\main\migrations\0003_product_brand_product_rating_product_rating_count.py                    4      0   100%
+apps\main\migrations\0004_remove_product_rating_count_alter_product_brand_and_more.py             4      0   100%
+apps\main\migrations\__init__.py                                                                  0      0   100%
+apps\main\models.py                                                                              32      0   100%
+apps\main\tests.py                                                                              182      0   100%
+apps\main\urls.py                                                                                 3      0   100%
+apps\main\views.py                                                                               87     12    86%   69-70, 96-97, 115, 119-120, 124-125, 136-138
+apps\order\__init__.py                                                                            0      0   100%
+apps\order\admin.py                                                                              43      5    88%   12, 25-27, 36
+apps\order\apps.py                                                                                4      0   100%
+apps\order\migrations\0001_initial.py                                                             7      0   100%
+apps\order\migrations\0002_order_delivery_started_at_order_delivery_status_and_more.py            6      0   100%
+apps\order\migrations\__init__.py                                                                 0      0   100%
+apps\order\models.py                                                                            168      1    99%   307
+apps\order\tests.py                                                                             390      0   100%
+apps\order\urls.py                                                                                4      0   100%
+apps\order\views.py                                                                             179     35    80%   31, 33, 38, 40, 47, 49, 54, 56, 58, 65, 73, 78, 83, 156-159, 199-211, 298, 351-358
+apps\profiles\__init__.py                                                                         0      0   100%
+apps\profiles\admin.py                                                                            9      0   100%
+apps\profiles\apps.py                                                                            13      0   100%
+apps\profiles\forms.py                                                                           32      1    97%   20
+apps\profiles\migrations\0001_initial.py                                                          7      0   100%
+apps\profiles\migrations\0002_auto_20251022_1747.py                                               9      0   100%
+apps\profiles\migrations\0003_profile_created_at_profile_profile_picture_and_more.py              4      0   100%
+apps\profiles\migrations\0004_profile_account_type.py                                             4      0   100%
+apps\profiles\migrations\__init__.py                                                              0      0   100%
+apps\profiles\models.py                                                                          20      0   100%
+apps\profiles\tests.py                                                                          207     54    74%   207-208, 214-216, 222-224, 240-247, 261-262, 282-290, 304-312, 319, 326, 341-350, 369-386, 397-401, 413-417
+apps\profiles\urls.py                                                                             3      0   100%
+apps\profiles\views.py                                                                           50     35    30%   10, 14-27, 32-37, 48-80
+apps\recommendation\__init__.py                                                                   0      0   100%
+apps\recommendation\admin.py                                                                      1      0   100%
+apps\recommendation\apps.py                                                                       4      0   100%
+apps\recommendation\migrations\__init__.py                                                        0      0   100%
+apps\recommendation\models.py                                                                     1      0   100%
+apps\recommendation\tests.py                                                                      1      0   100%
+apps\recommendation\urls.py                                                                       4      0   100%
+apps\recommendation\views.py                                                                     11      7    36%   5-13, 18-19
+apps\stores\__init__.py                                                                           0      0   100%
+apps\stores\admin.py                                                                              7      0   100%
+apps\stores\apps.py                                                                               4      0   100%
+apps\stores\migrations\0001_initial.py                                                            5      0   100%
+apps\stores\migrations\0002_store_updated_at_alter_store_created_at.py                            5      0   100%
+apps\stores\migrations\0003_alter_store_options_store_country_store_store_hours_and_more.py       5      0   100%
+apps\stores\migrations\__init__.py                                                                0      0   100%
+apps\stores\models.py                                                                            18      0   100%
+apps\stores\tests.py                                                                             31      0   100%
+apps\stores\urls.py                                                                               4      0   100%
+apps\stores\views.py                                                                             55     44    20%   9, 12-13, 17-21, 29-73
+---------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                          2689    260    90%

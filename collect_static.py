@@ -28,7 +28,7 @@ try:
     call_command('collectstatic', '--noinput', '--clear', verbosity=2)
     print("\n✓ Static files collected successfully")
     
-    # Verify files were collected
+    # Verify files were  collected
     import os
     static_root = settings.STATIC_ROOT
     if os.path.exists(static_root):

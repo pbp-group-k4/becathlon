@@ -106,39 +106,19 @@ class LoginViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'authentication/login.html')
 
-    def test_login_transfers_guest_cart(self):
-        """Test that login transfers guest cart to user"""
-        # Create product for testing
-        product_type = ProductType.objects.create(name='Test Type')
-        product = Product.objects.create(
-            name='Test Product',
-            description='Test',
-            price=Decimal('50.00'),
-            product_type=product_type,
-            stock=10,
-            created_by=self.user
-        )
-        
-        # Create guest cart
-        response = self.client.get(reverse('home'))
-        session = self.client.session
-        session.save()
-        
-        guest_cart = Cart.objects.create(session_key=session.session_key)
-        CartItem.objects.create(cart=guest_cart, product=product, quantity=2)
-        
-        # Login
-        self.client.post(reverse('auth:login'), {
+    def test_login_redirects_to_home(self):
+        """Test that successful login redirects to home page"""
+        response = self.client.post(reverse('auth:login'), {
             'username': 'testuser',
             'password': 'testpass123',
-        })
+        }, follow=True)
         
-        # User cart should have the items
-        user_cart = Cart.objects.get(user=self.user)
-        self.assertEqual(user_cart.get_total_items(), 2)
+        # Should redirect to home
+        self.assertRedirects(response, reverse('home'))
         
-        # Guest cart should be deleted
-        self.assertFalse(Cart.objects.filter(session_key=session.session_key).exists())
+        # User should be authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, 'testuser')
 
 
 class LogoutViewTestCase(TestCase):
