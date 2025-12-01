@@ -39,22 +39,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://muhammad-vegard-becathlon.pbp.cs.ui.ac.id',
     'https://pbp.cs.ui.ac.id',
     'https://muhammad.vegard.pbp.cs.ui.ac.id',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
 ]
-
-# Security Settings for Production
-if not DEBUG:
-    # HTTPS/SSL Settings
-    SECURE_SSL_REDIRECT = False  # PWS handles SSL termination
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
-    
-    # Cookie settings for cross-subdomain support
-    CSRF_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SAMESITE = 'Lax'
-
 
 # Application definition
 
@@ -77,9 +64,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # MUST be first for CORS to work properly
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files in production
-    'corsheaders.middleware.CorsMiddleware',  # Add CORS middleware for mobile API
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -275,16 +262,81 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS Settings for Mobile API
-CORS_ALLOW_ALL_ORIGINS = True  # For development - restrict in production
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'http://10.0.2.2:8000',  # Android emulator
+
+# =============================================================================
+# CORS Configuration for Flutter Mobile App & Web
+# =============================================================================
+# IMPORTANT: When using credentials (cookies/sessions), you CANNOT use
+# CORS_ALLOW_ALL_ORIGINS = True because browsers require the server to return
+# the exact origin in Access-Control-Allow-Origin header, not '*'.
+# =============================================================================
+
+# Do NOT set CORS_ALLOW_ALL_ORIGINS = True when using credentials!
+# Instead, use CORS_ALLOWED_ORIGIN_REGEXES for flexible origin matching.
+
+CORS_ALLOW_CREDENTIALS = True  # Required for session/cookie-based auth
+
+# Allow any origin dynamically (works with credentials unlike ALLOW_ALL_ORIGINS)
+# This regex matches any http or https origin
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https?://.*$",  # Match any origin - server will echo the exact origin back
 ]
 
-# Mobile API specific settings
+# Or use explicit list (more secure for production):
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:8000',
+#     'http://127.0.0.1:8000',
+#     'http://localhost:3000',
+#     'http://localhost:5000',
+#     'http://10.0.2.2:8000',  # Android emulator
+#     'https://muhammad-vegard-becathlon.pbp.cs.ui.ac.id',
+# ]
+
+# Allow all standard headers plus custom ones
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Allow all standard methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# =============================================================================
+# Cookie Settings for Cross-Origin Requests (Flutter Web & Mobile)
+# =============================================================================
+# SameSite=None + Secure=True is REQUIRED for cross-origin cookie setting.
+# Without these, browsers will reject Set-Cookie headers from cross-origin responses.
+# =============================================================================
+
+# These settings apply to both DEBUG and production for Flutter compatibility
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True  # Required when SameSite=None
+CSRF_COOKIE_SECURE = True     # Required when SameSite=None
+
+# =============================================================================
+# Security Settings (Production-specific overrides)
+# =============================================================================
 if not DEBUG:
-    CSRF_COOKIE_SAMESITE = 'None'
-    SESSION_COOKIE_SAMESITE = 'None'
+    # HTTPS/SSL Settings
+    SECURE_SSL_REDIRECT = False  # PWS handles SSL termination
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # If behind a reverse proxy that terminates SSL
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
