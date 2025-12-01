@@ -275,7 +275,23 @@ def flutter_remove_from_cart(request, item_id):
 
     # mimic the remove_from_cart logic here
 
-    return JsonResponse({'success': True, 'message': 'Cart item removed'})
+    if request.user.is_authenticated:
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    else:
+        session_key = request.session.session_key
+        if not session_key:
+            return JsonResponse({'success': False, 'error': 'Unauthorized'})
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__session_key=session_key)
+
+    cart_item.delete()
+    cart = get_or_create_cart(request)
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Item removed from cart',
+        'cart_count': cart.get_total_items(),
+        'cart_subtotal': float(cart.get_subtotal()),
+    })
 
 @csrf_exempt
 def flutter_clear_cart(request):
