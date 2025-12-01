@@ -354,6 +354,318 @@ GET /catalog/mobile/categories/
 - Sorted by insertion order (no specific sort applied)
 - Empty if no categories exist
 
+---
+
+## 4. Cart API Endpoints (Flutter)
+
+**Location:** `apps/cart/views.py`  
+**Route Pattern:** `/cart/flutter/...`
+
+These endpoints are CSRF-exempt (`@csrf_exempt`) and support both guest (session-key) or authenticated users (session cookie returned by `/auth/flutter/login/`). Use form-encoded `quantity` data for POSTs (`Content-Type: application/x-www-form-urlencoded`).
+
+Endpoint summary:
+- GET `/cart/flutter/` — Retrieve cart summary and items
+- POST `/cart/flutter/add/<product_id>/` — Add a product (path param `product_id`, body: `quantity`)
+- POST `/cart/flutter/update/<item_id>/` — Update quantity for cart item (path param `item_id`, body: `quantity`). If quantity <= 0 the item is removed.
+- POST `/cart/flutter/remove/<item_id>/` — Remove a cart item (path param `item_id`)
+- POST `/cart/flutter/clear/` — Clear the whole cart
+- GET `/cart/flutter/count/` — Return total item count
+- GET/POST `/cart/flutter/checkout/` — Starts the checkout flow; requires authenticated user
+
+Minimal examples (development):
+
+Login (create session cookie):
+```bash
+curl -c cookie-jar.txt -X POST http://localhost:8000/auth/flutter/login/ \
+    -d "username=testuser&password=testpass123"
+```
+
+Add to cart (form-encoded POST):
+```bash
+curl -b cookie-jar.txt -X POST http://localhost:8000/cart/flutter/add/1/ \
+    -d "quantity=2"
+```
+
+Get cart summary:
+```bash
+curl -X GET http://localhost:8000/cart/flutter/
+```
+
+Update an item (reduce to 1):
+```bash
+curl -b cookie-jar.txt -X POST http://localhost:8000/cart/flutter/update/1/ \
+    -d "quantity=1"
+```
+
+Example responses:
+```json
+{ "success": true, "message": "Item added to cart" }
+```
+```json
+{
+    "total_items": 2,
+    "subtotal": 299.98,
+    "item_count": 2,
+    "items": [
+        {"id": 1, "product_id": 1, "product_name": "Running Shoes Pro", "quantity": 2, "price": 149.99, "subtotal": 299.98}
+    ]
+}
+```
+
+Notes:
+- For guests: the server will set a session cookie on first contact — persist and reuse it.
+- For authenticated users: use `/auth/flutter/login/` to obtain a session cookie (persisted) used for subsequent cart operations.
+- The `checkout` endpoint requires authentication; the server replies with an error for guests.
+- Endpoints return `success` booleans and `message` strings for action feedback.
+
+## 5. Order API Endpoints (Flutter)
+
+**Location:** `apps/order/views.py`  
+**Route Pattern:** `/order/flutter/...`
+
+These endpoints are CSRF-exempt (`@csrf_exempt`) and require authenticated users.
+
+#### POST `/order/flutter/checkout/`
+Handle checkout and order creation for Flutter app.
+
+**Request Format:**
+```json
+{
+    "full_name": "John Doe",
+    "phone_number": "+628123456789",
+    "address_line1": "Jl. Contoh No. 123",
+    "address_line2": "Blok A",
+    "city": "Jakarta",
+    "state": "DKI Jakarta",
+    "postal_code": "12345",
+    "country": "Indonesia",
+    "payment_method": "CREDIT_CARD"
+}
+```
+
+**Success Response (201):**
+```json
+{
+    "status": true,
+    "message": "Order created successfully",
+    "order_id": 123
+}
+```
+
+**Error Response (400, 401, 500):**
+```json
+{
+    "status": false,
+    "message": "Error message details",
+    "errors": {
+        "field_name": "Validation error message"
+    }
+}
+```
+**Key Points:**
+- Requires authenticated user.
+- Accepts JSON request body for shipping address and payment method.
+- Validates all shipping address fields and payment method.
+- Decrements product stock atomically.
+
+#### GET `/order/flutter/list/`
+Retrieve a list of all orders for the authenticated user.
+
+**Example Request:**
+```
+GET /order/flutter/list/
+```
+
+**Success Response (200):**
+```json
+{
+    "status": true,
+    "orders": [
+        {
+            "id": 123,
+            "status": "PAID",
+            "delivery_status": "EN_ROUTE",
+            "delivery_status_display": "En Route",
+            "total_price": 150.00,
+            "created_at": "2025-12-02 10:30:00",
+            "item_count": 2
+        },
+        {
+            "id": 124,
+            "status": "PAID",
+            "delivery_status": "PROCESSING",
+            "delivery_status_display": "Processing",
+            "total_price": 25.50,
+            "created_at": "2025-12-01 15:00:00",
+            "item_count": 1
+        }
+    ]
+}
+```
+
+**Error Response (401):**
+```json
+{
+    "status": false,
+    "message": "User not authenticated"
+}
+```
+**Key Points:**
+- Requires authenticated user.
+- Returns a list of simplified order objects.
+- `delivery_status_display` provides a human-readable status.
+
+#### GET `/order/flutter/<int:order_id>/`
+Retrieve detailed information for a specific order.
+
+**Path Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `order_id` | integer | Unique order identifier |
+
+**Example Request:**
+```
+GET /order/flutter/123/
+```
+
+**Success Response (200):**
+```json
+{
+    "status": true,
+    "order": {
+        "id": 123,
+        "status": "PAID",
+        "delivery_status": "EN_ROUTE",
+        "delivery_status_display": "En Route",
+        "total_price": 150.00,
+        "created_at": "2025-12-02 10:30:00",
+        "items": [
+            {
+                "product_id": 1,
+                "product_name": "Running Shoes Pro",
+                "quantity": 1,
+                "price": 149.99,
+                "subtotal": 149.99,
+                "image_url": "https://example.com/running_shoes.jpg"
+            },
+            {
+                "product_id": 5,
+                "product_name": "Sport Socks",
+                "quantity": 2,
+                "price": 0.01,
+                "subtotal": 0.02,
+                "image_url": "https://example.com/sport_socks.jpg"
+            }
+        ],
+        "shipping_address": {
+            "full_name": "John Doe",
+            "phone_number": "+628123456789",
+            "address": "Jl. Contoh No. 123, Jakarta, 12345, Indonesia"
+        },
+        "rated_product_ids": [1]
+    }
+}
+```
+
+**Error Response (401, 404):**
+```json
+{
+    "status": false,
+    "message": "User not authenticated"
+}
+```
+```json
+{
+    "status": false,
+    "message": "Order not found"
+}
+```
+**Key Points:**
+- Requires authenticated user.
+- Provides comprehensive details about the order, its items, and shipping address.
+- `rated_product_ids` indicates which products in the order the user has already rated.
+
+#### GET `/order/flutter/<int:order_id>/status/`
+Check the current delivery status of a specific order.
+
+**Path Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `order_id` | integer | Unique order identifier |
+
+**Example Request:**
+```
+GET /order/flutter/123/status/
+```
+
+**Success Response (200):**
+```json
+{
+    "status": true,
+    "delivery_status": "EN_ROUTE",
+    "delivery_status_display": "En Route",
+    "progress_percentage": 50,
+    "seconds_remaining": 60,
+    "is_delivered": false
+}
+```
+
+**Error Response (401, 404):**
+```json
+{
+    "status": false,
+    "message": "User not authenticated"
+}
+```
+```json
+{
+    "status": false,
+    "message": "Order not found"
+}
+```
+**Key Points:**
+- Requires authenticated user.
+- Provides real-time delivery status, progress, and estimated time remaining.
+
+#### POST `/order/flutter/<int:order_id>/rate/`
+Submit or update a product rating for a delivered order.
+
+**Path Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `order_id` | integer | Unique order identifier |
+
+**Request Format:**
+```json
+{
+    "product_id": 1,
+    "rating": 4,
+    "review": "Great product, very comfortable!"
+}
+```
+
+**Success Response (200):**
+```json
+{
+    "status": true,
+    "message": "Rating submitted successfully!",
+    "new_aggregate_rating": 4.25
+}
+```
+
+**Error Response (400, 401, 404, 500):**
+```json
+{
+    "status": false,
+    "message": "Error message details"
+}
+```
+**Key Points:**
+- Requires authenticated user.
+- Order must be in `DELIVERED` status.
+- `product_id`, `rating` (1-5) are required; `review` is optional.
+- Updates the aggregate rating of the product.
+
 ## Testing Mobile API
 
 ### Using cURL
@@ -622,6 +934,8 @@ All error responses follow this format:
 | `apps/authentication/urls.py` | Added Flutter mobile authentication routes | URL routing for mobile auth |
 | `apps/catalog/views.py` | Added `mobile_products_list`, `mobile_product_detail`, `mobile_categories_list` views | Mobile product browsing |
 | `apps/catalog/urls.py` | Added mobile API URL patterns | URL routing for mobile catalog |
+| `apps/order/views.py` | Added `flutter_checkout`, `flutter_order_list`, `flutter_order_detail`, `flutter_check_delivery_status`, `flutter_submit_rating` views | Mobile order management endpoints |
+| `apps/order/urls.py` | Added Flutter mobile order routes | URL routing for mobile order |
 | `requirements.txt` | Added `django-cors-headers==4.3.1` | Enable CORS support |
 
 ### Data Flow Architecture
@@ -650,6 +964,20 @@ Mobile Client (Parse JSON)
 /catalog/mobile/products/            → mobile_products_list (GET)
 /catalog/mobile/products/<id>/       → mobile_product_detail (GET)
 /catalog/mobile/categories/          → mobile_categories_list (GET)
+
+/cart/flutter/                      → flutter_cart_view (GET)
+/cart/flutter/add/<product_id>/     → flutter_add_to_cart (POST)
+/cart/flutter/update/<item_id>/     → flutter_update_cart_item (POST)
+/cart/flutter/remove/<item_id>/     → flutter_remove_from_cart (POST)
+/cart/flutter/clear/                → flutter_clear_cart (POST)
+/cart/flutter/count/                → flutter_cart_count (GET)
+/cart/flutter/checkout/             → flutter_checkout_view (POST)
+
+/order/flutter/checkout/            → flutter_checkout (POST)
+/order/flutter/list/                → flutter_order_list (GET)
+/order/flutter/<int:order_id>/      → flutter_order_detail (GET)
+/order/flutter/<int:order_id>/status/ → flutter_check_delivery_status (GET)
+/order/flutter/<int:order_id>/rate/ → flutter_submit_rating (POST)
 ```
 
 ## Query Optimization
@@ -678,13 +1006,11 @@ All changes are **fully backward compatible**:
 
 ## Planned Future Enhancements
 
-1. **Cart & Order API** - Mobile-specific endpoints for cart management and checkout
-2. **Rating System** - Submit ratings from mobile app, aggregated to products
-3. **User Profile API** - Retrieve and update user profile information
-4. **Order History** - View past orders and order details
-5. **Wishlist API** - Save favorite products
-6. **API Versioning** - Support `/api/v1/`, `/api/v2/` for future updates
-7. **Rate Limiting** - Protect against abuse (per IP/user)
-8. **JWT Authentication** - Token-based auth alternative to sessions
-9. **Pagination** - Proper page-based pagination for large product lists
-10. **OpenAPI/Swagger** - Auto-generated API documentation
+1. **User Profile API** - Retrieve and update user profile information
+2. **Order History** - View past orders and order details (Partially implemented now with flutter_order_list and flutter_order_detail)
+3. **Wishlist API** - Save favorite products
+4. **API Versioning** - Support `/api/v1/`, `/api/v2/` for future updates
+5. **Rate Limiting** - Protect against abuse (per IP/user)
+6. **JWT Authentication** - Token-based auth alternative to sessions
+7. **Pagination** - Proper page-based pagination for large product lists
+8. **OpenAPI/Swagger** - Auto-generated API documentation
