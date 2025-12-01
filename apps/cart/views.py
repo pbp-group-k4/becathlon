@@ -368,4 +368,11 @@ def flutter_checkout_view(request):
 
     if not cart.items.exists():
         return JsonResponse({'success': False, 'error': 'Your cart is empty'})
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Checkout functionality coming soon!',
+        'cart_count': cart.get_total_items(),
+        'cart_subtotal': float(cart.get_subtotal()),
+    })
     
