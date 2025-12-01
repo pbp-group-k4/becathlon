@@ -157,6 +157,12 @@ def flutter_register(request):
 @csrf_exempt
 def flutter_logout(request):
     """Handle Flutter app logout"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'status': False,
+            'message': 'Method not allowed'
+        }, status=405)
+    
     try:
         logout(request)
         return JsonResponse({
