@@ -11,7 +11,7 @@ class Profile(models.Model):
     first_name = models.CharField(max_length=100, blank=True)
     last_name  = models.CharField(max_length=100, blank=True)
     phone      = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
+    email = models.EmailField(max_length=254, blank=True, help_text='Optional. Enter a valid email address.')
     preferred_sports = models.CharField(max_length=200, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     newsletter_opt_in = models.BooleanField(default=False)
