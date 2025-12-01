@@ -72,7 +72,7 @@ def logout_view(request):
     return redirect('home')
 
 
-# Flutter Mobile API Views (following PBP tutorial pattern)
+# Flutter Mobile API V iews (following PBP tutorial pattern)
 @csrf_exempt
 def flutter_login(request):
     """Handle Flutter app login - following PBP tutorial pattern"""
