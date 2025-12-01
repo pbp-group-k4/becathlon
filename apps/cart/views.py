@@ -7,6 +7,7 @@ from apps.main.models import Product
 from .models import Cart, CartItem
 from .utils import get_or_create_cart, validate_cart_item_stock
 from urllib.parse import urlencode
+from django.views.decorators.csrf import csrf_exempt
 
 def cart_view(request):
     """
@@ -196,3 +197,185 @@ def checkout_view(request):
     
     messages.info(request, 'Checkout functionality coming soon!')
     return redirect('cart:cart_view')
+
+# flutter endpoints for all cart logic, csrf_exempt 
+
+@csrf_exempt
+def flutter_cart_view(request):
+    """
+    Flutter API endpoint to get cart summary
+    """
+    cart = get_or_create_cart(request)
+    items = []
+    for item in cart.items.select_related('product').all():
+        items.append({
+            'id': item.id,
+            'product_id': item.product.id,
+            'product_name': item.product.name,
+            'quantity': item.quantity,
+            'price': float(item.product.price),
+            'subtotal': float(item.get_subtotal()),
+        })
+
+    return JsonResponse({
+        'total_items': cart.get_total_items(),
+        'subtotal': float(cart.get_subtotal()),
+        'item_count': cart.get_item_count(),
+        'items': items,
+    })
+
+@csrf_exempt
+def flutter_add_to_cart(request, product_id):
+    """
+    Flutter API endpoint to add product to cart
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    # mimic the add_to_cart logic here
+
+    # validate stock
+    product = get_object_or_404(Product, id=product_id)
+    cart = get_or_create_cart(request)
+    quantity = int(request.POST.get('quantity', 1))
+    is_valid, error_msg = validate_cart_item_stock(product, quantity)
+    if not is_valid:
+        return JsonResponse({'success': False, 'error': error_msg})
+    # TODO: flutter redirect to product detail if stock invalid
+
+    # Add or update cart item
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        product=product,
+        defaults={'quantity': quantity}
+    )
+
+    if not created:
+        cart_item.quantity += quantity
+        cart_item.save()
+    
+    return JsonResponse({'success': True, 'message': 'Item added to cart'})
+
+@csrf_exempt
+def flutter_update_cart_item(request, item_id):
+    """
+    Flutter API endpoint to update cart item quantity
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    # mimic the update_cart_item logic here
+
+    if request.user.is_authenticated:
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    else:
+        session_key = request.session.session_key
+        if not session_key:
+            return JsonResponse({'success': False, 'error': 'Unauthorized'})
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__session_key=session_key)
+
+    quantity = int(request.POST.get('quantity', 1))
+
+    if quantity <= 0:
+        cart_item.delete()
+        cart = get_or_create_cart(request)
+        return JsonResponse({
+            'success': True,
+            'message': 'Item removed from cart',
+            'cart_count': cart.get_total_items(),
+            'cart_subtotal': float(cart.get_subtotal()),
+            'item_subtotal': 0,
+        })
+
+    is_valid, error_msg = validate_cart_item_stock(cart_item.product, quantity)
+    if not is_valid:
+        return JsonResponse({'success': False, 'error': error_msg})
+
+    cart_item.quantity = quantity
+    cart_item.save()
+    cart = cart_item.cart
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Cart updated',
+        'cart_count': cart.get_total_items(),
+        'cart_subtotal': float(cart.get_subtotal()),
+        'item_subtotal': float(cart_item.get_subtotal()),
+    })
+
+@csrf_exempt
+def flutter_remove_from_cart(request, item_id):
+    """
+    Flutter API endpoint to remove cart item
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    # mimic the remove_from_cart logic here
+
+    if request.user.is_authenticated:
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    else:
+        session_key = request.session.session_key
+        if not session_key:
+            return JsonResponse({'success': False, 'error': 'Unauthorized'})
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__session_key=session_key)
+
+    cart_item.delete()
+    cart = get_or_create_cart(request)
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Item removed from cart',
+        'cart_count': cart.get_total_items(),
+        'cart_subtotal': float(cart.get_subtotal()),
+    })
+
+@csrf_exempt
+def flutter_clear_cart(request):
+    """
+    Flutter API endpoint to clear cart
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    # mimic the clear_cart logic here
+
+    cart = get_or_create_cart(request)
+    cart.clear()
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Cart cleared',
+        'cart_count': 0,
+        'cart_subtotal': 0,
+    })
+
+@csrf_exempt
+def flutter_cart_count(request):
+    """
+    Flutter API endpoint to get cart item count
+    """
+    cart = get_or_create_cart(request)
+    return JsonResponse({'count': cart.get_total_items()})
+
+@csrf_exempt
+def flutter_checkout_view(request):
+    """
+    Flutter API endpoint for checkout view
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required for checkout'})
+
+    cart = get_or_create_cart(request)
+
+    if not cart.items.exists():
+        return JsonResponse({'success': False, 'error': 'Your cart is empty'})
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Checkout functionality coming soon!',
+        'cart_count': cart.get_total_items(),
+        'cart_subtotal': float(cart.get_subtotal()),
+    })
+    
