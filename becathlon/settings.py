@@ -340,3 +340,4 @@ if not DEBUG:
     
     # If behind a reverse proxy that terminates SSL
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # PWS deployment test commit: 2025-12-01 - Do not remove; used to test branch deployment
