@@ -235,6 +235,9 @@ def flutter_add_to_cart(request, product_id):
     # mimic the add_to_cart logic here
 
     # validate stock
+    product = get_object_or_404(Product, id=product_id)
+    cart = get_or_create_cart(request)
+    quantity = int(request.POST.get('quantity', 1))
     is_valid, error_msg = validate_cart_item_stock(product, quantity)
     if not is_valid:
         return JsonResponse({'success': False, 'error': error_msg})
