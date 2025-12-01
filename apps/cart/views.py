@@ -263,7 +263,42 @@ def flutter_update_cart_item(request, item_id):
 
     # mimic the update_cart_item logic here
 
-    return JsonResponse({'success': True, 'message': 'Cart item updated'})
+    if request.user.is_authenticated:
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    else:
+        session_key = request.session.session_key
+        if not session_key:
+            return JsonResponse({'success': False, 'error': 'Unauthorized'})
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__session_key=session_key)
+
+    quantity = int(request.POST.get('quantity', 1))
+
+    if quantity <= 0:
+        cart_item.delete()
+        cart = get_or_create_cart(request)
+        return JsonResponse({
+            'success': True,
+            'message': 'Item removed from cart',
+            'cart_count': cart.get_total_items(),
+            'cart_subtotal': float(cart.get_subtotal()),
+            'item_subtotal': 0,
+        })
+
+    is_valid, error_msg = validate_cart_item_stock(cart_item.product, quantity)
+    if not is_valid:
+        return JsonResponse({'success': False, 'error': error_msg})
+
+    cart_item.quantity = quantity
+    cart_item.save()
+    cart = cart_item.cart
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Cart updated',
+        'cart_count': cart.get_total_items(),
+        'cart_subtotal': float(cart.get_subtotal()),
+        'item_subtotal': float(cart_item.get_subtotal()),
+    })
 
 @csrf_exempt
 def flutter_remove_from_cart(request, item_id):
