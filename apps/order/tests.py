@@ -909,3 +909,58 @@ class OrderViewsTestCase(TestCase):
         data = response.json()
         self.assertFalse(data['success'])
         self.assertIn('not in this order', data['error'])
+
+    def test_flutter_order_detail_includes_image_url_with_primary_image(self):
+        """Test that flutter_order_detail returns image_url from ProductImage primary"""
+        from apps.catalog.models import ProductImage
+
+        # Ensure user is logged in
+        self.client.login(username='testuser', password='testpass123')
+
+        # Add a primary ProductImage to product
+        ProductImage.objects.create(
+            product=self.product,
+            image_url='https://example.com/img.jpg',
+            is_primary=True,
+            display_order=0
+        )
+
+        response = self.client.get(reverse('order:flutter_order_detail', kwargs={'order_id': self.order.id}))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['status'])
+        items = data['order']['items']
+        self.assertTrue(len(items) > 0)
+        self.assertEqual(items[0]['image_url'], 'https://example.com/img.jpg')
+
+    def test_flutter_order_detail_falls_back_to_product_image_url(self):
+        """Test that flutter_order_detail uses Product.image_url when no ProductImage primary exists"""
+        # Ensure user is logged in
+        self.client.login(username='testuser', password='testpass123')
+
+        # Create product with image_url and a new order
+        product2 = Product.objects.create(
+            name='Fallback Product',
+            description='Fallback image URL',
+            price=Decimal('20.00'),
+            product_type=self.product_type,
+            stock=5,
+            created_by=self.user,
+            image_url='https://example.com/fallback.jpg'
+        )
+
+        # Create cart and order
+        cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=cart, product=product2, quantity=1)
+        order2 = Order.create_from_cart(cart, self.shipping_address)
+        order2.status = Order.Status.PAID
+        order2.start_delivery_tracking()
+        order2.save()
+
+        response = self.client.get(reverse('order:flutter_order_detail', kwargs={'order_id': order2.id}))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['status'])
+        items = data['order']['items']
+        self.assertTrue(len(items) > 0)
+        self.assertEqual(items[0]['image_url'], 'https://example.com/fallback.jpg')

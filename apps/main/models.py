@@ -46,3 +46,20 @@ class Product(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+    def get_primary_image_url(self):
+        """
+        Returns the primary image URL for product. If a ProductImage instance
+        exists and marked primary, return `image_url`, else fall back
+        to the `image_url` field on the product itself (if present, else an empty
+        string.
+        """
+        # reverse relation `images` from apps.catalog.models.ProductImage
+        primary = self.images.filter(is_primary=True).first()
+        if primary and getattr(primary, 'image_url', None):
+            return primary.image_url
+        return self.image_url or ''
+
+    @property
+    def primary_image_url(self):
+        return self.get_primary_image_url()

@@ -512,7 +512,8 @@ def flutter_order_detail(request, order_id):
             'quantity': item.quantity,
             'price': float(item.price),
             'subtotal': float(item.subtotal),
-            'image_url': item.product.image.url if item.product.image else '',
+            # Use Product.get_primary_image_url() helper to avoid AttributeError
+            'image_url': item.product.get_primary_image_url(),
         })
 
     shipping_data = {
