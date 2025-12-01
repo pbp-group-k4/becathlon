@@ -75,9 +75,23 @@ def logout_view(request):
 # Flutter Mobile API V iews (following PBP tutorial pattern)
 @csrf_exempt
 def flutter_login(request):
-    """Handle Flutter app login - following PBP tutorial pattern"""
-    username = request.POST.get('username')
-    password = request.POST.get('password')
+    """Handle Flutter app login - accepts JSON body"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'status': False,
+            'message': 'Method not allowed'
+        }, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'status': False,
+            'message': 'Invalid JSON'
+        }, status=400)
+    
     user = authenticate(username=username, password=password)
     
     if user is not None:
@@ -103,7 +117,13 @@ def flutter_login(request):
 
 @csrf_exempt
 def flutter_register(request):
-    """Handle Flutter app registration"""
+    """Handle Flutter app registration - accepts JSON body"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'status': False,
+            'message': 'Method not allowed'
+        }, status=405)
+    
     try:
         data = json.loads(request.body)
         username = data.get('username')
