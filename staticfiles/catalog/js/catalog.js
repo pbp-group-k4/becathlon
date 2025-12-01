@@ -123,9 +123,12 @@ function initQuickView() {
 
             } catch (error) {
                 console.error('Error loading quick view:', error);
-                // Just close the modal silently instead of showing error
-                modal.classList.remove('active');
-                return;
+                modalContent.innerHTML = `
+                    <div class="error-message">
+                        <p>Failed to load product details. Please try again.</p>
+                        <button onclick="document.getElementById('quick-view-modal').classList.remove('active')">Close</button>
+                    </div>
+                `;
             }
         });
     });
