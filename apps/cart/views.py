@@ -287,7 +287,15 @@ def flutter_clear_cart(request):
 
     # mimic the clear_cart logic here
 
-    return JsonResponse({'success': True, 'message': 'Cart cleared'})
+    cart = get_or_create_cart(request)
+    cart.clear()
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Cart cleared',
+        'cart_count': 0,
+        'cart_subtotal': 0,
+    })
 
 @csrf_exempt
 def flutter_cart_count(request):
