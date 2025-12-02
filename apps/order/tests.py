@@ -10,6 +10,7 @@ from datetime import timedelta
 from apps.main.models import Product, ProductType
 from apps.cart.models import Cart, CartItem
 from apps.order.models import Order, OrderItem, ShippingAddress, Payment, ProductRating
+from apps.order.views import CheckoutResult, process_checkout_service
 
 
 class ShippingAddressModelTestCase(TestCase):
@@ -825,7 +826,6 @@ class OrderViewsTestCase(TestCase):
         self.assertEqual(data['message'], 'Rating submitted successfully!')
 
         # Check rating was created
-        from .models import ProductRating
         rating = ProductRating.objects.get(user=self.user, product=self.product, order=self.order)
         self.assertEqual(rating.rating, 5)
         self.assertEqual(rating.review, 'Excellent product!')
@@ -949,8 +949,9 @@ class OrderViewsTestCase(TestCase):
             image_url='https://example.com/fallback.jpg'
         )
 
-        # Create cart and order
-        cart = Cart.objects.create(user=self.user)
+        # Get or create cart and add item
+        cart, _ = Cart.objects.get_or_create(user=self.user)
+        cart.items.all().delete()  # Clear existing items
         CartItem.objects.create(cart=cart, product=product2, quantity=1)
         order2 = Order.create_from_cart(cart, self.shipping_address)
         order2.status = Order.Status.PAID
@@ -964,3 +965,233 @@ class OrderViewsTestCase(TestCase):
         items = data['order']['items']
         self.assertTrue(len(items) > 0)
         self.assertEqual(items[0]['image_url'], 'https://example.com/fallback.jpg')
+
+
+class CheckoutResultTestCase(TestCase):
+    """Test cases for CheckoutResult class"""
+
+    def test_checkout_result_success(self):
+        """Test CheckoutResult with success=True"""
+        result = CheckoutResult(success=True, order="mock_order")
+        self.assertTrue(result.success)
+        self.assertEqual(result.order, "mock_order")
+        self.assertIsNone(result.error_type)
+        self.assertIsNone(result.error_message)
+        self.assertEqual(result.errors, {})
+
+    def test_checkout_result_failure_with_errors(self):
+        """Test CheckoutResult with validation errors"""
+        errors = {'full_name': 'Full name is required.'}
+        result = CheckoutResult(
+            success=False,
+            error_type='validation',
+            error_message='Validation failed',
+            errors=errors
+        )
+        self.assertFalse(result.success)
+        self.assertIsNone(result.order)
+        self.assertEqual(result.error_type, 'validation')
+        self.assertEqual(result.error_message, 'Validation failed')
+        self.assertEqual(result.errors, errors)
+
+    def test_checkout_result_failure_stock_error(self):
+        """Test CheckoutResult with stock error"""
+        result = CheckoutResult(
+            success=False,
+            error_type='stock',
+            error_message='Insufficient stock'
+        )
+        self.assertFalse(result.success)
+        self.assertEqual(result.error_type, 'stock')
+        self.assertEqual(result.error_message, 'Insufficient stock')
+
+
+class ProcessCheckoutServiceTestCase(TestCase):
+    """Test cases for process_checkout_service function"""
+
+    def setUp(self):
+        """Set up test data"""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+        self.product_type = ProductType.objects.create(
+            name='Running Shoes',
+            description='High-performance running shoes'
+        )
+
+        self.product = Product.objects.create(
+            name='Test Running Shoe',
+            description='A great running shoe for testing',
+            price=Decimal('99.99'),
+            product_type=self.product_type,
+            stock=10,
+            created_by=self.user
+        )
+
+        self.cart = Cart.objects.create(user=self.user)
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
+
+        self.valid_shipping_data = {
+            'full_name': 'John Doe',
+            'phone_number': '+62123456789',
+            'address_line1': '123 Main St',
+            'address_line2': '',
+            'city': 'Jakarta',
+            'state': '',
+            'postal_code': '12345',
+            'country': 'Indonesia',
+        }
+
+    def test_process_checkout_service_success(self):
+        """Test successful checkout through service"""
+        cart_items = self.cart.items.select_related('product')
+
+        result = process_checkout_service(
+            user=self.user,
+            cart=self.cart,
+            cart_items=cart_items,
+            shipping_data=self.valid_shipping_data,
+            payment_method='CREDIT_CARD'
+        )
+
+        self.assertTrue(result.success)
+        self.assertIsNotNone(result.order)
+        self.assertEqual(result.order.user, self.user)
+        self.assertEqual(result.order.status, Order.Status.PAID)
+        self.assertIsNotNone(result.order.delivery_started_at)
+
+        # Verify stock was decremented
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, 8)
+
+        # Verify payment was created
+        self.assertTrue(hasattr(result.order, 'payment'))
+        self.assertEqual(result.order.payment.method, 'CREDIT_CARD')
+
+    def test_process_checkout_service_invalid_shipping_address(self):
+        """Test checkout fails with invalid shipping address"""
+        cart_items = self.cart.items.select_related('product')
+
+        invalid_shipping_data = {
+            'full_name': '',  # Required field is empty
+            'phone_number': '+62123456789',
+            'address_line1': '123 Main St',
+            'city': 'Jakarta',
+            'postal_code': '12345',
+            'country': 'Indonesia',
+        }
+
+        result = process_checkout_service(
+            user=self.user,
+            cart=self.cart,
+            cart_items=cart_items,
+            shipping_data=invalid_shipping_data,
+            payment_method='CREDIT_CARD'
+        )
+
+        self.assertFalse(result.success)
+        self.assertEqual(result.error_type, 'validation')
+        self.assertIn('full_name', result.errors)
+
+    def test_process_checkout_service_invalid_payment_method(self):
+        """Test checkout fails with invalid payment method"""
+        cart_items = self.cart.items.select_related('product')
+
+        result = process_checkout_service(
+            user=self.user,
+            cart=self.cart,
+            cart_items=cart_items,
+            shipping_data=self.valid_shipping_data,
+            payment_method='INVALID_METHOD'
+        )
+
+        self.assertFalse(result.success)
+        self.assertEqual(result.error_type, 'validation')
+        self.assertIn('Invalid payment method', result.error_message)
+
+    def test_process_checkout_service_insufficient_stock(self):
+        """Test checkout fails with insufficient stock"""
+        # Update cart item to have more than available stock
+        cart_item = self.cart.items.first()
+        cart_item.quantity = 20  # More than available stock (10)
+        cart_item.save()
+
+        cart_items = self.cart.items.select_related('product')
+
+        result = process_checkout_service(
+            user=self.user,
+            cart=self.cart,
+            cart_items=cart_items,
+            shipping_data=self.valid_shipping_data,
+            payment_method='CREDIT_CARD'
+        )
+
+        self.assertFalse(result.success)
+        self.assertEqual(result.error_type, 'stock')
+        self.assertIn(self.product.name, result.error_message)
+
+    def test_process_checkout_service_all_payment_methods(self):
+        """Test checkout succeeds with all valid payment methods"""
+        valid_methods = ['CREDIT_CARD', 'BANK_TRANSFER', 'E_WALLET', 'COD']
+
+        for payment_method in valid_methods:
+            # Get existing cart and refill it (checkout clears the cart)
+            cart, _ = Cart.objects.get_or_create(user=self.user)
+            cart.items.all().delete()  # Clear any existing items
+            CartItem.objects.create(cart=cart, product=self.product, quantity=1)
+            cart_items = cart.items.select_related('product')
+
+            result = process_checkout_service(
+                user=self.user,
+                cart=cart,
+                cart_items=cart_items,
+                shipping_data=self.valid_shipping_data,
+                payment_method=payment_method
+            )
+
+            self.assertTrue(result.success, f"Checkout failed for payment method: {payment_method}")
+            self.assertEqual(result.order.payment.method, payment_method)
+
+    def test_process_checkout_service_clears_cart(self):
+        """Test that checkout clears the cart"""
+        cart_items = self.cart.items.select_related('product')
+
+        result = process_checkout_service(
+            user=self.user,
+            cart=self.cart,
+            cart_items=cart_items,
+            shipping_data=self.valid_shipping_data,
+            payment_method='CREDIT_CARD'
+        )
+
+        self.assertTrue(result.success)
+
+        # Verify cart was cleared
+        self.cart.refresh_from_db()
+        self.assertEqual(self.cart.get_item_count(), 0)
+
+    def test_process_checkout_service_creates_shipping_address(self):
+        """Test that checkout creates shipping address correctly"""
+        cart_items = self.cart.items.select_related('product')
+
+        result = process_checkout_service(
+            user=self.user,
+            cart=self.cart,
+            cart_items=cart_items,
+            shipping_data=self.valid_shipping_data,
+            payment_method='CREDIT_CARD'
+        )
+
+        self.assertTrue(result.success)
+
+        # Verify shipping address was created with correct data
+        shipping = result.order.shipping_address
+        self.assertEqual(shipping.full_name, 'John Doe')
+        self.assertEqual(shipping.phone_number, '+62123456789')
+        self.assertEqual(shipping.address_line1, '123 Main St')
+        self.assertEqual(shipping.city, 'Jakarta')
+        self.assertEqual(shipping.postal_code, '12345')
+        self.assertEqual(shipping.country, 'Indonesia')
