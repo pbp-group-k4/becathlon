@@ -4,14 +4,16 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from urllib.parse import urlencode
 import logging
 import re
+import json
 
 from apps.cart.models import Cart, CartItem
 from apps.cart.utils import get_or_create_cart, validate_cart_item_stock
 from apps.main.models import Product
-from .models import Order, OrderItem, ShippingAddress, Payment
+from .models import Order, OrderItem, ShippingAddress, Payment, ProductRating
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +98,113 @@ def validate_payment_method(payment_method):
     return True, None
 
 
+class CheckoutResult:
+    """Result object for checkout service operations."""
+    def __init__(self, success, order=None, error_type=None, error_message=None, errors=None):
+        self.success = success
+        self.order = order
+        self.error_type = error_type  # 'validation', 'stock', 'processing'
+        self.error_message = error_message
+        self.errors = errors or {}  # Field-level validation errors
+
+
+@transaction.atomic
+def process_checkout_service(user, cart, cart_items, shipping_data, payment_method):
+    """
+    Core checkout business logic - creates order from cart with shipping and payment.
+
+    Args:
+        user: The authenticated user
+        cart: The user's cart
+        cart_items: QuerySet of cart items
+        shipping_data: Dict with shipping address fields
+        payment_method: Payment method string (e.g., 'CREDIT_CARD')
+
+    Returns:
+        CheckoutResult with success status and order or error details
+    """
+    # Validate shipping address
+    is_valid, errors = validate_shipping_address_data(shipping_data)
+    if not is_valid:
+        return CheckoutResult(
+            success=False,
+            error_type='validation',
+            error_message='Shipping address validation failed',
+            errors=errors
+        )
+
+    # Validate payment method
+    is_valid, error_msg = validate_payment_method(payment_method)
+    if not is_valid:
+        return CheckoutResult(
+            success=False,
+            error_type='validation',
+            error_message=error_msg
+        )
+
+    # Validate cart items stock
+    for item in cart_items:
+        is_valid, error_msg = validate_cart_item_stock(item.product, item.quantity)
+        if not is_valid:
+            return CheckoutResult(
+                success=False,
+                error_type='stock',
+                error_message=f"{item.product.name}: {error_msg}"
+            )
+
+    try:
+        # Create shipping address
+        shipping_address = ShippingAddress.objects.create(
+            user=user,
+            full_name=shipping_data.get('full_name', '').strip(),
+            phone_number=shipping_data.get('phone_number', '').strip(),
+            address_line1=shipping_data.get('address_line1', '').strip(),
+            address_line2=shipping_data.get('address_line2', '').strip(),
+            city=shipping_data.get('city', '').strip(),
+            state=shipping_data.get('state', '').strip(),
+            postal_code=shipping_data.get('postal_code', '').strip(),
+            country=shipping_data.get('country', 'Indonesia').strip(),
+        )
+
+        # Create order using the create_from_cart method
+        # This will automatically decrement stock atomically
+        order = Order.create_from_cart(
+            cart=cart,
+            shipping_address=shipping_address
+        )
+
+        # Create payment record
+        Payment.objects.create(
+            order=order,
+            method=payment_method,
+            amount=order.total_price,
+            status='SUCCESS'  # Mock successful payment
+        )
+
+        # Update order status to PAID and start delivery tracking
+        order.status = Order.Status.PAID
+        order.start_delivery_tracking()
+        order.save()
+
+        logger.info(f"Order #{order.id} created successfully for user {user.id}")
+        return CheckoutResult(success=True, order=order)
+
+    except ValueError as e:
+        # Handle insufficient stock error from Order.create_from_cart
+        return CheckoutResult(
+            success=False,
+            error_type='stock',
+            error_message=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Checkout processing error for user {user.id}: {str(e)}", exc_info=True)
+        return CheckoutResult(
+            success=False,
+            error_type='processing',
+            error_message='Error processing checkout. Please try again.'
+        )
+
+
 def checkout_view(request):
     """
     Checkout view - displays checkout form and processes orders.
@@ -124,90 +233,48 @@ def checkout_view(request):
     return render(request, 'order/checkout.html', context)
 
 
-@transaction.atomic
 def process_checkout(request, cart, cart_items):
     """
     Process the checkout form submission with full validation.
+    Uses the shared checkout service for business logic.
     """
-    # Validate shipping address
-    is_valid, errors = validate_shipping_address_data(request.POST)
-    if not is_valid:
-        for field, error_msg in errors.items():
-            messages.error(request, f"{field}: {error_msg}")
-        logger.warning(f"Checkout validation failed for user {request.user.id}: {errors}")
-        return redirect('order:checkout')
-    
-    # Validate payment method
+    # Extract shipping data from POST
+    shipping_data = {
+        'full_name': request.POST.get('full_name', ''),
+        'phone_number': request.POST.get('phone_number', ''),
+        'address_line1': request.POST.get('address_line1', ''),
+        'address_line2': request.POST.get('address_line2', ''),
+        'city': request.POST.get('city', ''),
+        'state': request.POST.get('state', ''),
+        'postal_code': request.POST.get('postal_code', ''),
+        'country': request.POST.get('country', 'Indonesia'),
+    }
     payment_method = request.POST.get('payment_method', '').strip()
-    is_valid, error_msg = validate_payment_method(payment_method)
-    if not is_valid:
-        messages.error(request, error_msg)
-        logger.warning(f"Invalid payment method for user {request.user.id}: {payment_method}")
-        return redirect('order:checkout')
-    
-    # Re-validate cart items stock (in case items were purchased by others)
-    try:
-        for item in cart_items:
-            is_valid, error_msg = validate_cart_item_stock(item.product, item.quantity)
-            if not is_valid:
-                messages.error(request, f"{item.product.name}: {error_msg}")
-                logger.warning(f"Stock validation failed for user {request.user.id}: {item.product.id}")
-                return redirect('order:checkout')
-    except Exception as e:
-        messages.error(request, "Error validating stock. Please try again.")
-        logger.error(f"Stock validation error for user {request.user.id}: {str(e)}")
-        return redirect('order:checkout')
-    
-    try:
-        # Create shipping address
-        shipping_address = ShippingAddress.objects.create(
-            user=request.user,
-            full_name=request.POST.get('full_name').strip(),
-            phone_number=request.POST.get('phone_number').strip(),
-            address_line1=request.POST.get('address_line1').strip(),
-            address_line2=request.POST.get('address_line2', '').strip(),
-            city=request.POST.get('city').strip(),
-            state=request.POST.get('state', '').strip(),
-            postal_code=request.POST.get('postal_code').strip(),
-            country=request.POST.get('country', 'Indonesia').strip(),
-        )
 
-        # Create order using the create_from_cart method
-        # This will automatically decrement stock atomically
-        order = Order.create_from_cart(
-            cart=cart,
-            shipping_address=shipping_address
-        )
+    # Use the shared checkout service
+    result = process_checkout_service(
+        user=request.user,
+        cart=cart,
+        cart_items=cart_items,
+        shipping_data=shipping_data,
+        payment_method=payment_method
+    )
 
-        # Create payment record
-        payment = Payment.objects.create(
-            order=order,
-            method=payment_method,
-            amount=order.total_price,
-            status='SUCCESS'  # Mock successful payment
-        )
-
-        # Update order status to PAID and start delivery tracking
-        order.status = Order.Status.PAID
-        order.start_delivery_tracking()  # Initialize delivery timer
-        order.save()
-
-        logger.info(f"Order #{order.id} created successfully for user {request.user.id}")
-        messages.success(request, f"Order #{order.id} created successfully!")
-        return redirect('order:checkout_success', order_id=order.id)
-
-    except ValueError as e:
-        # Handle insufficient stock error
-        messages.error(request, str(e))
-        logger.warning(f"Insufficient stock during checkout for user {request.user.id}: {str(e)}")
-        return redirect('order:checkout')
-    except ShippingAddress.DoesNotExist as e:
-        messages.error(request, "Error creating shipping address. Please try again.")
-        logger.error(f"Shipping address creation error for user {request.user.id}: {str(e)}")
-        return redirect('order:checkout')
-    except Exception as e:
-        messages.error(request, "Error processing checkout. Please try again.")
-        logger.error(f"Checkout processing error for user {request.user.id}: {str(e)}", exc_info=True)
+    if result.success:
+        messages.success(request, f"Order #{result.order.id} created successfully!")
+        return redirect('order:checkout_success', order_id=result.order.id)
+    else:
+        # Handle validation errors with field-level messages
+        if result.errors:
+            for field, error_msg in result.errors.items():
+                messages.error(request, f"{field}: {error_msg}")
+            logger.warning(f"Checkout validation failed for user {request.user.id}: {result.errors}")
+        else:
+            messages.error(request, result.error_message)
+            if result.error_type == 'stock':
+                logger.warning(f"Stock validation failed for user {request.user.id}: {result.error_message}")
+            else:
+                logger.warning(f"Checkout failed for user {request.user.id}: {result.error_message}")
         return redirect('order:checkout')
 
 
@@ -359,3 +426,230 @@ def submit_rating(request, order_id):
             'success': False, 
             'error': 'An error occurred while submitting your rating'
         }, status=500)
+
+
+# ---------------------------------------------------------------------------
+# Flutter Mobile API Views
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+def flutter_checkout(request):
+    """
+    Handle checkout for Flutter app - accepts JSON body.
+    Uses the shared checkout service for business logic.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'User not authenticated'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': False, 'message': 'Invalid JSON'}, status=400)
+
+    cart = get_or_create_cart(request)
+    cart_items = cart.items.select_related('product')
+
+    if not cart_items.exists():
+        return JsonResponse({'status': False, 'message': 'Cart is empty'}, status=400)
+
+    # Extract payment method from JSON data
+    payment_method = data.get('payment_method', '').strip()
+
+    # Use the shared checkout service
+    result = process_checkout_service(
+        user=request.user,
+        cart=cart,
+        cart_items=cart_items,
+        shipping_data=data,
+        payment_method=payment_method
+    )
+
+    if result.success:
+        return JsonResponse({
+            'status': True,
+            'message': 'Order created successfully',
+            'order_id': result.order.id
+        }, status=201)
+    else:
+        # Determine appropriate status code
+        if result.error_type == 'validation':
+            status_code = 400
+        elif result.error_type == 'stock':
+            status_code = 400
+        else:
+            status_code = 500
+
+        response_data = {'status': False, 'message': result.error_message}
+        if result.errors:
+            response_data['errors'] = result.errors
+        return JsonResponse(response_data, status=status_code)
+
+
+@csrf_exempt
+def flutter_order_list(request):
+    """
+    Return list of orders for the authenticated user in JSON format.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'User not authenticated'}, status=401)
+
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    data = []
+    for order in orders:
+        # Update delivery status
+        if order.delivery_started_at:
+            order.update_delivery_status()
+            
+        data.append({
+            'id': order.id,
+            'status': order.status,
+            'delivery_status': order.delivery_status,
+            'delivery_status_display': order.get_delivery_status_display(),
+            'total_price': float(order.total_price),
+            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'item_count': order.get_item_count(),
+        })
+
+    return JsonResponse({'status': True, 'orders': data}, status=200)
+
+
+@csrf_exempt
+def flutter_order_detail(request, order_id):
+    """
+    Return detailed order info in JSON format.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'User not authenticated'}, status=401)
+
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        return JsonResponse({'status': False, 'message': 'Order not found'}, status=404)
+
+    order.update_delivery_status()
+    
+    items_data = []
+    for item in order.items.select_related('product').all():
+        items_data.append({
+            'product_id': item.product.id,
+            'product_name': item.product.name,
+            'quantity': item.quantity,
+            'price': float(item.price),
+            'subtotal': float(item.subtotal),
+            # Use Product.get_primary_image_url() helper to avoid AttributeError
+            'image_url': item.product.get_primary_image_url(),
+        })
+
+    shipping_data = {
+        'full_name': order.shipping_address.full_name,
+        'phone_number': order.shipping_address.phone_number,
+        'address': f"{order.shipping_address.address_line1}, {order.shipping_address.city}, {order.shipping_address.postal_code}, {order.shipping_address.country}",
+    }
+
+    return JsonResponse({
+        'status': True,
+        'order': {
+            'id': order.id,
+            'status': order.status,
+            'delivery_status': order.delivery_status,
+            'delivery_status_display': order.get_delivery_status_display(),
+            'total_price': float(order.total_price),
+            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'items': items_data,
+            'shipping_address': shipping_data,
+            'rated_product_ids': list(order.product_ratings.values_list('product_id', flat=True))
+        }
+    }, status=200)
+
+
+@csrf_exempt
+def flutter_check_delivery_status(request, order_id):
+    """
+    Check delivery status for Flutter app.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'User not authenticated'}, status=401)
+
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        return JsonResponse({'status': False, 'message': 'Order not found'}, status=404)
+    
+    order.update_delivery_status()
+    current_status, seconds_remaining = order.get_current_delivery_status()
+    progress = order.get_delivery_progress_percentage()
+    
+    return JsonResponse({
+        'status': True,
+        'delivery_status': current_status,
+        'delivery_status_display': order.get_delivery_status_display(),
+        'progress_percentage': progress,
+        'seconds_remaining': seconds_remaining,
+        'is_delivered': current_status == Order.DeliveryStatus.DELIVERED,
+    }, status=200)
+
+
+@csrf_exempt
+def flutter_submit_rating(request, order_id):
+    """
+    Submit rating for Flutter app.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': False, 'message': 'Method not allowed'}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': False, 'message': 'User not authenticated'}, status=401)
+
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        return JsonResponse({'status': False, 'message': 'Order not found'}, status=404)
+
+    # Check if order is delivered
+    if order.delivery_status != Order.DeliveryStatus.DELIVERED:
+        return JsonResponse({
+            'status': False, 
+            'message': 'Can only rate products after delivery'
+        }, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        product_id = int(data.get('product_id'))
+        rating_value = int(data.get('rating'))
+        review_text = data.get('review', '').strip()
+        
+        if rating_value < 1 or rating_value > 5:
+            return JsonResponse({'status': False, 'message': 'Rating must be between 1 and 5'}, status=400)
+            
+        # Verify product
+        product = get_object_or_404(Product, id=product_id)
+        if not order.items.filter(product=product).exists():
+            return JsonResponse({'status': False, 'message': 'Product not in this order'}, status=400)
+
+        # Create/Update rating
+        rating_obj, created = ProductRating.objects.update_or_create(
+            user=request.user,
+            product=product,
+            order=order,
+            defaults={
+                'rating': rating_value,
+                'review': review_text,
+            }
+        )
+        
+        product.update_aggregate_rating()
+        
+        return JsonResponse({
+            'status': True,
+            'message': 'Rating submitted successfully!',
+            'new_aggregate_rating': float(product.rating)
+        }, status=200)
+
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({'status': False, 'message': 'Invalid data provided'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': False, 'message': str(e)}, status=500)
