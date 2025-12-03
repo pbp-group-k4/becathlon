@@ -81,3 +81,41 @@ def switch_account_type_ajax(request):
         'success': False,
         'error': 'Account type already set'
     }, status=400)
+
+
+
+@login_required
+def api_profile_detail(request):
+    profile = request.user.profile
+
+    return JsonResponse({
+        "username": request.user.username,
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "email": profile.email,
+        "phone": profile.phone,
+        "preferred_sports": profile.preferred_sports,
+        "newsletter_opt_in": profile.newsletter_opt_in,
+        "account_type": profile.account_type,
+    })
+
+
+@csrf_exempt
+@login_required
+def api_profile_update(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=400)
+
+    profile = request.user.profile
+    data = json.loads(request.body.decode("utf-8"))
+
+    profile.first_name = data.get("first_name", profile.first_name)
+    profile.last_name = data.get("last_name", profile.last_name)
+    profile.phone = data.get("phone", profile.phone)
+    profile.email = data.get("email", profile.email)
+    profile.preferred_sports = data.get("preferred_sports", profile.preferred_sports)
+    profile.newsletter_opt_in = data.get("newsletter_opt_in", profile.newsletter_opt_in)
+
+    profile.save()
+
+    return JsonResponse({"success": True})
