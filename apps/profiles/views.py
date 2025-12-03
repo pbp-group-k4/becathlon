@@ -4,6 +4,9 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_POST
 from .forms import ProfileForm
 from apps.main.models import Product
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 
 @login_required
 def detail(request):
